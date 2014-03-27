@@ -1,0 +1,4 @@
+Copyright (c) 2014 Paul Götze
+
+This software is licensed under the GPL v3.
+For further information and the full license text see: http://www.gnu.org/licenses/gpl-3.0.en.html

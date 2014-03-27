@@ -1,0 +1,119 @@
+<mediawiki>
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <base>http://en.wikipedia.org/wiki/Main_Page</base>
+    <generator>MediaWiki 1.23wmf12</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter"/>
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal talk</namespace>
+      <namespace key="108" case="first-letter">Book</namespace>
+      <namespace key="109" case="first-letter">Book talk</namespace>
+      <namespace key="118" case="first-letter">Draft</namespace>
+      <namespace key="119" case="first-letter">Draft talk</namespace>
+      <namespace key="446" case="first-letter">Education Program</namespace>
+      <namespace key="447" case="first-letter">Education Program talk</namespace>
+      <namespace key="710" case="first-letter">TimedText</namespace>
+      <namespace key="711" case="first-letter">TimedText talk</namespace>
+      <namespace key="828" case="first-letter">Module</namespace>
+      <namespace key="829" case="first-letter">Module talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Vandalism on Wikipedia</title>
+    <ns>0</ns>
+    <id>100</id>
+    <revision>
+      <id>1</id>
+      <timestamp>time 1</timestamp>
+      <contributor>
+        <ip>1</ip>
+      </contributor>
+      <comment>comment
+
+        1
+
+      </comment>
+      <text xml:space="preserve" bytes="1880">text
+
+
+        1
+
+      </text>
+      <sha1>eju7ojn2omej7atr11ll7k64hzhpkaq</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>2</id>
+      <parentid>1</parentid>
+      <timestamp>time 2</timestamp>
+      <contributor>
+        <username>user</username>
+        <id>10</id>
+      </contributor>
+      <comment>comment 2</comment>
+      <text xml:space="preserve" bytes="1914">text 2</text>
+      <sha1>rwmi3pu1ormoc1mqgs7mej6r63u9uxk</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>3</id>
+      <parentid>2</parentid>
+      <timestamp>time 3</timestamp>
+      <contributor>
+        <username>user</username>
+        <id>11</id>
+      </contributor>
+      <text xml:space="preserve" bytes="3177">text 3</text>
+      <sha1>hya1xftsfkq6wml6uigb6j480p4x2nt</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>4</id>
+      <parentid>3</parentid>
+      <timestamp>time 4</timestamp>
+      <contributor>
+        <username>user</username>
+        <id>12</id>
+      </contributor>
+      <text xml:space="preserve" bytes="3261">text 4</text>
+      <sha1>ebb1e4tgy49mqdwtyk0rafzdcokp4lh</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>5</id>
+      <parentid>4</parentid>
+      <timestamp>time 5</timestamp>
+      <contributor>
+        <ip>2</ip>
+      </contributor>
+      <comment>comment 3</comment>
+      <text xml:space="preserve" bytes="3541">text 5</text>
+      <sha1>t8s84rnkje13fkdkw0exui4hrs3fx8x</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+  </page>
+</mediawiki>

@@ -1,0 +1,234 @@
+<mediawiki>
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <base>http://en.wikipedia.org/wiki/Main_Page</base>
+    <generator>MediaWiki 1.23wmf12</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter"/>
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal talk</namespace>
+      <namespace key="108" case="first-letter">Book</namespace>
+      <namespace key="109" case="first-letter">Book talk</namespace>
+      <namespace key="118" case="first-letter">Draft</namespace>
+      <namespace key="119" case="first-letter">Draft talk</namespace>
+      <namespace key="446" case="first-letter">Education Program</namespace>
+      <namespace key="447" case="first-letter">Education Program talk</namespace>
+      <namespace key="710" case="first-letter">TimedText</namespace>
+      <namespace key="711" case="first-letter">TimedText talk</namespace>
+      <namespace key="828" case="first-letter">Module</namespace>
+      <namespace key="829" case="first-letter">Module talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Vandalism on Wikipedia</title>
+    <ns>0</ns>
+    <id>29753790</id>
+    <revision>
+      <id>398880281</id>
+      <timestamp>2010-11-25T23:50:21Z</timestamp>
+      <contributor>
+        <username>Hellno2</username>
+        <id>3020504</id>
+      </contributor>
+      <comment>[[WP:AES|←]]Created page with '{{newpage}} On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, remov...'</comment>
+      <text xml:space="preserve" bytes="1880">{{newpage}}
+On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, removal, or other modification of the text or other material in a manner that consists either of humor, nonsense, [[hoax]]es, [[spam]] or promotion of a subject, or is of an offensive or degrading nature. 
+
+Frequent targets of vandalism include articles on hot and controversial topics and current events&lt;ref name=Newzealand/&gt;.
+
+==Fighting vandalism==
+The are various measures taken by Wikipedia to prevent or reduce the amount of vandalism. These include:
+*Reverting the vandalism by restoring the article to the last version before the vandalism occurred&lt;ref name=Newzealand/&gt;
+*Locking articles so only established users, or in some cases, only administrators can edit them&lt;ref name=Newzealand/&gt;
+*Blocking and banning those who have repeatedly committed acts of vandalism from editing for a period of time or in some cases, indefinitely&lt;ref name=Newzealand/&gt;
+
+==Notable acts of vandalism==
+*In 2006, [[Rolling Stone Magazine]] printed a false story from which they learned the information from an act of Wikipedia vandalism. Their article's title stated that [[Halle Berry]] was set to ruin her reputation&lt;ref&gt;http://en.wikinews.org/wiki/Rolling_Stone_prints_story_based_on_Wikipedia_vandalism&lt;/ref&gt;.
+*Professional golfer [[Fuzzy Zoeller]] sued a Miami company whose IP-based edits to the Wikipedia site included negative information about him&lt;ref&gt;http://www.tomshardware.com/news/golfer-sues-wikipedia-vandalism,4377.html&lt;/ref&gt;. 
+*Soon after the death of [[Steve Irwin]] in 2007, the [[stingray]] article was vandalized, stating that stingrays &quot;hate Australian people.&quot;&lt;ref name=Newzealand&gt;http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&amp;objectid=10432042&lt;/ref&gt; 
+
+==References==
+{{reflist}}
+
+{{Wikipedia}}</text>
+      <sha1>eju7ojn2omej7atr11ll7k64hzhpkaq</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>398880502</id>
+      <parentid>398880281</parentid>
+      <timestamp>2010-11-25T23:52:13Z</timestamp>
+      <contributor>
+        <username>Hellno2</username>
+        <id>3020504</id>
+      </contributor>
+      <comment>inuse</comment>
+      <text xml:space="preserve" bytes="1914">{{inuse}}
+{{newpage}}
+On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, removal, or other modification of the text or other material in a manner that consists either of humor, nonsense, [[hoax]]es, [[spam]] or promotion of a subject, or is of an offensive or degrading nature. 
+
+Frequent targets of vandalism include articles on hot and controversial topics and current events&lt;ref name=Newzealand/&gt;.
+
+==Fighting vandalism==
+The are various measures taken by Wikipedia to prevent or reduce the amount of vandalism. These include:
+*Reverting the vandalism by restoring the article to the last version before the vandalism occurred&lt;ref name=Newzealand/&gt;
+*Locking articles so only established users, or in some cases, only administrators can edit them&lt;ref name=Newzealand/&gt;
+*Blocking and banning those who have repeatedly committed acts of vandalism from editing for a period of time or in some cases, indefinitely&lt;ref name=Newzealand/&gt;
+
+==Notable acts of vandalism==
+*In 2006, [[Rolling Stone Magazine]] printed a false story from which they learned the information from an act of Wikipedia vandalism. Their article's title stated that [[Halle Berry]] was set to ruin her reputation&lt;ref&gt;http://en.wikinews.org/wiki/Rolling_Stone_prints_story_based_on_Wikipedia_vandalism&lt;/ref&gt;.
+*Professional golfer [[Fuzzy Zoeller]] sued a Miami company whose IP-based edits to the Wikipedia site included negative information about him&lt;ref&gt;http://www.tomshardware.com/news/golfer-sues-wikipedia-vandalism,4377.html&lt;/ref&gt;. 
+*Soon after the death of [[Steve Irwin]] in 2007, the [[stingray]] article was vandalized, stating that stingrays &quot;hate Australian people.&quot;&lt;ref name=Newzealand&gt;http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&amp;objectid=10432042&lt;/ref&gt; 
+
+==References==
+{{reflist}}
+
+{{Wikipedia}}
+
+[[Category:Wikipedia]]</text>
+      <sha1>rwmi3pu1ormoc1mqgs7mej6r63u9uxk</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>398883278</id>
+      <parentid>398880502</parentid>
+      <timestamp>2010-11-26T00:13:45Z</timestamp>
+      <contributor>
+        <username>Hellno2</username>
+        <id>3020504</id>
+      </contributor>
+      <text xml:space="preserve" bytes="3177">On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, removal, or other modification of the text or other material in a manner that consists either of humor, nonsense, [[hoax]]es, [[spam]] or promotion of a subject, or is of an offensive or degrading nature. 
+
+Vandalism is easy to commit on Wikipedia due to the fact that anyone can edit the site&lt;ref name=newscientist/&gt;. Founder [[Jimmy Wales]] is very much aware of the fact that the open editing policy allows the addition of false information&lt;ref name=BBC&gt;http://news.bbc.co.uk/2/hi/4502846.stm&lt;/ref&gt;.
+
+Most vandalism is committed on impulse&lt;ref name=BBC/&gt;. Frequent targets of vandalism include articles on hot and controversial topics and current events&lt;ref name=Newzealand/&gt;&lt;ref&gt;http://www.guardian.co.uk/technology/2006/jun/18/wikipedia.news&lt;/ref&gt;.
+
+==Fighting vandalism==
+The are various measures taken by Wikipedia to prevent or reduce the amount of vandalism. These include:
+*Reverting the vandalism by restoring the article to the last version before the vandalism occurred&lt;ref name=Newzealand/&gt;
+*Locking articles so only established users, or in some cases, only administrators can edit them&lt;ref name=Newzealand/&gt;
+*Blocking and banning those who have repeatedly committed acts of vandalism from editing for a period of time or in some cases, indefinitely&lt;ref name=Newzealand/&gt;
+
+In 2005, Wikipedia started to require those who create new articles to have a registered account in an effort to fight some vandalism. This occurred after inaccurate information was added to Wikipedia in which a journalist was accused of taking part in Kennedy's assassination&lt;ref name=newscientist&gt;http://www.newscientist.com/article/dn8425-wikipedia-tightens-editorial-rules-after-complaint.html&lt;/ref&gt;.
+
+In 2009, Wikipedia instituted a new policy in which the posting of edits to articles on living people would be delayed until they could be reviewed for inclusion of a source to verify accuracy. This was in an effort to prevent inaccurate and potentially damaging information about living people from appearing on the site&lt;ref&gt;http://news.ebrandz.com/miscellaneous/2009/2824-wikipedia-plans-to-enforce-new-editing-policy-to-thwart-vandals-.html&lt;/ref&gt;. 
+
+==Notable acts of vandalism==
+*In 2006, [[Rolling Stone Magazine]] printed a false story from which they learned the information from an act of Wikipedia vandalism. Their article's title stated that [[Halle Berry]] was set to ruin her reputation&lt;ref&gt;http://en.wikinews.org/wiki/Rolling_Stone_prints_story_based_on_Wikipedia_vandalism&lt;/ref&gt;.
+*Professional golfer [[Fuzzy Zoeller]] sued a Miami company whose IP-based edits to the Wikipedia site included negative information about him&lt;ref&gt;http://www.tomshardware.com/news/golfer-sues-wikipedia-vandalism,4377.html&lt;/ref&gt;. 
+*Soon after the death of [[Steve Irwin]] in 2007, the [[stingray]] article was vandalized, stating that stingrays &quot;hate Australian people.&quot;&lt;ref name=Newzealand&gt;http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&amp;objectid=10432042&lt;/ref&gt; 
+
+==References==
+{{reflist}}
+
+{{Wikipedia}}
+
+[[Category:Wikipedia]]</text>
+      <sha1>hya1xftsfkq6wml6uigb6j480p4x2nt</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>398883675</id>
+      <parentid>398883278</parentid>
+      <timestamp>2010-11-26T00:17:04Z</timestamp>
+      <contributor>
+        <username>Hellno2</username>
+        <id>3020504</id>
+      </contributor>
+      <text xml:space="preserve" bytes="3261">[[Image:Wikipedia vandalism.svg|thumb|300 px|[[Vandalism]] of a Wikipedia article]]
+On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, removal, or other modification of the text or other material in a manner that consists either of humor, nonsense, [[hoax]]es, [[spam]] or promotion of a subject, or is of an offensive or degrading nature. 
+
+Vandalism is easy to commit on Wikipedia due to the fact that anyone can edit the site&lt;ref name=newscientist/&gt;. Founder [[Jimmy Wales]] is very much aware of the fact that the open editing policy allows the addition of false information&lt;ref name=BBC&gt;http://news.bbc.co.uk/2/hi/4502846.stm&lt;/ref&gt;.
+
+Most vandalism is committed on impulse&lt;ref name=BBC/&gt;. Frequent targets of vandalism include articles on hot and controversial topics and current events&lt;ref name=Newzealand/&gt;&lt;ref&gt;http://www.guardian.co.uk/technology/2006/jun/18/wikipedia.news&lt;/ref&gt;.
+
+==Fighting vandalism==
+The are various measures taken by Wikipedia to prevent or reduce the amount of vandalism. These include:
+*Reverting the vandalism by restoring the article to the last version before the vandalism occurred&lt;ref name=Newzealand/&gt;
+*Locking articles so only established users, or in some cases, only administrators can edit them&lt;ref name=Newzealand/&gt;
+*Blocking and banning those who have repeatedly committed acts of vandalism from editing for a period of time or in some cases, indefinitely&lt;ref name=Newzealand/&gt;
+
+In 2005, Wikipedia started to require those who create new articles to have a registered account in an effort to fight some vandalism. This occurred after inaccurate information was added to Wikipedia in which a journalist was accused of taking part in Kennedy's assassination&lt;ref name=newscientist&gt;http://www.newscientist.com/article/dn8425-wikipedia-tightens-editorial-rules-after-complaint.html&lt;/ref&gt;.
+
+In 2009, Wikipedia instituted a new policy in which the posting of edits to articles on living people would be delayed until they could be reviewed for inclusion of a source to verify accuracy. This was in an effort to prevent inaccurate and potentially damaging information about living people from appearing on the site&lt;ref&gt;http://news.ebrandz.com/miscellaneous/2009/2824-wikipedia-plans-to-enforce-new-editing-policy-to-thwart-vandals-.html&lt;/ref&gt;. 
+
+==Notable acts of vandalism==
+*In 2006, [[Rolling Stone Magazine]] printed a false story from which they learned the information from an act of Wikipedia vandalism. Their article's title stated that [[Halle Berry]] was set to ruin her reputation&lt;ref&gt;http://en.wikinews.org/wiki/Rolling_Stone_prints_story_based_on_Wikipedia_vandalism&lt;/ref&gt;.
+*Professional golfer [[Fuzzy Zoeller]] sued a Miami company whose IP-based edits to the Wikipedia site included negative information about him&lt;ref&gt;http://www.tomshardware.com/news/golfer-sues-wikipedia-vandalism,4377.html&lt;/ref&gt;. 
+*Soon after the death of [[Steve Irwin]] in 2007, the [[stingray]] article was vandalized, stating that stingrays &quot;hate Australian people.&quot;&lt;ref name=Newzealand&gt;http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&amp;objectid=10432042&lt;/ref&gt; 
+
+==References==
+{{reflist}}
+
+{{Wikipedia}}
+
+[[Category:Wikipedia]]</text>
+      <sha1>ebb1e4tgy49mqdwtyk0rafzdcokp4lh</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+    <revision>
+      <id>398885233</id>
+      <parentid>398883675</parentid>
+      <timestamp>2010-11-26T00:29:53Z</timestamp>
+      <contributor>
+        <username>Hellno2</username>
+        <id>3020504</id>
+      </contributor>
+      <comment>/* Notable acts of vandalism */</comment>
+      <text xml:space="preserve" bytes="3541">[[Image:Wikipedia vandalism.svg|thumb|300 px|[[Vandalism]] of a Wikipedia article]]
+On [[Wikipedia]], '''Vandalism''' is the act of editing the project in a manner that is intentionally disruptive. Vandalism includes the addition, removal, or other modification of the text or other material in a manner that consists either of humor, nonsense, [[hoax]]es, [[spam]] or promotion of a subject, or is of an offensive or degrading nature. 
+
+Vandalism is easy to commit on Wikipedia due to the fact that anyone can edit the site&lt;ref name=newscientist/&gt;. Founder [[Jimmy Wales]] is very much aware of the fact that the open editing policy allows the addition of false information&lt;ref name=BBC&gt;http://news.bbc.co.uk/2/hi/4502846.stm&lt;/ref&gt;.
+
+Most vandalism is committed on impulse&lt;ref name=BBC/&gt;. Frequent targets of vandalism include articles on hot and controversial topics and current events&lt;ref name=Newzealand/&gt;&lt;ref&gt;http://www.guardian.co.uk/technology/2006/jun/18/wikipedia.news&lt;/ref&gt;.
+
+==Fighting vandalism==
+The are various measures taken by Wikipedia to prevent or reduce the amount of vandalism. These include:
+*Reverting the vandalism by restoring the article to the last version before the vandalism occurred&lt;ref name=Newzealand/&gt;
+*Locking articles so only established users, or in some cases, only administrators can edit them&lt;ref name=Newzealand/&gt;
+*Blocking and banning those who have repeatedly committed acts of vandalism from editing for a period of time or in some cases, indefinitely&lt;ref name=Newzealand/&gt;
+
+In 2005, Wikipedia started to require those who create new articles to have a registered account in an effort to fight some vandalism. This occurred after inaccurate information was added to Wikipedia in which a journalist was accused of taking part in Kennedy's assassination&lt;ref name=newscientist&gt;http://www.newscientist.com/article/dn8425-wikipedia-tightens-editorial-rules-after-complaint.html&lt;/ref&gt;.
+
+In 2009, Wikipedia instituted a new policy in which the posting of edits to articles on living people would be delayed until they could be reviewed for inclusion of a source to verify accuracy. This was in an effort to prevent inaccurate and potentially damaging information about living people from appearing on the site&lt;ref&gt;http://news.ebrandz.com/miscellaneous/2009/2824-wikipedia-plans-to-enforce-new-editing-policy-to-thwart-vandals-.html&lt;/ref&gt;. 
+
+==Notable acts of vandalism==
+*In 2006, comedian [[Steve Colbert]] vandalized the article [[elephant]] publicly on the air. This resulted in Colbert being blocked from editing, and a lot of elephant-related articles being protected&lt;ref&gt;http://www.tvsquad.com/2006/08/01/did-colbert-hack-wikipedia-video/&lt;/ref&gt;.
+*In 2006, [[Rolling Stone Magazine]] printed a false story from which they learned the information from an act of Wikipedia vandalism. Their article's title stated that [[Halle Berry]] was set to ruin her reputation&lt;ref&gt;http://en.wikinews.org/wiki/Rolling_Stone_prints_story_based_on_Wikipedia_vandalism&lt;/ref&gt;.
+*Professional golfer [[Fuzzy Zoeller]] sued a Miami company whose IP-based edits to the Wikipedia site included negative information about him&lt;ref&gt;http://www.tomshardware.com/news/golfer-sues-wikipedia-vandalism,4377.html&lt;/ref&gt;. 
+*Soon after the death of [[Steve Irwin]] in 2007, the [[stingray]] article was vandalized, stating that stingrays &quot;hate Australian people.&quot;&lt;ref name=Newzealand&gt;http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&amp;objectid=10432042&lt;/ref&gt;
+
+==References==
+{{reflist}}
+
+{{Wikipedia}}
+
+[[Category:Wikipedia]]</text>
+      <sha1>t8s84rnkje13fkdkw0exui4hrs3fx8x</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+  </page>
+</mediawiki>

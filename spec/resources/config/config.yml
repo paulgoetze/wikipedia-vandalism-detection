@@ -1,0 +1,15 @@
+training_corpus:
+  annotations_file: ../../../resources/corpus/annotations.csv
+  edits_file: ../../../resources/corpus/edits.csv
+  revisions_directory: ../../../resources/corpus/revisions
+  arff_file: ../../../resources/data/training-data.arff
+
+features:
+  - anonymity
+  - character sequence
+  - comment length
+
+classifier:
+  type: Trees::RandomForest
+  options: -I 12
+  cross-validation-fold: 2

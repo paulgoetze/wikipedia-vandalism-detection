@@ -1,0 +1,30 @@
+{{text}}
+[[text]]
+[[text:text]]
+[[text|text]]
+[http://domain.com]
+=text=
+==text==
+===text===
+====text====
+=====text=====
+======text======
+----
+<text>
+:text
+::text
+:::text
+::::text
+'''text'''
+''text''
+* text
+** text
+*** text
+**** text
+# text
+## text
+### text
+#### text
+&lsaquo;
+&quot;
+[http://www.wikipedia.com/images/uploads/beaver.jpg text text text]
