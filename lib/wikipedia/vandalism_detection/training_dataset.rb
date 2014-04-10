@@ -17,11 +17,12 @@ module Wikipedia
     class TrainingDataset
 
       def self.dataset
-        arff_file = Wikipedia::VandalismDetection.configuration["training_corpus"]["arff_file"]
+        config = Wikipedia::VandalismDetection.configuration
+        arff_file = config.training_output_arff_file
         dataset = (File.exist?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
 
         dataset = remove_invalid_instances(dataset)
-        dataset.class_index = Wikipedia::VandalismDetection.configuration["features"].count
+        dataset.class_index = config.features.count
         dataset
       end
 
@@ -29,8 +30,6 @@ module Wikipedia
       # As training data it uses the configured data corpus from /config/config.yml.
       def self.build!
         @config = Wikipedia::VandalismDetection.configuration
-        @training_corpus = @config["training_corpus"]
-
         feature_calculator = FeatureCalculator.new
         create_dataset!(feature_calculator)
       end
@@ -38,7 +37,7 @@ module Wikipedia
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
       def self.create_corpus_file_index!
         @config = Wikipedia::VandalismDetection.configuration
-        revisions_directory = @config["training_corpus"]["revisions_directory"]
+        revisions_directory = @config.training_corpus_revisions_directory
 
         raise RevisionsDirectoryNotConfiguredError unless revisions_directory
 
@@ -60,7 +59,7 @@ module Wikipedia
           end
         end
 
-        file = @config["training_corpus"]["index_file"]
+        file = @config.training_output_index_file
         dirname = File.dirname(file)
         FileUtils.mkdir(dirname) unless Dir.exists?(dirname)
 
@@ -73,10 +72,10 @@ module Wikipedia
       # Adds the computed values to for the given feature to the arff_file if not already available.
       def self.add_feature_to_arff!(feature_name)
         @config = Wikipedia::VandalismDetection.configuration
-        @training_corpus = @config["training_corpus"]
-        annotations_file = @training_corpus["annotations_file"]
-        arff_file = @training_corpus["arff_file"]
-        edits_file = @training_corpus["edits_file"]
+
+        annotations_file = @config.training_corpus_annotations_file
+        arff_file = @config.training_output_arff_file
+        edits_file = @config.training_corpus_edits_file
 
         raise AnnotationsFileNotConfiguredError unless annotations_file
         raise EditsFileNotConfiguredError unless edits_file
@@ -87,7 +86,7 @@ module Wikipedia
         annotations = CSV.parse(File.read(annotations_file), headers: true)
         annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
 
-        features_count = @config["features"].count
+        features_count = @config.features.count
         data_start_index = features_count + 5
         attr_name = feature_name.gsub(' ','_')
 
@@ -179,13 +178,13 @@ module Wikipedia
 
         dataset = Instances.empty
 
-        annotations_file = @training_corpus["annotations_file"]
+        annotations_file = @config.training_corpus_annotations_file
         raise AnnotationsFileNotConfiguredError unless annotations_file
 
         annotations = CSV.parse(File.read(annotations_file), headers: true)
         annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
 
-        arff_file = @training_corpus["arff_file"]
+        arff_file = @config.training_output_arff_file
         dataset.to_ARFF(arff_file)
 
         processed_edits = 0
@@ -249,7 +248,7 @@ module Wikipedia
       # Gets or creates the corpus index file, which holds a hash of revision files name and their path
       # in the article revisions directory.
       def self.load_corpus_file_index
-        index_file = @training_corpus["index_file"]
+        index_file = @config.training_output_index_file
 
         if File.exists? index_file
           puts " (Using #{index_file}) \n"
@@ -261,7 +260,7 @@ module Wikipedia
 
       # Returns the line array of the edits.csv file with given edit id.
       def self.find_edits_data_for(edit_id)
-        edits_file = @config["training_corpus"]["edits_file"]
+        edits_file = @config.training_corpus_edits_file
         raise EditsFileNotConfiguredError unless edits_file
 
         @edits_file_content ||= File.read(edits_file)

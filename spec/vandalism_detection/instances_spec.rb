@@ -25,7 +25,7 @@ describe Wikipedia::VandalismDetection::Instances do
 
     it "has all configured features and class as attributes" do
       attribute_names = @attributes.map{ |attr| "#{attr.name.gsub('_', ' ')}" }
-      features = Wikipedia::VandalismDetection.configuration["features"]
+      features = Wikipedia::VandalismDetection.configuration.features
 
       attribute_names.should == features
     end

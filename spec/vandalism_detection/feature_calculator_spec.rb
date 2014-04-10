@@ -3,17 +3,10 @@ require 'spec_helper'
 describe  Wikipedia::VandalismDetection::FeatureCalculator do
 
   it "raises NoFeaturesConfiguredError when no features are configured" do
-    config = {
-        "source"    => Dir.pwd,
-        'features'  => nil,
-        "training_corpus" => paths[:training_corpus],
-        "classifier" => {
-            "type"    => nil,
-            "options" => nil
-        }
-    }
+    configuration = Wikipedia::VandalismDetection::Configuration.new
+    configuration.instance_variable_set :@features, nil
 
-    use_configuration(config)
+    use_configuration(configuration)
 
     expect { Wikipedia::VandalismDetection::FeatureCalculator.new }.to raise_error \
         Wikipedia::VandalismDetection::FeaturesNotConfiguredError
@@ -93,7 +86,7 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
     it { should respond_to :used_features }
 
     it "returns an array of the features defined in the config feature.yml" do
-      @calculator.used_features.sort.should ==  Wikipedia::VandalismDetection.configuration['features'].sort
+      @calculator.used_features.sort.should ==  Wikipedia::VandalismDetection.configuration.features.sort
     end
   end
 end

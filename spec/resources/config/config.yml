@@ -1,8 +1,25 @@
-training_corpus:
-  annotations_file: ../../../resources/corpus/annotations.csv
-  edits_file: ../../../resources/corpus/edits.csv
-  revisions_directory: ../../../resources/corpus/revisions
-  arff_file: ../../../resources/data/training-data.arff
+corpora:
+  base_directory: ../../../../spec/resources/corpora
+
+  training:
+    base_directory: training
+    annotations_file: annotations.csv
+    edits_file: edits.csv
+    revisions_directory: revisions
+
+  test:
+    base_directory: test
+    edits_file: edits.csv
+    revisions_directory: revisions
+
+output:
+  base_directory: ../../../../spec/resources/build
+  training:
+    index_file: training_index.yml
+    arff_file: training.arff
+  test:
+    index_file: test_index.yml
+    arff_file: test.arff
 
 features:
   - anonymity
@@ -11,5 +28,5 @@ features:
 
 classifier:
   type: Trees::RandomForest
-  options: -I 12
+  options: -I 10
   cross-validation-fold: 2

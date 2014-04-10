@@ -2,6 +2,25 @@ require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Evaluator do
 
+  before do
+    use_test_configuration
+  end
+
+  after do
+    @config = Wikipedia::VandalismDetection.configuration
+    arff_file = @config.training_output_arff_file
+    build_dir = @config.output_base_directory
+
+    if File.exists?(arff_file)
+      File.delete(arff_file)
+      FileUtils.rm_r(File.dirname arff_file)
+    end
+
+    if Dir.exists?(build_dir)
+      FileUtils.rm_r(build_dir)
+    end
+  end
+
   describe "#initialize" do
 
     it "raises an ArgumentError if classifier attr is not of Wikipedia::VandalismDetection::Classfier" do
@@ -9,18 +28,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "does not raise an error while appropriate initialization" do
-      use_test_configuration
-      @config = test_config
-
       classifier = Wikipedia::VandalismDetection::Classifier.new
       expect { Wikipedia::VandalismDetection::Evaluator.new(classifier) }.not_to raise_error
     end
   end
 
   before do
-    use_test_configuration
-    @config = test_config
-
     classifier = Wikipedia::VandalismDetection::Classifier.new
     @evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
   end

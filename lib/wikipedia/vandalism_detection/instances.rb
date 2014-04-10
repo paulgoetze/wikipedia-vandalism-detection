@@ -26,7 +26,7 @@ module Wikipedia
       #        ...,
       #        #<Java::WekaCore::Attribute:0x5a74fae4>]>
       def self.empty
-        features = Wikipedia::VandalismDetection.configuration["features"]
+        features = Wikipedia::VandalismDetection.configuration.features
 
         dataset_classes = Array.new
         dataset_classes[VANDALISM_CLASS_INDEX] = VANDALISM

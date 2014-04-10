@@ -10,8 +10,8 @@ describe Wikipedia::VandalismDetection::Classifier do
   end
 
   after do
-    arff_file = @config["training_corpus"]["arff_file"]
-    build_dir = "#{@config['source']}/build"
+    arff_file = @config.training_output_arff_file
+    build_dir = @config.output_base_directory
 
     if File.exists?(arff_file)
       File.delete(arff_file)
@@ -24,25 +24,15 @@ describe Wikipedia::VandalismDetection::Classifier do
   end
 
   it "loads the configured classifier while instanciating" do
-    classifier_name =  @config["classifier"]["type"]
+    classifier_name =  @config.classifier_type
     class_type = "Weka::Classifiers::#{classifier_name}::Base".constantize
 
     @classifier.classifier_instance.should be_a class_type
   end
 
   it "raises an error if no classifier is configured" do
-    config = {
-        "source"    => Dir.pwd,
-        'features'  => [
-            "anonymity"
-        ],
-        "training_corpus" => paths[:training_corpus],
-        "classifier" => {
-            "type"    => nil,
-            "options" => ""
-        }
-    }
-
+    config = test_config
+    config.instance_variable_set :@classifier_type, nil
     use_configuration(config)
 
     expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
@@ -50,18 +40,8 @@ describe Wikipedia::VandalismDetection::Classifier do
   end
 
   it "raises an error if an unknown classifier is configured" do
-    config = {
-        "source"    => Dir.pwd,
-        'features'  => [
-            "anonymity"
-        ],
-        "training_corpus" => paths[:training_corpus],
-        "classifier" => {
-            "type"    => "Unknown Classifier",
-            "options" => ""
-        }
-    }
-
+    config = test_config
+    config.instance_variable_set :@classifier_type, "Unknown Classifier"
     use_configuration(config)
 
     expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
@@ -69,16 +49,8 @@ describe Wikipedia::VandalismDetection::Classifier do
   end
 
   it "raises an error if no features are configured" do
-    config = {
-        "source"    => Dir.pwd,
-        'features'  => [],
-        "training_corpus" => paths[:training_corpus],
-        "classifier" => {
-            "type"    => "Trees::RandomForest",
-            "options" => nil
-        }
-    }
-
+    config = test_config
+    config.instance_variable_set :@features, []
     use_configuration(config)
 
     expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
@@ -129,7 +101,7 @@ describe Wikipedia::VandalismDetection::Classifier do
       consensus.should be_a Numeric
     end
 
-    it "returns an array that holds the consensus at first that is betwween 0.0 and 1.0" do
+    it "returns an array that holds the consensus at first that is between 0.0 and 1.0" do
       consensus = @classifier.classify @features
       consensus_between_0_and_1 = (consensus <= 1.0) && (consensus >= 0.0)
       consensus_between_0_and_1.should be_true

@@ -40,7 +40,7 @@ module Wikipedia
       #   consensus = classifier.classify(features)
       #   consensus = classifier.classify(edit)
       def classify(edit_or_features)
-        features = @config["features"]
+        features = @config.features
         param_is_features = edit_or_features.is_a?(Array) && (edit_or_features.size == features.count)
         param_is_edit = edit_or_features.is_a? Edit
 
@@ -80,7 +80,7 @@ module Wikipedia
 
       # Loads the (Weka-) Classifier set in the Configuration
       def load_classifier
-        classifier_name = @config["classifier"]["type"]
+        classifier_name = @config.classifier_type
 
         raise ClassifierNotConfiguredError, "You have to define a classifier type in config.yml" unless classifier_name
 
@@ -90,12 +90,12 @@ module Wikipedia
           raise ClassifierUnknownError, "The configured classifier type '#{classifier_name}' is unknown."
         end
 
-        raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config["features"].blank?
+        raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
         @dataset = TrainingDataset.dataset
         dataset = @dataset
-        options = @config["classifier"]["options"]
+        options = @config.classifier_options
 
         begin
           classifier = classifier_class.new do

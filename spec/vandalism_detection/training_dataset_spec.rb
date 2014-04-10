@@ -8,10 +8,9 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     use_test_configuration
     @config = test_config
 
-    @training_corpus = @config["training_corpus"]
-    @arff_file = @training_corpus["arff_file"]
-    @index_file = @training_corpus["index_file"]
-    @annotations_file = @training_corpus["annotations_file"]
+    @arff_file = @config.training_output_arff_file
+    @index_file = @config.training_output_index_file
+    @annotations_file = @config.training_corpus_annotations_file
   end
 
   after do
@@ -56,17 +55,9 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     describe "exceptions" do
 
-      it "raises an RevisionsDirectoryNotConfiguredError if no annotations file is configured" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => nil,
-            "training_corpus" => paths[:training_corpus].merge({ "revisions_directory" => nil }),
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+      it "raises an RevisionsDirectoryNotConfiguredError if no revisions directory is configured" do
+        config = test_config
+        config.instance_variable_set :@training_corpus_revisions_directory, nil
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.create_corpus_file_index! }.to raise_error \
@@ -74,7 +65,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
     end
 
-    it "creates an corpus_index.yml file in the build directory" do
+    it "creates a corpus_index.yml file in the build directory" do
       File.exist?(@index_file).should be_false
       Wikipedia::VandalismDetection::TrainingDataset.create_corpus_file_index!
       File.exist?(@index_file).should be_true
@@ -89,16 +80,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     describe "exceptions" do
       it "raises an EditsFileNotConfiguredError if no edits file is configured" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => ["anonymity"],
-            "training_corpus" => paths[:training_corpus].merge({ "edits_file" => nil }),
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+        config = test_config
+        config.instance_variable_set :@training_corpus_edits_file, nil
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.build! }.to raise_error \
@@ -106,16 +89,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
 
       it "raises an AnnotationsFileNotConfiguredError if no annotations file is configured" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => ["anonymity"],
-            "training_corpus" => paths[:training_corpus].merge({ "annotations_file" => nil }),
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+        config = test_config
+        config.instance_variable_set :@training_corpus_annotations_file, nil
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.build! }.to raise_error \
@@ -131,7 +106,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     describe "internal algorithm" do
       before do
-        @features_num = @config["features"].count
+        @features_num = @config.features.count
       end
 
       it "has builds the right number of data lines" do
@@ -146,7 +121,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
         Wikipedia::VandalismDetection::TrainingDataset.build!
         dataset = Core::Parser.parse_ARFF @arff_file
 
-        dataset.n_col.should == @config["features"].count + 1
+        dataset.n_col.should == @config.features.count + 1
       end
     end
   end
@@ -160,33 +135,15 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     describe "exceptions" do
 
       it "raises an ArffFileNotFound if no arff file has been created, yet" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => ["anonymity"],
-            "training_corpus" => paths[:training_corpus],
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
-        use_configuration(config)
+        use_test_configuration
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.add_feature_to_arff!(@feature_name) }.to raise_error \
             Wikipedia::VandalismDetection::ArffFileNotFoundError
       end
 
       it "raises an EditsFileNotConfiguredError if no edits file is configured" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => ["anonymity"],
-            "training_corpus" => paths[:training_corpus].merge({ "edits_file" => nil }),
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+        config = test_config
+        config.instance_variable_set :@training_corpus_edits_file, nil
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.add_feature_to_arff!(@feature_name) }.to raise_error \
@@ -194,16 +151,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
 
       it "raises an AnnotationsFileNotConfiguredError if no annotations file is configured" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => ["anonymity"],
-            "training_corpus" => paths[:training_corpus].merge({ "annotations_file" => nil }),
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+        config = test_config
+        config.instance_variable_set :@training_corpus_annotations_file, nil
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.add_feature_to_arff!(@feature_name) }.to raise_error \
@@ -211,17 +160,10 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
 
       it "raises a FeatureAlreadyUsedError if no feaure is alredy in arff file" do
-        config = {
-            "source"    => Dir.pwd,
-            'features'  => [@feature_name],
-            "training_corpus" => paths[:training_corpus],
-            "classifier" => {
-                "type"    => nil,
-                "options" => nil
-            }
-        }
-
+        config = test_config
+        config.instance_variable_set :@features, [@feature_name]
         use_configuration(config)
+
         Wikipedia::VandalismDetection::TrainingDataset.build!
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.add_feature_to_arff!(@feature_name) }.to raise_error \
@@ -244,7 +186,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       Wikipedia::VandalismDetection::TrainingDataset.build!
       Wikipedia::VandalismDetection::TrainingDataset.add_feature_to_arff!(@feature_name)
 
-      features = @config["features"]
+      features = @config.features
       features_num = features.include?(@feature_name) ? features.count : (features.count + 1)
       annotations_num = File.open(@annotations_file, 'r').lines.count - 1
       additional_header_lines = 5

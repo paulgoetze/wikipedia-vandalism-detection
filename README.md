@@ -8,7 +8,10 @@ The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library via
 
 * parsing Wikipedia history pages to get edits and revisions
 * creating training ARFF file from
-the [PAN 2010 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/)
+the [PAN 2010 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/) and
+the [PAN 2011 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-11/)
+(See also http://pan.webis.de under Wikipedia Vandalsim Detection)
+
 * calculating vandalism features for a Wikipedia page (XML) from the history dump
 * creating and evaluate a classifier with the created training ARFF file
 * classifing new instances of Wikipedia pages as 'regular' or 'vandalism'
@@ -37,16 +40,34 @@ To configure the system put a `config.yml` file in the `config/` or `lib/config/
 
 You can configure:
 
-* the training corpus directory and essential input and output files
+A) the training and test corpora directories and essential input and output files
 
-    training_corpus:
-      annotations_file: /home/user/annotations.csv
-      edits_file: /home/user/edits.csv
-      revisions_directory: /home/user/revisions
-      index_file: /home/user/path/to/index.yml
-      arff_file: /home/user/path/to/traing-data.arff
+    corpora:
+      base_directory: /home/user/corpora
 
-* the features used by the feature calculator
+      training:
+        base_directory: training
+        annotations_file: annotations.csv
+        edits_file: edits.csv
+        revisions_directory: revisions
+
+      test:
+        base_directory: test
+        edits_file: edits.csv
+        revisions_directory: revisons
+
+    output:
+      base_directory: /home/user/output_path
+      training:
+        arff_file: training.arff
+        index_file: training_index.yml
+      test:
+        arff_file: test.arff
+        index_file: test_index.yml
+
+Evaluation outputs are saved under the output base directory path.
+
+B) the features used by the feature calculator
 
     features:
       - anonymity
@@ -54,12 +75,12 @@ You can configure:
       - character sequence
       - ...
 
-* the classifier type and its options and the number of cross validation splits for the classifier evaluation
+C) the classifier type and its options and the number of cross validation splits for the classifier evaluation
 
     classifier:
       type: Trees::RandomForest
-      cross-validation-fold: 5 #default is 10
       options: -I 10 -K 0.5
+      cross-validation-fold: 5 #default is 10
 
 ### Examples
 

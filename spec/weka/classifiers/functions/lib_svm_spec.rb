@@ -1,14 +1,13 @@
 require 'spec_helper'
 
-describe Weka::Classifiers::Meta::OneClassClassifier do
+describe Weka::Classifiers::Functions::LibSVM do
 
-  it { should be_a Java::WekaClassifiersMeta::OneClassClassifier }
+  it { should be_a Java::WekaClassifiersFunctions::LibSVM}
 
   before do
     @config = test_config
-    @config.instance_variable_set :@classifier_type, 'Meta::OneClassClassifier'
-    @config.instance_variable_set :@classifier_options, "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM }"
-    @config.instance_variable_set :@cross_validation_fold, 2
+    @config.instance_variable_set :@classifier_type, 'Functions::LibSVM'
+    @config.instance_variable_set :@cross_validation_fold, '2'
 
     use_configuration(@config)
   end
@@ -27,7 +26,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     end
   end
 
-  it "can be used to classify vandalism" do
+  it "can be used to classifiy vandalism" do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
       classifier.cross_validate

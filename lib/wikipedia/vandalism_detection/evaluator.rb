@@ -3,6 +3,7 @@ require 'wikipedia/vandalism_detection/training_dataset'
 require 'wikipedia/vandalism_detection/classifier'
 require 'wikipedia/vandalism_detection/instances'
 require 'ruby-band'
+require 'fileutils'
 
 module Wikipedia
   module VandalismDetection
@@ -41,8 +42,8 @@ module Wikipedia
       def cross_validate(options = {})
         equally_distributed = options[:equally_distributed]
 
-        fold_defaults = Wikipedia::VandalismDetection::Configuration::DEFAULTS['classifier']['cross-validation-fold']
-        fold = (@config["classifier"]["cross-validation-fold"] || fold_defaults)
+        fold_defaults = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['classifier']['cross-validation-fold']
+        fold = (@config.cross_validation_fold || fold_defaults)
 
         if equally_distributed
           cross_validate_equally_distributed(fold)
@@ -97,10 +98,13 @@ module Wikipedia
 
       # Cross validates classifier over equally distributed dataset with <fold>-fold cross validation
       def cross_validate_equally_distributed(fold)
-        dirname = "#{@config['source']}/build"
+        dirname = @config.output_base_directory
         FileUtils.mkdir(dirname) unless Dir.exists?(dirname)
-        file_path = "#{dirname}/cross_validation_eq_distr.txt"
-        puts file_path
+
+        file_name = 'cross_validation_eq_distr.txt'
+        file_path = File.join(dirname, file_name)
+
+        puts "Writing to #{file_path}..."
         result_file = File.open(file_path, 'a')
 
         begin
@@ -122,27 +126,26 @@ module Wikipedia
           regular_count = dataset_regular.n_rows
           min_count = [vandalism_count, regular_count].min
 
-          smaller_dataset = (vandalism_count > regular_count) ? dataset_regular : dataset_vandalism
-          bigger_dataset = (vandalism_count < regular_count) ? dataset_regular : dataset_vandalism
+          smaller_dataset = (vandalism_count >= regular_count) ? dataset_regular : dataset_vandalism
+          bigger_dataset = (vandalism_count >= regular_count) ? dataset_vandalism : dataset_regular
 
           time = Time.now.strftime("%Y-%m-%d %H:%M")
-          type = @config['classifier']['type']
-          options = @config['classifier']['options'] || "default"
+          type = @config.classifier_type
+          options = @config.classifier_options || "default"
           result_file.puts "\nCROSS VALIDATION - #{fold} fold (Classifier: #{type}, options: #{options} ) | #{time}"
-          result_file.puts "Features: \n\t#{@config['features'].join("\n\t")}\n\n"
+          result_file.puts "Features: \n\t#{@config.features.join("\n\t")}\n\n"
 
           evaluations = []
 
-          times = 1
+          times = 10
 
           # run n times validation
           (1..times).each do |i|
             temp_dataset = smaller_dataset
             temp_dataset_bigger = bigger_dataset
 
-            while temp_dataset.n_rows < 2 * min_count
+            while temp_dataset.n_rows < (2 * min_count)
               random_index = SecureRandom.random_number(temp_dataset_bigger.n_rows)
-              print "\r#{random_index}"
               instance = temp_dataset_bigger.instance(random_index)
 
               temp_dataset.add(instance)
@@ -153,7 +156,7 @@ module Wikipedia
             @classifier.set_data(temp_dataset)
             evaluations << @classifier.cross_validate(fold)
 
-            #print_evaluation_data(evaluations, result_file, i) if (i % (times/10)) == 0
+            print_evaluation_data(evaluations, result_file, i) if (i % (times / 10)) == 0
           end
 
           #evaluation_data_of(evaluations)
@@ -162,7 +165,7 @@ module Wikipedia
           raise "Error while cross validation for equally distributed instances: #{e}"
         ensure
           result_file.close
-          puts "The evaulation results has been saved to #{file_path}"
+          puts "\nThe evaulation results has been saved to #{file_path}"
         end
       end
 

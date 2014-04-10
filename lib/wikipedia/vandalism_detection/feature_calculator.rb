@@ -22,7 +22,7 @@ module Wikipedia
     class FeatureCalculator
 
       def initialize
-        @features = Wikipedia::VandalismDetection.configuration["features"]
+        @features = Wikipedia::VandalismDetection.configuration.features
         raise FeaturesNotConfiguredError if (@features.blank? || @features.empty?)
         @feature_classes = build_feature_classes @features
       end

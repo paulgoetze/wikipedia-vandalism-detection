@@ -4,13 +4,70 @@ module Wikipedia
     require 'yaml'
 
     def self.configuration
-      config = Configuration[Configuration::DEFAULTS]
-      @config_from_file ||= config.load_config_file(config.config_file)
-
-      @configuration ||= (@config_from_file ? config.deep_merge(@config_from_file) : config)
+      @configuration ||= Configuration.new
     end
 
-    class Configuration < Hash
+    class Configuration
+
+      attr_reader :data,
+                  :features,
+                  :classifier_options,
+                  :classifier_type,
+                  :cross_validation_fold,
+                  :output_base_directory
+
+      def initialize
+        config = DefaultConfiguration[DefaultConfiguration::DEFAULTS]
+        @config_from_file ||= config.load_config_file(config.config_file)
+
+        @data ||= (@config_from_file ? config.deep_merge(@config_from_file) : config)
+
+        @classifier_type = @data['classifier']['type']
+        @classifier_options = @data['classifier']['options']
+        @cross_validation_fold = @data['classifier']['cross-validation-fold']
+        @features = @data['features']
+        @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
+      end
+
+      # Returns file/path string for corpora files/directories and output files
+      # after following schema: <corpus type>_<progress stage>_<file name>.
+      #
+      # Instead of 'corpora' the word 'corpus' is used for grammatical reasons.
+      #
+      # example:
+      #   training_corpus_edits_file()
+      #   test_output_index_file()
+      #
+      def method_missing(method_name, *args)
+        return instance_variable_get("@#{method_name}") if instance_variable_defined?("@#{method_name}")
+
+        file_path_parts = method_name.to_s.split('_')
+
+        if file_path_parts.count == 4
+          corpus_type = file_path_parts[0]
+          progress_stage = file_path_parts[1]
+          file_path = file_path_parts[2..3].join('_')
+
+          if progress_stage == 'corpus'
+            progress_stage = 'corpora'
+            path = File.join(@data[progress_stage]['base_directory'], @data[progress_stage][corpus_type]['base_directory'])
+          elsif progress_stage == 'output'
+            path = @output_base_directory
+          else
+            return super
+          end
+
+          relative_path = File.join(path, @data[progress_stage][corpus_type][file_path])
+          absolute_path = File.expand_path(relative_path, __FILE__)
+          instance_variable_set "@#{method_name}", absolute_path
+        else
+          super
+        end
+      end
+    end
+
+    # This class represents the default config which is merged with the customized config from config YAML file.
+    class DefaultConfiguration < Hash
       DEFAULTS = {
           "source"    => Dir.pwd,
           'features'  => [
@@ -20,6 +77,7 @@ module Wikipedia
               "character sequence",
               "comment length",
               "compressibility",
+              "digit ratio",
               "longest word",
               "pronoun frequency",
               "pronoun impact",
@@ -31,12 +89,30 @@ module Wikipedia
               "vulgarism frequency",
               "vulgarism impact"
           ],
-          "training_corpus" => {
-              "index_file"          => File.join(Dir.pwd, 'build/corpus_file_index.yml'),
-              "edits_file"          => nil,
-              "annotations_file"    => nil,
-              "revisions_directory" => nil,
-              "arff_file"           => File.join(Dir.pwd, 'data/training-data.arff')
+          "corpora" => {
+            "base_directory" => nil,
+            "training" => {
+                "base_directory"      => nil,
+                "edits_file"          => nil,
+                "annotations_file"    => nil,
+                "revisions_directory" => nil
+            },
+            "test" => {
+                "base_directory"      => nil,
+                "edits_file"          => nil,
+                "revisions_directory" => nil
+            }
+          },
+          "output" => {
+              "base_directory" => File.join(Dir.pwd, 'build'),
+              "training" => {
+                  "arff_file" => 'training.arff',
+                  "index_file" => 'training_index.yml',
+              },
+              "test" => {
+                  "arff_file" => 'test.arff',
+                  "index_file" => 'test_index.yml',
+              }
           },
           "classifier" => {
               "type"    => nil,
@@ -59,6 +135,7 @@ module Wikipedia
       end
 
       def load_config_file(file)
+
         if File.exists? file
           YAML.load_file(file)
         else
@@ -70,6 +147,7 @@ module Wikipedia
           }
         end
       end
+
     end
   end
 end
