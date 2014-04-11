@@ -16,6 +16,7 @@ require 'wikipedia/vandalism_detection/feature_calculator'
 
 require 'wikipedia/vandalism_detection/instances'
 require 'wikipedia/vandalism_detection/training_dataset'
+require 'wikipedia/vandalism_detection/test_dataset'
 require 'wikipedia/vandalism_detection/classifier'
 require 'wikipedia/vandalism_detection/evaluator'
 

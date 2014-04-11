@@ -46,4 +46,51 @@ describe Wikipedia::VandalismDetection::Instances do
       values.should == ['vandalism', 'regular']
     end
   end
+
+  describe "#empty_for_test" do
+
+    before do
+      @dataset = Wikipedia::VandalismDetection::Instances.empty_for_test
+
+      @feature_attributes = @dataset.enumerate_attributes.to_a[0...-2]
+      @old_revision_id_attribute = @dataset.enumerate_attributes.to_a[-2]
+      @new_revision_id_attribute = @dataset.enumerate_attributes.to_a.last
+    end
+
+    it "returns a weka dataset" do
+      @dataset.class.should == Java::WekaCore::Instances::Base
+    end
+
+    it "returns an empty dataset" do
+      @dataset.n_rows.should == 0
+    end
+
+    it "has all configured features as attributes" do
+      attribute_names = @feature_attributes.map{ |attr| "#{attr.name.gsub('_', ' ')}" }
+      features = Wikipedia::VandalismDetection.configuration.features
+
+      attribute_names.should == features
+    end
+
+    it "has feature attributes of type 'numeric'" do
+      all_features_numeric = @feature_attributes.reduce{ |result, attr| result && attr.numeric? }
+      all_features_numeric.should be_true
+    end
+
+    it "has an attribute with name 'oldrevisionid'" do
+      @old_revision_id_attribute.name.should == 'oldrevisionid'
+    end
+
+    it "has an oldrevisionid attribute of type 'numeric'" do
+      @old_revision_id_attribute.numeric?.should be_true
+    end
+
+    it "has an attribute with name 'newrevisionid'" do
+      @new_revision_id_attribute.name.should == 'newrevisionid'
+    end
+
+    it "has a newrevisionid attribute of type 'numeric'" do
+      @new_revision_id_attribute.numeric?.should be_true
+    end
+  end
 end
