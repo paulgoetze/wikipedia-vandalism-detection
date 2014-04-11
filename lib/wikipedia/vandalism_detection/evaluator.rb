@@ -108,7 +108,7 @@ module Wikipedia
         result_file = File.open(file_path, 'a')
 
         begin
-          dataset_arff = TrainingDataset.dataset
+          dataset_arff = TrainingDataset.instances
           dataset_vandalism = Instances.empty
           dataset_regular = Instances.empty
 

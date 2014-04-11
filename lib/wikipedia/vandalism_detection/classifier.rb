@@ -93,7 +93,7 @@ module Wikipedia
         raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
-        @dataset = TrainingDataset.dataset
+        @dataset = TrainingDataset.instances
         dataset = @dataset
         options = @config.classifier_options
 

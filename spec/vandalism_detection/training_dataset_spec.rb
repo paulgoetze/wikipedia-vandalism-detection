@@ -22,15 +22,15 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     File.delete(@index_file) if File.exists?(@index_file)
   end
 
-  describe "#dataset" do
+  describe "#instances" do
 
     it "returns a weka dataset" do
-      dataset = Wikipedia::VandalismDetection::TrainingDataset.dataset
+      dataset = Wikipedia::VandalismDetection::TrainingDataset.instances
       dataset.class.should == Java::WekaCore::Instances
     end
 
     it "returns a dataset built from the configured corpus" do
-      dataset = Wikipedia::VandalismDetection::TrainingDataset.dataset
+      dataset = Wikipedia::VandalismDetection::TrainingDataset.instances
       filter = Weka::Filters::Unsupervised::Instance::RemoveWithValues.new
 
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)

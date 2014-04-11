@@ -16,7 +16,7 @@ module Wikipedia
     # This class provides methods for getting and creating a training ARFF file from a configured training corpus.
     class TrainingDataset
 
-      def self.dataset
+      def self.instances
         config = Wikipedia::VandalismDetection.configuration
         arff_file = config.training_output_arff_file
         dataset = (File.exist?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
@@ -221,7 +221,7 @@ module Wikipedia
 
         old_revision_id = edit_data['oldrevisionid'].to_i
         new_revision_id = edit_data['newrevisionid'].to_i
-        
+
         editor = edit_data['editor']
         comment = edit_data['editcomment']
 
