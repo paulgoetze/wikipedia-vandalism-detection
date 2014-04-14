@@ -90,28 +90,55 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     it "returns the same value for both edit and features as parameter" do
-      consensus_from_edit = @classifier.classify @edit
-      consensus_from_features = @classifier.classify @features
+      confidence_from_edit = @classifier.classify @edit
+      confidence_from_features = @classifier.classify @features
 
-      consensus_from_edit.should == consensus_from_features
+      confidence_from_edit.should == confidence_from_features
     end
 
-    it "returns a Numeric value which represents the consensus of vandalism class" do
-      consensus = @classifier.classify @features
-      consensus.should be_a Numeric
+    it "returns a Numeric value which represents the confidence of vandalism class" do
+      confidence = @classifier.classify @features
+      confidence.should be_a Numeric
     end
 
-    it "returns an array that holds the consensus at first that is between 0.0 and 1.0" do
-      consensus = @classifier.classify @features
-      consensus_between_0_and_1 = (consensus <= 1.0) && (consensus >= 0.0)
-      consensus_between_0_and_1.should be_true
+    it "returns an array that holds the confidence at first that is between 0.0 and 1.0" do
+      confidence = @classifier.classify @features
+      confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
+      confidence_between_0_and_1.should be_true
     end
 
     it "returns -1.0 if features cannot be computed from the edit" do
       Wikipedia::VandalismDetection::FeatureCalculator.any_instance.stub(calculate_features_for: [])
-      consensus = @classifier.classify @edit
+      confidence = @classifier.classify @edit
 
-      consensus.should == -1.0
+      confidence.should == -1.0
+    end
+
+    describe "with option ':return_all_params = true'" do
+
+      it "returns a hash" do
+        parameters = @classifier.classify @features, return_all_params: true
+        parameters.should be_a Hash
+      end
+
+      [:confidence, :class_index].each do |key|
+        it "returns a hash with key :#{key}" do
+          parameters = @classifier.classify @features, return_all_params: true
+          parameters.keys.should include key
+        end
+      end
+
+      it "returns a class_index value of 0 or 1" do
+        class_index = @classifier.classify(@features, return_all_params: true)[:class_index]
+        is_one_or_zero = class_index == 0 || class_index == 1
+        is_one_or_zero.should be_true
+      end
+
+      it "returns an confidence value that is between 0.0 and 1.0" do
+        confidence = (@classifier.classify @features, return_all_params: true)[:confidence]
+        confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
+        confidence_between_0_and_1.should be_true
+      end
     end
 
     it "raises an argument error if given features are an empty array" do

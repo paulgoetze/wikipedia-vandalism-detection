@@ -43,7 +43,7 @@ describe Wikipedia::VandalismDetection::Instances do
 
     it "has a class attribute with values 'vandalism' and 'regular'" do
       values = @class_attribute.num_values.times.collect {|index| @class_attribute.value(index) }
-      values.should == ['vandalism', 'regular']
+      values.should == ['regular','vandalism']
     end
   end
 

@@ -22,8 +22,14 @@ module Wikipedia
     # Exception is raised when trying to read revisions directory without having configured some
     class RevisionsDirectoryNotConfiguredError < Error; end
 
+    # Exception is raised when trying to classify without a configured ground thruth test file
+    class GroundTruthFileNotConfiguredError < Error; end
+
     # Exception is raises when there is no arff file available
     class ArffFileNotFoundError < Error; end
+
+    # Exception is raises when there is no ground truth file available
+    class GroundTruthFileNotFoundError < Error; end
 
     # Exceptoion is raised when an already available featture should be added to the arff file
     class FeatureAlreadyUsedError < Error; end

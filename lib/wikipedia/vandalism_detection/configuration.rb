@@ -43,10 +43,10 @@ module Wikipedia
 
         file_path_parts = method_name.to_s.split('_')
 
-        if file_path_parts.count == 4
+        if file_path_parts.count >= 4
           corpus_type = file_path_parts[0]
           progress_stage = file_path_parts[1]
-          file_path = file_path_parts[2..3].join('_')
+          file_path = file_path_parts[2..-1].join('_')
 
           if progress_stage == 'corpus'
             progress_stage = 'corpora'
@@ -100,7 +100,8 @@ module Wikipedia
             "test" => {
                 "base_directory"      => nil,
                 "edits_file"          => nil,
-                "revisions_directory" => nil
+                "revisions_directory" => nil,
+                "ground_truth_file"   => nil
             }
           },
           "output" => {
@@ -112,6 +113,7 @@ module Wikipedia
               "test" => {
                   "arff_file" => 'test.arff',
                   "index_file" => 'test_index.yml',
+                  "classification_file" => 'classification.txt'
               }
           },
           "classifier" => {

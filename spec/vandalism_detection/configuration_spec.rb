@@ -40,10 +40,12 @@ describe Wikipedia::VandalismDetection do
       :training_corpus_revisions_directory,
       :test_corpus_edits_file,
       :test_corpus_revisions_directory,
+      :test_corpus_ground_truth_file,
       :training_output_arff_file,
       :training_output_index_file,
       :test_output_arff_file,
       :test_output_index_file,
+      :test_output_classification_file,
       :classifier_type,
       :classifier_options,
       :output_base_directory

@@ -35,15 +35,11 @@ describe Wikipedia::VandalismDetection::TestDataset do
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
 
       # remove those with -1 values
-      filter.set do
-        data parsed_dataset
-        filter_options '-S 0 -V'
-      end
+      filtered_dataset = parsed_dataset.to_a2d.delete_if { |instance| instance.include?(-1) }
 
-      parsed_dataset = filter.use
-      puts parsed_dataset
 
-      dataset.to_s.should == parsed_dataset.to_s
+
+      dataset.to_a2d.should == filtered_dataset
     end
   end
 

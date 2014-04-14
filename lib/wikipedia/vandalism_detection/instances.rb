@@ -6,15 +6,21 @@ module Wikipedia
 
     class Instances
 
-      VANDALISM_CLASS_INDEX = 0
-      REGULAR_CLASS_INDEX = 1
+      REGULAR_CLASS_INDEX = 0
+      VANDALISM_CLASS_INDEX = 1
+
       VANDALISM = "vandalism"
       REGULAR = "regular"
+
+      VANDALISM_SHORT= "V"
+      REGULAR_SHORT = "R"
 
       OLD_REVISION_ID = 'oldrevisionid'
       NEW_REVISION_ID = 'newrevisionid'
 
-      CLASSES = { VANDALISM_CLASS_INDEX => VANDALISM , REGULAR_CLASS_INDEX => REGULAR }
+
+      CLASSES = { REGULAR_CLASS_INDEX => REGULAR, VANDALISM_CLASS_INDEX => VANDALISM }
+      CLASSES_SHORT = { REGULAR_CLASS_INDEX => REGULAR_SHORT, VANDALISM_CLASS_INDEX => VANDALISM_SHORT }
 
       # Returns an empty instances dataset of type Java::WekaCore::Instances::Base.
       # This dataset is used for feature computation and classification for Wikipedia vandalism detection

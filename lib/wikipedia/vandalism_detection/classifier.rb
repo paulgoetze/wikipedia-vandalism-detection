@@ -30,7 +30,9 @@ module Wikipedia
         @classifier
       end
 
-      # Classifies an edit or a set of features and returns the assigned label
+      # Classifies an edit or a set of features and returns the vandalism consensus by default
+      # If 'return_all_params = true' is set, it returns a Hash of form
+      # { consensus => ..., class_index => ...}
       #
       # @example
       #   # suppose you have a dataset with 2 feature or 'edit' as an instance of Wikipedia::VandalismDetection::Edit
@@ -39,13 +41,13 @@ module Wikipedia
       #
       #   consensus = classifier.classify(features)
       #   consensus = classifier.classify(edit)
-      def classify(edit_or_features)
+      def classify(edit_or_features, options = {})
         features = @config.features
         param_is_features = edit_or_features.is_a?(Array) && (edit_or_features.size == features.count)
         param_is_edit = edit_or_features.is_a? Edit
 
         unless param_is_edit || param_is_features
-          raise ArgumentError, "Input has to be an Edit or an Array of Features."
+          raise ArgumentError, "Input has to be an Edit or an Array of feature values."
         end
 
         feature_values = param_is_edit ? @feature_calculator.calculate_features_for(edit_or_features) : edit_or_features
@@ -58,7 +60,14 @@ module Wikipedia
         results = []
 
         dataset.each_row do |instance|
-          results = (@classifier.distribution_for_instance(instance).to_a).first
+          if options[:return_all_params]
+            confidence = (@classifier.distribution_for_instance(instance).to_a).first
+            class_index = @classifier.classify_instance(instance).to_i
+
+            results = { confidence: confidence, class_index: class_index }
+          else
+            results = (@classifier.distribution_for_instance(instance).to_a).first
+          end
         end
 
         results

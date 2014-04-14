@@ -20,7 +20,7 @@ module Wikipedia
         arff_file = Wikipedia::VandalismDetection.configuration.test_output_arff_file
         dataset = (File.exist?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
 
-        dataset = remove_invalid_instances(dataset)
+        #dataset = remove_invalid_instances(dataset)
       end
 
       # Builds the dataset as ARFF file which can be used by an Evaluator.

@@ -11,6 +11,7 @@ corpora:
     base_directory: test
     edits_file: edits.csv
     revisions_directory: revisions
+    ground_truth_file: ground-truth.txt
 
 output:
   base_directory: ../../../../spec/resources/build
@@ -20,6 +21,7 @@ output:
   test:
     index_file: test_index.yml
     arff_file: test.arff
+    classification_file: classification.txt
 
 features:
   - anonymity
