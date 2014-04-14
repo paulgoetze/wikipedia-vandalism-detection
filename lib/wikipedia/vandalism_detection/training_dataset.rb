@@ -264,9 +264,9 @@ module Wikipedia
         raise EditsFileNotConfiguredError unless edits_file
 
         @edits_file_content ||= File.read(edits_file)
-        @edits_cvs ||= CSV.parse(@edits_file_content, headers: true)
+        @edits_csv ||= CSV.parse(@edits_file_content, headers: true)
 
-        edit_data = @edits_cvs.find { |row| row['editid'] == edit_id }
+        edit_data = @edits_csv.find { |row| row['editid'] == edit_id }
         raise "Edit data for edit id #{edit_id} not found in #{ File.basename(edits_file) }." unless edit_data
 
         edit_data
