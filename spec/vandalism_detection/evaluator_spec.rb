@@ -10,8 +10,6 @@ describe Wikipedia::VandalismDetection::Evaluator do
     @test_arff_file = @config.test_output_arff_file
     @build_dir = @config.output_base_directory
     @test_classification_file = @config.test_output_classification_file
-
-    puts @config.test_corpus_ground_truth_file
   end
 
   after do
@@ -54,6 +52,148 @@ describe Wikipedia::VandalismDetection::Evaluator do
   before do
     classifier = Wikipedia::VandalismDetection::Classifier.new
     @evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+  end
+
+  describe "#test_performance_curves" do
+
+    before do
+      @classification = {
+          :"1-2" => {
+              old_revision_id: 1,
+              new_revision_id: 2,
+              class: "R",
+              confidence: 0.2
+          },
+          :"2-3" => {
+              old_revision_id: 2,
+              new_revision_id: 3,
+              class: "R",
+              confidence: 0.3
+          },
+          :"3-4" => {
+              old_revision_id: 3,
+              new_revision_id: 4,
+              class: "V",
+              confidence: 0.8
+          },
+          :"4-5" => {
+              old_revision_id: 4,
+              new_revision_id: 5,
+              class: "V",
+              confidence: 1.0
+          }
+      }
+
+      @ground_truth = {
+          :"1-2" => {
+              old_revision_id: 1,
+              new_revision_id: 2,
+              class: "R"
+          },
+          :"2-3" => {
+              old_revision_id: 2,
+              new_revision_id: 3,
+              class: "V"
+          },
+          :"3-4" => {
+              old_revision_id: 3,
+              new_revision_id: 4,
+              class: "R"
+          },
+          :"4-5" => {
+              old_revision_id: 4,
+              new_revision_id: 5,
+              class: "V"
+          }
+      }
+
+      @sample_count = 10
+
+      @curve_data = @evaluator.test_performance_curves(@ground_truth, @classification, @sample_count)
+    end
+
+    it "returns a Hash" do
+      @curve_data.should be_a Hash
+    end
+
+    [:recalls, :precisions,:fp_rates, :auprc, :auroc].each do |attribute|
+      it "returns a Hash including #{attribute}" do
+        @curve_data.should have_key(attribute)
+      end
+    end
+
+    [:recalls, :precisions,:fp_rates].each do |attribute|
+      it "returns a Hash including #{attribute} of length #{@sample_count}" do
+        @curve_data[attribute].count.should == @sample_count
+      end
+    end
+
+    describe "#predictive_values" do
+
+      before do
+        @threshold = 0.5
+        @predictive_values = @evaluator.predictive_values(@ground_truth, @classification, @threshold)
+      end
+
+      it "returns a Hash" do
+        @predictive_values.should be_a Hash
+      end
+
+      [
+          { threshold: 0.5, result: {tp: 1, fp: 1, tn: 1, fn: 1} },
+          { threshold: 0.2, result: {tp: 2, fp: 2, tn: 0, fn: 0} },
+          { threshold: 0.0, result: {tp: 2, fp: 2, tn: 0, fn: 0} },
+          { threshold: 1.0, result: {tp: 1, fp: 0, tn: 2, fn: 1} }
+      ].each do |values|
+        it "returns the right values for threshold #{values[:threshold]}" do
+          predictive_values = @evaluator.predictive_values(@ground_truth, @classification, values[:threshold])
+          predictive_values.should == values[:result]
+        end
+      end
+    end
+
+    describe "#area_under_curve" do#
+
+      before do
+        precisions = @curve_data[:precisions]
+        recalls = @curve_data[:precisions]
+        fp_rates = @curve_data[:fp_rates]
+
+        @auprc = @evaluator.area_under_curve(recalls, precisions)
+        @auroc = @evaluator.area_under_curve(fp_rates, recalls)
+      end
+
+      it "returns a numeric value for auprc" do
+        @auprc.should be_a Numeric
+      end
+
+      it "returns a numeric value between 0.0 & 1.0 for auprc" do
+        is_between_zero_and_one = @auprc >= 0.0 && @auprc <= 1.0
+        is_between_zero_and_one.should be_true
+      end
+
+      it "returns a numeric value for auroc" do
+        @auroc.should be_a Numeric
+      end
+
+      it "returns a numeric value between 0.0 & 1.0 for auroc" do
+        is_between_zero_and_one = @auroc >= 0.0 && @auroc <= 1.0
+        is_between_zero_and_one.should be_true
+      end
+
+      [
+          { x: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], y: [1.0, 0.8, 0.6, 0.4, 0.2, 0.0], auc: 0.5 }
+      ].each do |data|
+        it "returns the right values" do
+          x = data[:x]
+          y = data[:y]
+          auc = data[:auc]
+
+          @evaluator.area_under_curve(x, y).should == auc
+        end
+      end
+
+    end
   end
 
   describe "#create_testcorpus_classification_file!" do
@@ -117,19 +257,20 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns a performance values Hash" do
-      performance_values = @evaluator.evaluate_testcorpus_classification
+      performance_values = @evaluator.evaluate_testcorpus_classification(sample_count: @sample_count)
       performance_values.should be_a Hash
     end
 
-    [ :true_positive_rate,
-      :false_positive_rate,
-      :precision,
-      :recall,
-      :area_under_prc,
-      :area_under_roc
+    [ :fp_rates,
+      :precisions,
+      :recalls,
+      :auprc,
+      :auroc,
+      :total_precision,
+      :total_recall
     ].each do |attr|
       it "returns a performance values Hash with property'#{attr}'" do
-        performance_values = @evaluator.evaluate_testcorpus_classification
+        performance_values = @evaluator.evaluate_testcorpus_classification(sample_count: @sample_count)
         performance_values[attr].should_not be_nil
       end
     end
@@ -182,12 +323,10 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "has non-empty :precision Array contents" do
-        puts @data[:precision].to_s
         @data[:precision].should_not be_empty
       end
 
       it "has non-empty :recall Array contents" do
-        puts @data[:recall].to_s
         @data[:recall].should_not be_empty
       end
     end
@@ -215,12 +354,10 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "has non-empty :precision Array contents" do
-        puts @data[:precision].to_s
         @data[:precision].should_not be_empty
       end
 
       it "has non-empty :recall Array contents" do
-        puts @data[:recall].to_s
         @data[:recall].should_not be_empty
       end
     end

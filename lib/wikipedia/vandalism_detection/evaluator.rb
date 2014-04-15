@@ -91,7 +91,15 @@ module Wikipedia
 
       # Evaluates the classification of the configured test corpus against the given ground truth.
       # Runs the file creation automatically unless the classification file exists, yet.
-      def evaluate_testcorpus_classification
+      #
+      # Returns a Hash with values:
+      #   :recalls - recall values
+      #   :precisions - precision values
+      #   :fp_rates - fals positive rate values
+      #   :total_recall - overall classifier recall value
+      #   :total_precision - overall classifier precision value
+      #
+      def evaluate_testcorpus_classification(options = {})
         classification_file_path = @config.test_output_classification_file
         create_testcorpus_classification_file! unless File.exists?(classification_file_path)
 
@@ -103,59 +111,186 @@ module Wikipedia
         raise(GroundTruthFileNotFoundError, 'Configured ground truth file is not available.') \
           unless File.exist?(ground_truth_file_path)
 
+        sample_count = options[:sample_count] || 100
+
+        # generate classification hash
         classification_file = File.read(classification_file_path)
-        ground_truth_file = File.read(ground_truth_file_path)
+        classification_samples = classification_file.lines.to_a
+        classification_samples.shift # remove header line
 
-        lines = classification_file.lines.to_a
-        lines.shift # remove header line
+        classification = {}
 
-        classification_hash = {}
-        lines.map do |line|
+        classification_samples.each do |line|
           line_parts = line.split(' ')
 
           old_revision_id = line_parts[0].to_i
           new_revision_id = line_parts[1].to_i
           class_short = line_parts[2]
-          confidence = line_parts[3]
+          confidence = line_parts[3].to_f
 
-          # curve calculation:
-          # set threshold 0.0 to 1.0 in certain steps
-          # compute tp, tf, fp, fn for threshold from confidence
-          # compute performance_params and area under this point
-          # draw allpoints to curve and sumup areas under points
+          classification[:"#{old_revision_id}-#{new_revision_id}"] = {
+              old_revision_id: old_revision_id,
+              new_revision_id: new_revision_id,
+              class: class_short,
+              confidence: confidence
+          }
+        end
 
-          classification_hash[:"#{old_revision_id}-#{new_revision_id}"] = {
+        # generate ground truth hash
+        ground_truth_file = File.read(ground_truth_file_path)
+        ground_truth_samples = ground_truth_file.lines.to_a
+
+        ground_truth = {}
+
+        ground_truth_samples.each do |line|
+          line_parts = line.split(' ')
+
+          old_revision_id = line_parts[0].to_i
+          new_revision_id = line_parts[1].to_i
+          class_short = line_parts[2]
+
+          ground_truth[:"#{old_revision_id}-#{new_revision_id}"] = {
               old_revision_id: old_revision_id,
               new_revision_id: new_revision_id,
               class: class_short
           }
         end
 
-        true_positives = 0    # vandalism which is classified as vandalism
-        false_positives = 0   # regular that is classified as vandalism
-        true_negatives = 0    # regular that is classified as regular
-        false_negatives = 0   # vandalism that is classified as regular
+        # get total precision & recall values
+        tp = 0  # vandalism which is classified as vandalism
+        fp = 0  # regular that is classified as vandalism
+        tn = 0  # regular that is classified as regular
+        fn = 0  # vandalism that is classified as regular
 
-        ground_truth_file.lines.each do |line|
-          line_parts = line.split(' ')
+        ground_truth.each do |sample|
+          values = sample[1]
 
-          old_revision_id = line_parts[0]
-          new_revision_id = line_parts[1]
-          target_class = line_parts[2]
+          old_revision_id = values[:old_revision_id]
+          new_revision_id = values[:new_revision_id]
+          target_class = values[:class]
 
-          classification_class = classification_hash[:"#{old_revision_id}-#{new_revision_id}"][:class]
+          classification_class = classification[:"#{old_revision_id}-#{new_revision_id}"][:class]
 
           case target_class
             when Instances::VANDALISM_SHORT
-              true_positives += 1 if classification_class == Instances::VANDALISM_SHORT # TP
-              false_negatives += 1 if classification_class == Instances::REGULAR_SHORT # FN
+              tp += 1 if classification_class == Instances::VANDALISM_SHORT # TP
+              fn += 1 if classification_class == Instances::REGULAR_SHORT   # FN
             when Instances::REGULAR_SHORT
-              false_positives += 1 if classification_class == Instances::VANDALISM_SHORT # FP
-              true_negatives += 1 if classification_class == Instances::REGULAR_SHORT # TN
+              fp += 1 if classification_class == Instances::VANDALISM_SHORT # FP
+              tn += 1 if classification_class == Instances::REGULAR_SHORT   # TN
           end
         end
 
-        performance_parameters(true_positives, false_positives, true_negatives, false_negatives)
+        params = performance_parameters(tp, fp, tn, fn)
+        curves = test_performance_curves(ground_truth, classification, sample_count)
+
+        curves[:total_recall] = params[:recall]
+        curves[:total_precision] = params[:precision]
+
+        curves
+      end
+
+      # Returns the performance curve points (recall, precision, fp-rate) and computed area under curves.
+      def test_performance_curves(ground_truth, classification, sample_count)
+        thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
+
+        precisions = []
+        recalls = []
+        fp_rates =  []
+
+        thresholds.each do |threshold|
+          values = predictive_values(ground_truth, classification, threshold)
+          performance_params = performance_parameters(values[:tp], values[:fp], values[:tn], values[:fn])
+
+          precisions.push performance_params[:precision]
+          recalls.push performance_params[:recall]
+          fp_rates.push performance_params[:fp_rate]
+        end
+
+        auprc = area_under_curve(recalls, precisions)
+        auroc = area_under_curve(fp_rates, recalls)
+
+        { precisions: precisions, recalls: recalls, fp_rates: fp_rates, auprc: auprc, auroc: auroc }
+      end
+
+      # Returns the predictive values (TP,FP, TN, FN) for a certain threshold.
+      def predictive_values(ground_truth, classification, threshold)
+        tp = 0 # vandalism which is classified as vandalism
+        fp = 0 # regular that is classified as vandalism
+        tn = 0 # regular that is classified as regular
+        fn = 0 # vandalism that is classified as regular
+
+        ground_truth.each do |sample|
+          values = sample[1]
+          target_class = values[:class]
+
+          key = :"#{values[:old_revision_id]}-#{values[:new_revision_id]}"
+          confidence = classification[key][:confidence]
+
+          case target_class
+            when Instances::VANDALISM_SHORT
+              tp += 1 if confidence >= threshold  # True Positives
+              fn += 1 if confidence < threshold  # False Negatives
+            when Instances::REGULAR_SHORT
+              fp += 1 if confidence >= threshold  # False Positives
+              tn += 1 if confidence < threshold  # True Negatives
+          end
+        end
+
+        { tp: tp, fp: fp, tn: tn, fn: fn }
+      end
+
+      # Returns a hash with performance parameters computed from given TP, FP, TN, FN
+      def performance_parameters(tp, fp, tn, fn)
+        precision = tp.to_f / (tp.to_f + fp.to_f)
+        recall = tp.to_f / (tp.to_f + fn.to_f)
+        fp_rate = fp.to_f / (fp.to_f + tn.to_f)
+
+        precision = 0.0 if precision.nan?
+        recall = 0.0 if recall.nan?
+        fp_rate = 0.0 if fp_rate.nan?
+
+        {
+            precision: precision,
+            recall: recall,
+            fp_rate: fp_rate
+        }
+      end
+
+      # Returns the calculated area under curve for given point values
+      # Recall and Precision values has to be float arrays of the same length.
+      def area_under_curve(recall_values, precision_values)
+        return 0.0 unless recall_values.all? {|f| !f.nan? } && precision_values.all? {|f| !f.nan?}
+
+        sorted = sort_curve_values(recall_values, precision_values)
+        recalls = sorted[:x]
+        precisions = sorted[:y]
+
+        sum = 0.0
+        last_index = recalls.size - 1
+
+        # trapezoid area formular: A = 1/2 * (b1 + b2) * h
+        recalls.each_with_index do |x, index |
+          break if index == last_index
+
+          h = recalls[index + 1] - x
+          b1 = precisions[index]
+          b2 = precisions[index + 1]
+
+          sum += 0.5 * (b1 + b2) * h
+        end
+
+        sum
+      end
+
+      # Returns given value array sorted by first array (x_values)
+      # Return value is a Hash { x: <x_values_sorted>, y: <y_values_sorted_after_x> }
+      def sort_curve_values(x_values, y_values)
+        merge_sorted = x_values.each_with_index.map { |x, index| [x, y_values[index]] }.sort
+        x = merge_sorted.transpose[0]
+        y = merge_sorted.transpose[1]
+
+        { x: x, y: y }
       end
 
       # Creates the test corpus text file by classifying the configured test samples
@@ -191,20 +326,6 @@ module Wikipedia
       end
 
       private
-
-      # Returns a hash with performance parameters computed from given TP, FP, TN, FN
-      def performance_parameters(tp, fp, tn, fn)
-        precision = tp / (tp + fp)
-        recall = tp / (tp + fn)
-        fp_rate = fp / (fp + tn)
-
-        {
-            precision: precision,
-            recall: recall,
-            false_positive_rate: fp_rate,
-            true_positive_rate: recall
-        }
-      end
 
       # Cross validates classifier over full dataset with <fold>-fold cross validation
       def cross_validate_all_instances(fold)
@@ -284,7 +405,7 @@ module Wikipedia
           raise "Error while cross validation for equally distributed instances: #{e}"
         ensure
           result_file.close
-          puts "\nThe evaulation results has been saved to #{file_path}"
+          puts "\nThe evaluation results has been saved to #{file_path}"
         end
       end
 
