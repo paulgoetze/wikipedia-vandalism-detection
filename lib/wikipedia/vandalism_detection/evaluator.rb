@@ -92,12 +92,27 @@ module Wikipedia
       # Evaluates the classification of the configured test corpus against the given ground truth.
       # Runs the file creation automatically unless the classification file exists, yet.
       #
+      # Number of samples to use can be set by 'sample_count: <number>' parameter
+      # Default number of samples is 100.
+      #
       # Returns a Hash with values:
       #   :recalls - recall values
       #   :precisions - precision values
       #   :fp_rates - fals positive rate values
+      #   :auprc - area under precision recall curve
+      #   :auroc - area under receiver operator curve
       #   :total_recall - overall classifier recall value
       #   :total_precision - overall classifier precision value
+      #
+      # @example
+      #   classifier = Wikipedia::VandalismDetection::Classifier.new
+      #   evaluator = classifier.evaluator
+      # or
+      #   classifier = Wikipedia::VandalismDetection::Classifier.new
+      #   evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+      #
+      #   evaluator.evaluate_testcorpus_classification
+      #   evaluator.evaluate_testcorpus_classification(sample_count: 50)
       #
       def evaluate_testcorpus_classification(options = {})
         classification_file_path = @config.test_output_classification_file
@@ -294,7 +309,7 @@ module Wikipedia
       end
 
       # Creates the test corpus text file by classifying the configured test samples
-      # All sub steps (as creating the test arff file, etc.) are runautomattically if needed.
+      # All sub steps (as creating the test arff file, etc.) are run automattically if needed.
       def create_testcorpus_classification_file!
         dataset = TestDataset.instances
 

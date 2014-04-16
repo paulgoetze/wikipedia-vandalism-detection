@@ -33,5 +33,8 @@ module Wikipedia
 
     # Exceptoion is raised when an already available featture should be added to the arff file
     class FeatureAlreadyUsedError < Error; end
+
+    # Exception is raised when a revisions text file cannot be found and loaded
+    class RevisionFileNotFound < Error; end
   end
 end

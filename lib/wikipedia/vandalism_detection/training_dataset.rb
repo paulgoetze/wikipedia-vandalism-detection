@@ -203,7 +203,7 @@ module Wikipedia
             processed_edits += 1
 
             if processed_edits % 100 == 0
-              print_progress(processed_edits, @edits_cvs.count, "computing features")
+              print_progress(processed_edits, @edits_csv.count, "computing features")
               print " | redirects: #{skipped_edits}" if skipped_edits > 0
             end
           end
@@ -227,6 +227,11 @@ module Wikipedia
 
         old_revision_file = @file_index["#{old_revision_id}.txt"]
         new_revision_file = @file_index["#{new_revision_id}.txt"]
+
+        raise(RevisionFileNotFound, "Old revision file #{old_revision_file} not found") unless \
+          File.exist?(old_revision_file)
+        raise(RevisionFileNotFound, "New revision file #{new_revision_file} not found") unless \
+          File.exist?(new_revision_file)
 
         old_revision_text = File.read(old_revision_file)
         new_revision_text = File.read(new_revision_file)

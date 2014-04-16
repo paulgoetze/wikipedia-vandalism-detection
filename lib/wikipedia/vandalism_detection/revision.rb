@@ -36,6 +36,10 @@ module Wikipedia
       end
 
       def redirect?
+        # remove invalid utf-8 byte sequences
+        @text.encode!('UTF-16', 'UTF-8', invalid: :replace, replace: '')
+        @text.encode!('UTF-8', 'UTF-16')
+
         !!(@text =~ REDIRECT_PATTERN)
       end
 

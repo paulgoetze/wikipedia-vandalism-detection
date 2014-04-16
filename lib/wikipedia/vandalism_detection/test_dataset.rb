@@ -1,6 +1,7 @@
 require 'find'
 require 'yaml'
 require 'fileutils'
+require 'csv'
 
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/text'
@@ -18,9 +19,9 @@ module Wikipedia
 
       def self.instances
         arff_file = Wikipedia::VandalismDetection.configuration.test_output_arff_file
-        dataset = (File.exist?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
 
-        #dataset = remove_invalid_instances(dataset)
+        not_empty_arff_file_exists = File.exist?(arff_file) && Core::Parser.parse_ARFF(arff_file)
+        dataset = (not_empty_arff_file_exists ? Core::Parser.parse_ARFF(arff_file) : build!)
       end
 
       # Builds the dataset as ARFF file which can be used by an Evaluator.
@@ -51,9 +52,12 @@ module Wikipedia
 
         File.open(arff_file, 'a') do |f|
           edits.each do |edit_data|
-            edit = create_edit_from edit_data
-            old_revision_id = edit.old_revision.id
-            new_revision_id = edit.new_revision.id
+
+            old_revision_id = edit_data['oldrevisionid']
+            new_revision_id = edit_data['newrevisionid']
+
+            next unless annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id)
+            edit = create_edit_from(edit_data)
 
             feature_values = feature_calculator.calculate_features_for(edit)
             f.puts([*feature_values, old_revision_id, new_revision_id].join(',')) unless feature_values.empty?
@@ -62,7 +66,7 @@ module Wikipedia
             processed_edits += 1
 
             if processed_edits % 100 == 0
-              print_progress(processed_edits, @edits_cvs.count, "computing features")
+              print_progress(processed_edits, edits.count, "computing features")
               print " | redirects: #{skipped_edits}" if skipped_edits > 0
             end
           end
@@ -89,7 +93,7 @@ module Wikipedia
               contents.each do |file|
                 path = "#{revisions_directory}/#{part_directory}/#{file}"
 
-                if File.file?(path) && (file =~ /\d+.txt/)
+                if File.file?(path) && (file =~ /\d+.txt/) && annotated_revision?(file)
                   file_index[file] = path
                   print "\r processed #{file_index.count } files"
                 end
@@ -109,6 +113,31 @@ module Wikipedia
       end
 
       private
+
+      # Returns whether the
+      def self.annotated_revision?(revision_file)
+        @annotated_revisions ||= annotated_revisions
+
+        revision_id = revision_file.gsub('.txt', '')
+        @annotated_revisions[revision_id.to_sym]
+      end
+
+      # Returns a Hash with the used revision ids from edits_file.
+      def self.annotated_revisions
+        annotations_file = @config.test_corpus_ground_truth_file
+        annotations = File.read(annotations_file).lines
+
+        annotated_revisions = {}
+
+        annotations.each do |annotation|
+          data = annotation.split(' ')
+
+          annotated_revisions[data[0].to_sym] = true
+          annotated_revisions[data[1].to_sym] = true
+        end
+
+        @annotated_revisions ||= annotated_revisions
+      end
 
       # Removes instances including -1 values
       def self.remove_invalid_instances(dataset)
@@ -134,6 +163,11 @@ module Wikipedia
 
         old_revision_file = @file_index["#{old_revision_id}.txt"]
         new_revision_file = @file_index["#{new_revision_id}.txt"]
+
+        raise(RevisionFileNotFound, "Old revision file #{old_revision_file} not found") unless \
+          File.exist?(old_revision_file)
+        raise(RevisionFileNotFound, "New revision file #{new_revision_file} not found") unless \
+          File.exist?(new_revision_file)
 
         old_revision_text = File.read(old_revision_file)
         new_revision_text = File.read(new_revision_file)
@@ -163,6 +197,13 @@ module Wikipedia
         else
           create_corpus_file_index!
         end
+      end
+
+      # Prints the progress to the $stdout
+      def self.print_progress(processed_count, total_count, message)
+        processed_absolute = "#{processed_count}/#{total_count}"
+        processed_percentage = "%0.2f%" % ((processed_count * 100.00) / total_count).round(2)
+        print "\r#{message}... #{processed_absolute} | #{processed_percentage}"
       end
     end
   end
