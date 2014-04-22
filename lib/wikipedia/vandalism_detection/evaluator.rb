@@ -115,9 +115,6 @@ module Wikipedia
       #   evaluator.evaluate_testcorpus_classification(sample_count: 50)
       #
       def evaluate_testcorpus_classification(options = {})
-        classification_file_path = @config.test_output_classification_file
-        create_testcorpus_classification_file! unless File.exists?(classification_file_path)
-
         ground_truth_file_path = @config.test_corpus_ground_truth_file
 
         raise(GroundTruthFileNotConfiguredError, 'Ground truth file path has to be set for test set evaluation!') \
@@ -127,6 +124,10 @@ module Wikipedia
           unless File.exist?(ground_truth_file_path)
 
         sample_count = options[:sample_count] || 100
+
+        classifier_name = @config.classifier_type.split('::').last.downcase
+        classification_file_path = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt")
+        create_testcorpus_classification_file! unless File.exists?(classification_file_path)
 
         # generate classification hash
         classification_file = File.read(classification_file_path)
@@ -184,7 +185,10 @@ module Wikipedia
           new_revision_id = values[:new_revision_id]
           target_class = values[:class]
 
-          classification_class = classification[:"#{old_revision_id}-#{new_revision_id}"][:class]
+          key = :"#{old_revision_id}-#{new_revision_id}"
+          next unless classification.has_key? key # go on if not in annotated not in classification
+
+          classification_class = classification[key][:class]
 
           case target_class
             when Instances::VANDALISM_SHORT
@@ -240,6 +244,8 @@ module Wikipedia
           target_class = values[:class]
 
           key = :"#{values[:old_revision_id]}-#{values[:new_revision_id]}"
+          next unless classification.has_key? key # go on if not in annotated not in classification
+
           confidence = classification[key][:confidence]
 
           case target_class
@@ -313,7 +319,8 @@ module Wikipedia
       def create_testcorpus_classification_file!
         dataset = TestDataset.instances
 
-        file_path = @config.test_output_classification_file
+        classifier_name = @config.classifier_type.split('::').last.downcase
+        file_path = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt")
         file = File.open(file_path, 'w')
 
         feature_names = dataset.enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]

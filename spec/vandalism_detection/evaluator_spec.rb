@@ -9,7 +9,9 @@ describe Wikipedia::VandalismDetection::Evaluator do
     @training_arff_file = @config.training_output_arff_file
     @test_arff_file = @config.test_output_arff_file
     @build_dir = @config.output_base_directory
-    @test_classification_file = @config.test_output_classification_file
+
+    classifier_name = @config.classifier_type.split('::').last.downcase
+    @test_classification_file = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt" )
   end
 
   after do
@@ -84,7 +86,14 @@ describe Wikipedia::VandalismDetection::Evaluator do
           }
       }
 
+      # ground truth has one sample more to represent fall-out samples while feature calculation
+      # (e.g. redirects are not considered)
       @ground_truth = {
+          :"0-1" => {
+              old_revision_id: 0,
+              new_revision_id: 1,
+              class: "R"
+          },
           :"1-2" => {
               old_revision_id: 1,
               new_revision_id: 2,

@@ -20,7 +20,7 @@ module Wikipedia
       def self.instances
         arff_file = Wikipedia::VandalismDetection.configuration.test_output_arff_file
 
-        not_empty_arff_file_exists = File.exist?(arff_file) && Core::Parser.parse_ARFF(arff_file)
+        not_empty_arff_file_exists = File.exist?(arff_file) && Core::Parser.parse_ARFF(arff_file).n_rows > 0
         dataset = (not_empty_arff_file_exists ? Core::Parser.parse_ARFF(arff_file) : build!)
       end
 

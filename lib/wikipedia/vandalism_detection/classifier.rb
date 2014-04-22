@@ -60,13 +60,13 @@ module Wikipedia
         results = []
 
         dataset.each_row do |instance|
-          if options[:return_all_params]
-            confidence = (@classifier.distribution_for_instance(instance).to_a).first
-            class_index = @classifier.classify_instance(instance).to_i
+          confidence = (@classifier.distribution_for_instance(instance).to_a)[Instances::VANDALISM_CLASS_INDEX]
 
+          if options[:return_all_params]
+            class_index = @classifier.classify_instance(instance).to_i
             results = { confidence: confidence, class_index: class_index }
           else
-            results = (@classifier.distribution_for_instance(instance).to_a).first
+            results = confidence
           end
         end
 
