@@ -223,10 +223,10 @@ module Wikipedia
 
           case target_class
             when Instances::VANDALISM_SHORT
-              tp += 1 if confidence >= threshold  # True Positives
-              fn += 1 if confidence < threshold  # False Negatives
+              tp += 1 if confidence > threshold  # True Positives
+              fn += 1 if confidence <= threshold   # False Negatives
             when Instances::REGULAR_SHORT
-              fp += 1 if confidence >= threshold  # False Positives
+              fp += 1 if confidence >= threshold   # False Positives
               tn += 1 if confidence < threshold  # True Negatives
           end
         end
@@ -352,27 +352,6 @@ module Wikipedia
         result_file = File.open(file_path, 'a')
 
         begin
-          dataset_arff = TrainingDataset.instances
-          dataset_vandalism = Instances.empty
-          dataset_regular = Instances.empty
-
-          dataset_arff.each_row do |instance|
-            label = Instances::CLASSES[instance.class_value.to_i]
-
-            if label == Instances::VANDALISM
-              dataset_vandalism.add(instance)
-            else
-              dataset_regular.add(instance)
-            end
-          end
-
-          vandalism_count = dataset_vandalism.n_rows
-          regular_count = dataset_regular.n_rows
-          min_count = [vandalism_count, regular_count].min
-
-          smaller_dataset = (vandalism_count >= regular_count) ? dataset_regular : dataset_vandalism
-          bigger_dataset = (vandalism_count >= regular_count) ? dataset_vandalism : dataset_regular
-
           time = Time.now.strftime("%Y-%m-%d %H:%M")
           type = @config.classifier_type
           options = @config.classifier_options || "default"
@@ -385,19 +364,10 @@ module Wikipedia
 
           # run n times validation
           (1..times).each do |i|
-            temp_dataset = smaller_dataset
-            temp_dataset_bigger = bigger_dataset
+            uniform_dataset = TrainingDataset.uniform_instances
 
-            while temp_dataset.n_rows < (2 * min_count)
-              random_index = SecureRandom.random_number(temp_dataset_bigger.n_rows)
-              instance = temp_dataset_bigger.instance(random_index)
-
-              temp_dataset.add(instance)
-              temp_dataset_bigger.delete(random_index)
-            end
-
-            print "\rcross validate dataset  (equally distributed) ... #{i}/#{times} | instances: #{temp_dataset.n_rows}"
-            @classifier_instance.set_data(temp_dataset)
+            print "\rcross validate dataset  (equally distributed) ... #{i}/#{times} | instances: #{uniform_dataset.n_rows}"
+            @classifier_instance.set_data(uniform_dataset)
             evaluations << @classifier_instance.cross_validate(fold)
 
             print_evaluation_data(evaluations, result_file, i) if (i % (times / 10)) == 0
