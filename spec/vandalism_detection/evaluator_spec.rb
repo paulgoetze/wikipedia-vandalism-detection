@@ -64,7 +64,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
               old_revision_id: 1,
               new_revision_id: 2,
               class: "R",
-              confidence: 0.2
+              confidence: 0.0
           },
           :"2-3" => {
               old_revision_id: 2,
@@ -89,7 +89,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       # ground truth has one sample more to represent fall-out samples while feature calculation
       # (e.g. redirects are not considered)
       @ground_truth = {
-          :"0-1" => {
+          :"0-1" => { # this is a sample that is not used!
               old_revision_id: 0,
               new_revision_id: 1,
               class: "R"
@@ -149,10 +149,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       [
-          { threshold: 0.5, result: {tp: 1, fp: 1, tn: 1, fn: 1} },
-          { threshold: 0.2, result: {tp: 2, fp: 2, tn: 0, fn: 0} },
           { threshold: 0.0, result: {tp: 2, fp: 2, tn: 0, fn: 0} },
-          { threshold: 1.0, result: {tp: 1, fp: 0, tn: 2, fn: 1} }
+          { threshold: 0.3, result: {tp: 1, fp: 1, tn: 1, fn: 1} },
+          { threshold: 0.5, result: {tp: 1, fp: 1, tn: 1, fn: 1} },
+          { threshold: 0.8, result: {tp: 1, fp: 1, tn: 1, fn: 1} },
+          { threshold: 0.9, result: {tp: 1, fp: 0, tn: 2, fn: 1} },
+          { threshold: 1.0, result: {tp: 0, fp: 0, tn: 2, fn: 2} }
       ].each do |values|
         it "returns the right values for threshold #{values[:threshold]}" do
           predictive_values = @evaluator.predictive_values(@ground_truth, @classification, values[:threshold])
@@ -161,7 +163,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
     end
 
-    describe "#area_under_curve" do#
+    describe "#area_under_curve" do
 
       before do
         precisions = @curve_data[:precisions]

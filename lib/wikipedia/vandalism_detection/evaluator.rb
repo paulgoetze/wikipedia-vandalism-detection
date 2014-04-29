@@ -173,7 +173,6 @@ module Wikipedia
         end
 
         curves = test_performance_curves(ground_truth, classification, sample_count)
-
         precision_recall = maximum_precision_recall(curves[:precisions], curves[:recalls])
 
         curves[:total_recall] = precision_recall[:recall]
@@ -240,10 +239,6 @@ module Wikipedia
         recall = tp.to_f / (tp.to_f + fn.to_f)
         fp_rate = fp.to_f / (fp.to_f + tn.to_f)
 
-        precision = 0.0 if precision.nan?
-        recall = 0.0 if recall.nan?
-        fp_rate = 0.0 if fp_rate.nan?
-
         {
             precision: precision,
             recall: recall,
@@ -254,8 +249,6 @@ module Wikipedia
       # Returns the calculated area under curve for given point values
       # Recall and Precision values has to be float arrays of the same length.
       def area_under_curve(recall_values, precision_values)
-        return 0.0 unless recall_values.all? {|f| !f.nan? } && precision_values.all? {|f| !f.nan?}
-
         sorted = sort_curve_values(recall_values, precision_values)
         recalls = sorted[:x]
         precisions = sorted[:y]
@@ -274,13 +267,16 @@ module Wikipedia
           sum += 0.5 * (b1 + b2) * h
         end
 
-        sum
+        sum.abs
       end
 
       # Returns given value array sorted by first array (x_values)
       # Return value is a Hash { x: <x_values_sorted>, y: <y_values_sorted_after_x> }
       def sort_curve_values(x_values, y_values)
-        merge_sorted = x_values.each_with_index.map { |x, index| [x, y_values[index]] }.sort
+        merge_sorted = x_values.each_with_index.map { |x, index| [x, y_values[index]] }
+        merge_sorted.reject! { |b| !b.all? { |f| !f.to_f.nan? } } # remove value pairs with NaN values
+        merge_sorted.sort
+
         x = merge_sorted.transpose[0]
         y = merge_sorted.transpose[1]
 
@@ -293,7 +289,8 @@ module Wikipedia
           [precision * recalls[index], index]
         end
 
-        max_index = areas.max[1]
+        areas.reject! { |b| !b.all? { |f| !f.to_f.nan? } } # remove arrays with NaN values
+        max_index = areas.sort.max[1]
 
         { precision: precisions[max_index], recall: recalls[max_index] }
       end
