@@ -172,39 +172,12 @@ module Wikipedia
           }
         end
 
-        # get total precision & recall values
-        tp = 0  # vandalism which is classified as vandalism
-        fp = 0  # regular that is classified as vandalism
-        tn = 0  # regular that is classified as regular
-        fn = 0  # vandalism that is classified as regular
-
-        ground_truth.each do |sample|
-          values = sample[1]
-
-          old_revision_id = values[:old_revision_id]
-          new_revision_id = values[:new_revision_id]
-          target_class = values[:class]
-
-          key = :"#{old_revision_id}-#{new_revision_id}"
-          next unless classification.has_key? key # go on if not in annotated not in classification
-
-          classification_class = classification[key][:class]
-
-          case target_class
-            when Instances::VANDALISM_SHORT
-              tp += 1 if classification_class == Instances::VANDALISM_SHORT # TP
-              fn += 1 if classification_class == Instances::REGULAR_SHORT   # FN
-            when Instances::REGULAR_SHORT
-              fp += 1 if classification_class == Instances::VANDALISM_SHORT # FP
-              tn += 1 if classification_class == Instances::REGULAR_SHORT   # TN
-          end
-        end
-
-        params = performance_parameters(tp, fp, tn, fn)
         curves = test_performance_curves(ground_truth, classification, sample_count)
 
-        curves[:total_recall] = params[:recall]
-        curves[:total_precision] = params[:precision]
+        precision_recall = maximum_precision_recall(curves[:precisions], curves[:recalls])
+
+        curves[:total_recall] = precision_recall[:recall]
+        curves[:total_precision] = precision_recall[:precision]
 
         curves
       end
@@ -314,6 +287,17 @@ module Wikipedia
         { x: x, y: y }
       end
 
+      # Returns the maximum precision recall pair
+      def maximum_precision_recall(precisions, recalls)
+        areas = precisions.each_with_index.map do |precision, index|
+          [precision * recalls[index], index]
+        end
+
+        max_index = areas.max[1]
+
+        { precision: precisions[max_index], recall: recalls[max_index] }
+      end
+
       # Creates the test corpus text file by classifying the configured test samples
       # All sub steps (as creating the test arff file, etc.) are run automattically if needed.
       def create_testcorpus_classification_file!
@@ -329,22 +313,20 @@ module Wikipedia
         file.puts header
 
         dataset.to_a2d.each do |instance|
-          unless instance.include?(-1)
-            features = instance[0...-2]
-            old_revision_id = instance[-2].to_i
-            new_revision_id = instance[-1].to_i
+          features = instance[0...-2]
+          next if features.include? -1
 
-            params = @classifier.classify(features, return_all_params: true)
-            class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
-            confidence = params[:confidence]
+          old_revision_id = instance[-2].to_i
+          new_revision_id = instance[-1].to_i
 
-            file.puts [old_revision_id, new_revision_id, class_short_name, confidence, *features].join(" ")
-          end
+          params = @classifier.classify(features, return_all_params: true)
+          class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
+          confidence = params[:confidence]
+
+          file.puts [old_revision_id, new_revision_id, class_short_name, confidence, *features].join(" ")
         end
 
         file.close
-
-        #puts File.read(file_path)
       end
 
       private

@@ -57,6 +57,29 @@ describe Wikipedia::VandalismDetection::Classifier do
       Wikipedia::VandalismDetection::FeaturesNotConfiguredError
   end
 
+  it "load the classifier and learns it regarding a uniform distributed training set if set in config" do
+    config = test_config
+    config.instance_variable_set(:@uniform_training_data, 'yaahaaap!')
+    use_configuration(config)
+
+    classifier = Wikipedia::VandalismDetection::Classifier.new
+
+    # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
+    classifier.dataset.n_rows.should == 4
+
+  end
+
+  it "load the classifier and learns it regarding the full configured training set" do
+    config = test_config
+    config.instance_variable_set(:@uniform_training_data, 'false')
+    use_configuration(config)
+
+    classifier = Wikipedia::VandalismDetection::Classifier.new
+
+    # 2 vandalism, 4 regular, see resources/corpora/training/annotations.csv
+    classifier.dataset.n_rows.should == 6
+  end
+
   describe "attribute readers" do
 
     [:classifier_instance, :evaluator, :dataset].each do |name|

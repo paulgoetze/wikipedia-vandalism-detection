@@ -16,7 +16,8 @@ describe Wikipedia::VandalismDetection do
       :features,
       :classifier_type,
       :classifier_options,
-      :cross_validation_fold
+      :cross_validation_fold,
+      :uniform_training_data?
     ].each do |attribute|
       it "responds to ##{attribute}" do
         @configuration.should respond_to attribute
@@ -31,8 +32,35 @@ describe Wikipedia::VandalismDetection do
       @configuration.features.should be_a Array
     end
 
-    it "returns a numeric for cross-validation-fold" do
+    it "returns a numeric for #cross-validation-fold" do
       @configuration.cross_validation_fold.should be_a Numeric
+    end
+
+    describe "#uniform_training_data?" do
+
+      it "returns true for if it is set in config" do
+        config = test_config
+        config.instance_variable_set(:@uniform_training_data, 'true')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_true
+      end
+
+      it "returns false if it is not set in config" do
+        config = test_config
+        config.instance_variable_set(:@uniform_training_data, nil)
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_false
+      end
+
+      it "returns false for if it is set to 'false'" do
+        config = test_config
+        config.instance_variable_set(:@uniform_training_data, 'false')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_false
+      end
     end
 
     [ :training_corpus_edits_file,
@@ -192,6 +220,10 @@ describe Wikipedia::VandalismDetection do
 
       it "has a default 10 'cross-validation-fold' config for classifier evaluation" do
         Wikipedia::VandalismDetection.configuration['classifier']['cross-validation-fold'].should == 10
+      end
+
+      it "has a default 'uniform-training-data' config of false for classifier training" do
+        Wikipedia::VandalismDetection.configuration['classifier']['uniform-training-data'].should be_false
       end
     end
   end

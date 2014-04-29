@@ -25,8 +25,17 @@ module Wikipedia
         @classifier_type = @data['classifier']['type']
         @classifier_options = @data['classifier']['options']
         @cross_validation_fold = @data['classifier']['cross-validation-fold']
+        @uniform_training_data = @data['classifier']['uniform-training-data']
+
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
+      end
+
+      # Returns a boolean value whether a uniform data set is used for classifier training.
+      # (uniform means: same number of vandalism and regular samples)
+      # If 'uniform-training-data' is set in config, all values other than 'false' lead to true value
+      def uniform_training_data?
+        !!@uniform_training_data && @uniform_training_data != 'false'
       end
 
       # Returns file/path string for corpora files/directories and output files
@@ -119,7 +128,8 @@ module Wikipedia
           "classifier" => {
               "type"    => nil,
               "options" => nil,
-              "cross-validation-fold" => 10
+              "cross-validation-fold" => 10,
+              "uniform-training-data" => false
           }
       }
 

@@ -32,3 +32,4 @@ classifier:
   type: Trees::RandomForest
   options: -I 10
   cross-validation-fold: 2
+  uniform-training-data: false

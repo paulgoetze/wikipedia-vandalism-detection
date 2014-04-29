@@ -35,6 +35,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
 
+      # remove instances with -1 values in features
       filter.set do
         data parsed_dataset
         filter_options '-S 0 -V'
@@ -44,6 +45,37 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       puts parsed_dataset
 
       dataset.to_s.should == parsed_dataset.to_s
+    end
+  end
+
+  describe "#uniform_instances" do
+
+    before do
+      config = test_config
+      config.instance_variable_set(:@uniform_training_data, 'true')
+      use_configuration(config)
+
+      @dataset = Wikipedia::VandalismDetection::TrainingDataset.uniform_instances
+    end
+
+    it "returns a weka dataset" do
+      @dataset.class.should == Java::WekaCore::Instances::Base
+    end
+
+    it "returns a dataset built from the configured corpus" do
+      # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
+      @dataset.n_rows.should == 4
+    end
+
+    [:VANDALISM, :REGULAR].each do |class_const|
+      it "has 2 '#{class_const.downcase}' samples in its instances" do
+        class_count = @dataset.enumerate_instances.reduce(0) do |count, instance|
+          label = Wikipedia::VandalismDetection::Instances::CLASSES[instance.class_value.to_i]
+          (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
+        end
+
+        class_count.should == 2
+      end
     end
   end
 

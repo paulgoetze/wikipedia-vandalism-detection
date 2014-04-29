@@ -54,20 +54,18 @@ module Wikipedia
         return -1.0 if feature_values.empty?
 
         dataset = Instances.empty
-        dataset.set_class_index feature_values.count
+        dataset.set_class_index(feature_values.count)
+        #dataset.add_instance([*feature_values, 'vandalism'])
         dataset.add_instance(feature_values)
 
-        results = []
+        instance = dataset.instance(0)
+        confidence = (@classifier.distribution_for_instance(instance).to_a)[Instances::VANDALISM_CLASS_INDEX]
 
-        dataset.each_row do |instance|
-          confidence = (@classifier.distribution_for_instance(instance).to_a)[Instances::VANDALISM_CLASS_INDEX]
-
-          if options[:return_all_params]
-            class_index = @classifier.classify_instance(instance).to_i
-            results = { confidence: confidence, class_index: class_index }
-          else
-            results = confidence
-          end
+        if options[:return_all_params]
+          class_index = @classifier.classify_instance(instance).to_i
+          results = { confidence: confidence, class_index: class_index }
+        else
+          results = confidence
         end
 
         results
@@ -102,7 +100,8 @@ module Wikipedia
         raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
-        @dataset = TrainingDataset.instances
+        @dataset = @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
+
         dataset = @dataset
         options = @config.classifier_options
 
