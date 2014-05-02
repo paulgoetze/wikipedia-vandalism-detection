@@ -63,7 +63,7 @@ module Wikipedia
       # Returns an array of all configured Feature class instances.
       def build_feature_classes(feature_names)
         feature_names.map do |name|
-          camelcased_name = name.split(' ').map{ |s| s.capitalize! }.join('')
+          camelcased_name = name.split(/[\s-]/).map{ |s| s.capitalize! }.join('')
           "Wikipedia::VandalismDetection::Features::#{camelcased_name}".constantize.new
         end
       end
