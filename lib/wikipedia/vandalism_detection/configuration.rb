@@ -93,6 +93,7 @@ module Wikipedia
               "pronoun frequency",
               "pronoun impact",
               "replacement similarity",
+              "size increment",
               "size ratio",
               "term frequency",
               "upper case ratio",
