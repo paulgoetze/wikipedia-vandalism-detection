@@ -6,8 +6,11 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
 
   before do
     @config = test_config
+    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM } -cvr 2 -cvf 50 " +
+        "-W weka.classifiers.meta.Bagging -W weka.classifiers.trees.RandomForest -D"
+
     @config.instance_variable_set :@classifier_type, 'Meta::OneClassClassifier'
-    @config.instance_variable_set :@classifier_options, "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM }"
+    @config.instance_variable_set :@classifier_options, options
     @config.instance_variable_set :@cross_validation_fold, 2
 
     use_configuration(@config)
@@ -30,7 +33,9 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
   it "can be used to classify vandalism" do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
-      classifier.cross_validate
+      features = [0.0, 25, 5]
+      confidence = classifier.classify features
+      puts "confidence: #{confidence}"
     }.not_to raise_error
   end
 end

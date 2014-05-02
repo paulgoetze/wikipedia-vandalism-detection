@@ -29,7 +29,9 @@ describe Weka::Classifiers::Functions::LibSVM do
   it "can be used to classifiy vandalism" do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
-      classifier.cross_validate
+      features = [0.0, 25, 5]
+      confidence = classifier.classify(features)
+      puts "confidence: #{confidence}"
     }.not_to raise_error
   end
 end
