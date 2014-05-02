@@ -1,3 +1,6 @@
+require 'wikipedia/vandalism_detection/diff'
+require 'wikipedia/vandalism_detection/text'
+
 module Wikipedia
   module VandalismDetection
     class Edit
@@ -38,8 +41,18 @@ module Wikipedia
         "#{old_revision_string}\t#{new_revision_string}"
       end
 
-      private
+      # Returns an array of the words inserted in the new revision compared with the old one.
+      def inserted_words
+        @inserted_words ||= Diff.new(@old_revision.text, @new_revision.text).inserted_words
+      end
 
+      def inserted_text
+        @inserted_text ||= Text.new(inserted_words.join(' '))
+      end
+
+      protected
+
+      # Returns whether the given revisions are sequent, i.e. the old revisions id is the the new revisions parent id.
       def sequent?(old_revision, new_revision)
         new_revision.parent_id == old_revision.id
       end

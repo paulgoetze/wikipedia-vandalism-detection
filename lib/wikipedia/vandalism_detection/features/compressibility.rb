@@ -15,14 +15,11 @@ module Wikipedia
         def calculate(edit)
           super
 
-          old_text = edit.old_revision.text
-          new_text = edit.new_revision.text
-
-          inserted_text = Wikipedia::VandalismDetection::Diff.new(old_text, new_text).inserted_words.join(' ')
+          inserted_text = edit.inserted_text
           uncompressed_size = inserted_text.bytesize.to_f
           compressed_size = Zlib::Deflate.deflate(inserted_text).bytesize.to_f
 
-          new_text.empty? ? 0.5 : (uncompressed_size / ( compressed_size + uncompressed_size))
+          inserted_text.empty? ? 0.5 : (uncompressed_size / ( compressed_size + uncompressed_size))
         end
       end
     end

@@ -1,5 +1,4 @@
 require 'wikipedia/vandalism_detection/features/base'
-require 'wikipedia/vandalism_detection/diff'
 
 module Wikipedia
   module VandalismDetection
@@ -11,12 +10,9 @@ module Wikipedia
         def calculate(edit)
           super
 
-          old_text = edit.old_revision.text
-          new_text = edit.new_revision.text
-          inserted_letters = Wikipedia::VandalismDetection::Diff.new(old_text, new_text).inserted_words.join("")
-
-          all_letters_count = inserted_letters.size
-          digit_count = inserted_letters.scan(/\D/).size
+          inserted_letters = edit.inserted_text
+          all_letters_count = inserted_letters.scan(/[[:alnum:]]/).size
+          digit_count = inserted_letters.scan(/[[:digit:]]/).size
 
           (1.0 + digit_count) / (1.0 + all_letters_count)
         end

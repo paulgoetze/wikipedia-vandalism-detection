@@ -4,12 +4,12 @@ module Wikipedia
   module VandalismDetection
     module Features
 
-      # This feature computes the uppercase to all letters ratio of the edit's new revision text.
+      # This feature computes the uppercase to all letters ratio of the edit's new revision inserted text.
       class UpperToLowerCaseRatio< Base
 
         def calculate(edit)
           super
-          text = edit.new_revision.text.clean
+          text = edit.inserted_text.clean
           uppercase_count = text.scan(/[[:upper:]]/).size
           lowercase_count = text.scan(/[[:lower:]]/).size
 

@@ -10,20 +10,23 @@ describe Wikipedia::VandalismDetection::Features::DigitRatio do
 
   describe "#calculate" do
 
-    it "returns the digit to all letters ratio of the edit's new revision text" do
-      text = Wikipedia::VandalismDetection::Text.new '1A4 B6 8Cd' # 3 digit letters of total 8 letters
-      new_revision = build(:new_revision, text: text)
-      old_revision = build(:old_revision, text: "")
+    it "returns the digit to all letters ratio of the edit's new revision inserted clean text" do
+      old_text = Wikipedia::VandalismDetection::Text.new('text')
+      new_text = Wikipedia::VandalismDetection::Text.new 'text [[1A4 B6 8Cd]]' # 3 digit letters of total 8 letters
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
       @feature.calculate(edit).should == (1.0 + 4) / (1.0 + 8)
     end
 
-    it "returns 1.0 on emtpy clean text revisions" do
-      text = Wikipedia::VandalismDetection::Text.new ""
+    it "returns 1.0 if no text inserted" do
+      old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
+      new_text = Wikipedia::VandalismDetection::Text.new("text")
 
-      old_revision = build(:old_revision, text: text)
-      new_revision = build(:new_revision, text: text)
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
       @feature.calculate(edit).should == 1.0
