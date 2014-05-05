@@ -47,6 +47,22 @@ describe Wikipedia::VandalismDetection::Revision do
     end
   end
 
+  describe "#contributor" do
+    it { should respond_to :contributor }
+
+    it "returns the contributor_id if set" do
+      id = "12345"
+      @revision.contributor = id
+      @revision.contributor.should == @revision.instance_variable_get(:@contributor_id)
+    end
+
+    it "returns the contributor_ip if set" do
+      ip = "127.0.0.1"
+      @revision.contributor = ip
+      @revision.contributor.should == @revision.instance_variable_get(:@contributor_ip)
+    end
+  end
+
   it "has the revision attributes" do
     @instance_variables.each do |name|
       @revision.should respond_to name

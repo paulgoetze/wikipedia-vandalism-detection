@@ -31,6 +31,10 @@ module Wikipedia
         end
       end
 
+      def contributor
+        @contributor_id || @contributor_ip
+      end
+
       def anonymous_contributor?
         !@contributor_ip.nil?
       end
