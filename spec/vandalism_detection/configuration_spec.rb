@@ -123,6 +123,7 @@ describe Wikipedia::VandalismDetection do
           "pronoun frequency",
           "pronoun impact",
           "replacement similarity",
+          "same editor",
           "size increment",
           "size ratio",
           "term frequency",

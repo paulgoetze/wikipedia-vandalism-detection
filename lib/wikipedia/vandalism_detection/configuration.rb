@@ -100,6 +100,7 @@ module Wikipedia
               "pronoun frequency",
               "pronoun impact",
               "replacement similarity",
+              "same editor",
               "size increment",
               "size ratio",
               "term frequency",
