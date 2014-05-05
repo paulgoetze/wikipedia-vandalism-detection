@@ -15,7 +15,7 @@ module Wikipedia
           super
 
           revision = edit.new_revision
-          user = revision.anonymous_contributor? ? revision.contributor_ip : revision.contributor_id
+          user = revision.contributor
           url = "http://en.wikipedia.org/w/api.php?action=query&format=xml&list=usercontribs&ucuser=#{user}&ucprop=ids"
 
           content = URI.parse(url).read
