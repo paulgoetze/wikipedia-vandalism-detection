@@ -9,7 +9,8 @@ module Wikipedia
 
         def calculate(edit)
           super
-          text = edit.inserted_text.clean
+
+          text = edit.inserted_text
           uppercase_count = text.scan(/[[:upper:]]/).size
           lowercase_count = text.scan(/[[:lower:]]/).size
 
