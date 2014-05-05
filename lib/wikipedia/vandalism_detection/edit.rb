@@ -55,12 +55,12 @@ module Wikipedia
       # Returns an array of the words removed in the new revision compared with the old one.
       def removed_words
         @diff ||= Diff.new(@old_revision.text, @new_revision.text)
-        @inserted_words ||= @diff.removed_words
+        @removed_words ||= @diff.removed_words
       end
 
       # Returns a Text of the words removed in the new revision compared with the old one.
       def removed_text
-        @inserted_text ||= Text.new(removed_words.join(' '))
+        @removed_text ||= Text.new(removed_words.join(' '))
       end
 
       protected
