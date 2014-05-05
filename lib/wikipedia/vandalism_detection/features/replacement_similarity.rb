@@ -1,6 +1,6 @@
 require 'wikipedia/vandalism_detection/features/base'
-require 'fuzzystringmatch'
 require 'wikipedia/vandalism_detection/diff'
+require 'hotwater'
 
 module Wikipedia
   module VandalismDetection
@@ -14,15 +14,7 @@ module Wikipedia
         def calculate(edit)
           super
 
-          old_text = edit.old_revision.text
-          new_text = edit.new_revision.text
-          diff = Wikipedia::VandalismDetection::Diff.new(old_text, new_text)
-
-          deleted_text = diff.removed_words.join(' ')
-          inserted_text = diff.inserted_words.join(' ')
-
-          jaro_winkler = FuzzyStringMatch::JaroWinkler.create(:pure)
-          jaro_winkler.getDistance(deleted_text, inserted_text)
+          ::Hotwater.jaro_winkler_distance(edit.removed_text, edit.inserted_text)
         end
       end
     end
