@@ -18,7 +18,7 @@ module Wikipedia
           user = revision.contributor
           url = "http://en.wikipedia.org/w/api.php?action=query&format=xml&list=usercontribs&ucuser=#{user}&ucprop=ids"
 
-          content = URI.parse(url).read
+          content = URI.parse(URI::encode(url)).read
           xml = Nokogiri::XML(content)
 
           page_item =  xml.xpath("//item[@revid='#{revision.id}']").first
