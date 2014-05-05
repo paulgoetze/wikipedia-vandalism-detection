@@ -104,6 +104,8 @@ describe Wikipedia::VandalismDetection do
 
       features = [
           "anonymity",
+          "all wordlists frequency",
+          "all wordlists impact",
           "biased frequency",
           "biased impact",
           "character sequence",

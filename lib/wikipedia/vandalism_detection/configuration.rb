@@ -81,6 +81,8 @@ module Wikipedia
           "source"    => Dir.pwd,
           'features'  => [
               "anonymity",
+              "all wordlists frequency",
+              "all wordlists impact",
               "biased frequency",
               "biased impact",
               "character sequence",
