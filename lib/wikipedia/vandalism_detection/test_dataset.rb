@@ -65,10 +65,15 @@ module Wikipedia
             skipped_edits += 1 if feature_values.empty?
             processed_edits += 1
 
-            if processed_edits % 100 == 0
-              print_progress(processed_edits, edits.count, "computing features")
-              print " | redirects: #{skipped_edits}" if skipped_edits > 0
-            end
+            message = "        \t\t\t (#{edit.old_revision.id}, #{edit.new_revision.id}) "
+            print_progress(processed_edits, @annotated_revisions.count, message)
+            print " | redirects: #{skipped_edits}" if skipped_edits > 0
+
+
+            #if processed_edits % 100 == 0
+            #  print_progress(processed_edits, edits.count, "computing features")
+            #  print " | redirects: #{skipped_edits}" if skipped_edits > 0
+            #end
           end
         end
 
