@@ -1,6 +1,7 @@
 require 'wikipedia/vandalism_detection/features/all_wordlists_frequency'
 require 'wikipedia/vandalism_detection/features/all_wordlists_impact'
 require 'wikipedia/vandalism_detection/features/anonymity'
+require 'wikipedia/vandalism_detection/features/anonymity_previous'
 require 'wikipedia/vandalism_detection/features/biased_frequency'
 require 'wikipedia/vandalism_detection/features/biased_impact'
 require 'wikipedia/vandalism_detection/features/character_diversity'
