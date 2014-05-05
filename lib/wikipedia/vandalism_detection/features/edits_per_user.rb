@@ -19,10 +19,16 @@ module Wikipedia
           url = "http://en.wikipedia.org/w/api.php?action=query&format=xml&list=usercontribs&ucuser=#{user}&ucprop=ids"
 
           content = URI.parse(url).read
-
           xml = Nokogiri::XML(content)
-          page_id =  xml.xpath("//item[@revid='#{revision.id}']").first.xpath("@pageid").text
-          xml.xpath("//item[@pageid='#{page_id}']").count
+
+          page_item =  xml.xpath("//item[@revid='#{revision.id}']").first
+
+          if page_item
+            page_id = page_item.xpath("@pageid").text
+            xml.xpath("//item[@pageid='#{page_id}']").count
+          else
+            0
+          end
         end
       end
     end

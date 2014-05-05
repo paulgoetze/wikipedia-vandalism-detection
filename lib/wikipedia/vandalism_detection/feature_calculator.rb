@@ -36,6 +36,7 @@ module Wikipedia
 
         features = contains_redirect ? [] : @feature_classes.map do |feature|
           begin
+            print "\r | #{feature.class.name.demodulize}        \t\t\t"
             feature.calculate(edit)
           rescue WikitextExtractionError => e
             $stderr.puts e.message
