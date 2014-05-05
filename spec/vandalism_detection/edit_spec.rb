@@ -68,4 +68,40 @@ describe Wikipedia::VandalismDetection::Edit do
       edit.inserted_text.should == Wikipedia::VandalismDetection::Text.new('[[inserted words]]')
     end
   end
+
+  describe "#removed_words" do
+    it "returns the removed words as array" do
+      old_revision = build(:old_revision, text: "removed words")
+      new_revision = build(:new_revision, text: "")
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+
+      edit.removed_words.should == ['removed', 'words']
+    end
+
+    it "returns the uncleaned text rremoved words as array" do
+      old_revision = build(:old_revision, text: "[[removed words]]")
+      new_revision = build(:new_revision, text: "")
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+
+      edit.removed_words.should == ['[[removed', 'words]]']
+    end
+  end
+
+  describe "#removed_text" do
+    it "returns the removed text as Wikipedia::VandalismDetection::Text" do
+      old_revision = build(:old_revision, text: "removed words")
+      new_revision = build(:new_revision, text: "")
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+
+      edit.removed_text.should == Wikipedia::VandalismDetection::Text.new('removed words')
+    end
+
+    it "returns the uncleaned text removed text as Wikipedia::VadalismDetection::Text" do
+      old_revision = build(:old_revision, text: "[[removed words]]")
+      new_revision = build(:new_revision, text: "")
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+
+      edit.removed_text.should == Wikipedia::VandalismDetection::Text.new('[[removed words]]')
+    end
+  end
 end
