@@ -8,7 +8,7 @@ module Wikipedia
       VULGARISM =
           [
           :"$#!+", :"$1ut", :"$h1t", :"$hit", :"$lut", :"'ho", :"'hobag", :"a$$", :anal, :anus, :ass, :assmunch,
-          :b1tch, :ballsack, :bastard, :beaner, :beastiality, :biatch, :beeyotch, :bitch, :bitchy,
+          :b1tch, :ballsack, :bastard, :beaner, :beastiality, :biatch, :beeyotch, :bitchy,
           :blow, :blowjob, :bollock, :bollocks, :bollok, :boner, :boob, :bugger,
           :buttplug, :"c-0-c-k", :"c-o-c-k", :"c-u-n-t", :"c.0.c.k", :"c.o.c.k.", :"c.u.n.", :jerk, :jackoff,
           :jackhole, :j3rk0ff, :homo, :hom0, :hobag, :hell, :h0mo, :h0m0, :goddamn, :goddammit,
