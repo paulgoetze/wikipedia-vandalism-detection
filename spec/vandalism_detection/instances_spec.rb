@@ -84,12 +84,12 @@ describe Wikipedia::VandalismDetection::Instances do
     end
   end
 
-  describe "#empty_for_test" do
+  describe "#empty_for_test_feature" do
 
     before do
-      @dataset = Wikipedia::VandalismDetection::Instances.empty_for_test
+      @dataset = Wikipedia::VandalismDetection::Instances.empty_for_test_feature('comment length')
 
-      @feature_attributes = @dataset.enumerate_attributes.to_a[0...-2]
+      @feature_attribute = @dataset.enumerate_attributes.to_a.first
       @old_revision_id_attribute = @dataset.enumerate_attributes.to_a[-2]
       @new_revision_id_attribute = @dataset.enumerate_attributes.to_a.last
     end
@@ -102,16 +102,13 @@ describe Wikipedia::VandalismDetection::Instances do
       @dataset.n_rows.should == 0
     end
 
-    it "has all configured features as attributes" do
-      attribute_names = @feature_attributes.map{ |attr| "#{attr.name.gsub('_', ' ')}" }
-      features = Wikipedia::VandalismDetection.configuration.features
-
-      attribute_names.should == features
+    it "has one given feature as attributes" do
+      attribute_name = @feature_attribute.name.gsub('_', ' ')
+      attribute_name.should == 'comment length'
     end
 
     it "has feature attributes of type 'numeric'" do
-      all_features_numeric = @feature_attributes.reduce{ |result, attr| result && attr.numeric? }
-      all_features_numeric.should be_true
+      @feature_attribute.numeric?.should be_true
     end
 
     it "has an attribute with name 'oldrevisionid'" do

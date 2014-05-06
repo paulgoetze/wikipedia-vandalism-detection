@@ -2,6 +2,7 @@ require 'find'
 require 'yaml'
 require 'fileutils'
 require 'csv'
+require 'ruby-band'
 
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/text'
@@ -35,51 +36,79 @@ module Wikipedia
       # Creates and returns an instance dataset from the configured gold annotation file using the
       # configured features from feature_calculator parameter.
       def self.create_dataset!(feature_calculator)
-        print "\nCreating test datset..."
-
-        dataset = Instances.empty_for_test
+        print "\ncreating test dataset..."
 
         edits_file = @config.test_corpus_edits_file
         raise EditsFileNotConfiguredError unless edits_file
 
         edits = CSV.parse(File.read(edits_file), headers: true)
 
-        arff_file = @config.test_output_arff_file
-        dataset.to_ARFF(arff_file)
+        output_directory = File.join(@config.output_base_directory, 'test')
+        FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
+        FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
 
-        processed_edits = 0
-        skipped_edits = 0
+        merged_dataset = nil
 
-        File.open(arff_file, 'a') do |f|
-          edits.each do |edit_data|
+        @config.features.each do |feature|
+          feature_name = feature.gsub(' ', '_')
+          file_name = "#{feature_name.downcase}.arff"
+          arff_file = File.join(output_directory, file_name)
 
-            old_revision_id = edit_data['oldrevisionid']
-            new_revision_id = edit_data['newrevisionid']
+          unless File.exists?(arff_file)
+            dataset = Instances.empty_for_test_feature(feature_name)
+            dataset.to_ARFF(arff_file)
 
-            next unless annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id)
-            edit = create_edit_from(edit_data)
+            processed_edits = 0
+            skipped_edits = 0
 
-            feature_values = feature_calculator.calculate_features_for(edit)
-            f.puts([*feature_values, old_revision_id, new_revision_id].join(',')) unless feature_values.empty?
+            File.open(arff_file, 'a') do |f|
+              edits.each do |edit_data|
 
-            skipped_edits += 1 if feature_values.empty?
-            processed_edits += 1
+                old_revision_id = edit_data['oldrevisionid']
+                new_revision_id = edit_data['newrevisionid']
 
-            message = "        \t\t\t (#{edit.old_revision.id}, #{edit.new_revision.id}) "
-            print_progress(processed_edits, @annotated_revisions.count, message)
-            print " | redirects: #{skipped_edits}" if skipped_edits > 0
+                next unless annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id)
+                edit = create_edit_from(edit_data)
 
+                feature_value = feature_calculator.calculate_feature_for(edit, feature)
+                f.puts [feature_value, old_revision_id, new_revision_id].join(',')
 
-            #if processed_edits % 100 == 0
-            #  print_progress(processed_edits, edits.count, "computing features")
-            #  print " | redirects: #{skipped_edits}" if skipped_edits > 0
-            #end
+                skipped_edits += 1 if (feature_value == -1)
+                processed_edits += 1
+
+                if processed_edits % 10 == 0
+                  print_progress(processed_edits, edits.count, "#{feature}:")
+                  print " | redirects: #{skipped_edits}" if skipped_edits > 0
+                end
+              end
+            end
+
+            puts "\n'#{File.basename(arff_file)}' saved to #{File.dirname(arff_file)}"
+          end
+
+          feature_dataset = Core::Parser.parse_ARFF(arff_file)
+
+          if merged_dataset
+            filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+
+            # remove two last columns (edit ids)
+            2.times do
+              filter.set do
+                data merged_dataset
+                filter_options '-R last'
+              end
+
+              merged_dataset = filter.use
+            end
+
+            merged_dataset = merged_dataset.merge_with(feature_dataset)
+          else
+            merged_dataset = feature_dataset
           end
         end
 
-        puts "\nYour '#{File.basename(arff_file)}' was saved to #{File.dirname(arff_file)}"
-
-        dataset = Core::Parser.parse_ARFF(arff_file)
+        merged_dataset.to_ARFF(@config.test_output_arff_file)
+        merged_dataset
       end
 
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.

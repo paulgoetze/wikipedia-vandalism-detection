@@ -10,6 +10,8 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
     @arff_file = @config.test_output_arff_file
     @index_file = @config.test_output_index_file
+
+    @arff_files_dir = File.join(@config.output_base_directory, 'test')
   end
 
   after do
@@ -19,6 +21,16 @@ describe Wikipedia::VandalismDetection::TestDataset do
     end
 
     File.delete(@index_file) if File.exists?(@index_file)
+
+    # remove feature arff files
+    @config.features.each do |name|
+      file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+
+      if File.exists?(file)
+        File.delete(file)
+        FileUtils.rm_r(File.dirname file)
+      end
+    end
   end
 
   describe "#instances" do
@@ -30,14 +42,10 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
     it "returns a instances built from the configured corpus" do
       dataset = Wikipedia::VandalismDetection::TestDataset.instances
-      filter = Weka::Filters::Unsupervised::Instance::RemoveWithValues.new
-
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
 
       # remove those with -1 values
       filtered_dataset = parsed_dataset.to_a2d.delete_if { |instance| instance.include?(-1) }
-
-
 
       dataset.to_a2d.should == filtered_dataset
     end
@@ -89,6 +97,39 @@ describe Wikipedia::VandalismDetection::TestDataset do
       File.exist?(@arff_file).should be_false
       Wikipedia::VandalismDetection::TestDataset.build!
       File.exist?(@arff_file).should be_true
+    end
+
+    Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
+      it "creates an arff file for the feature '#{name}'" do
+        config = test_config
+        config.instance_variable_set :@features, [name]
+        use_configuration(config)
+
+        file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+
+        File.exist?(file).should be_false
+        Wikipedia::VandalismDetection::TestDataset.build!
+        File.exist?(file).should be_true
+      end
+    end
+
+    it "creates only feature files that are not available yet" do
+      config = test_config
+      config.instance_variable_set :@features, ['anonymity', 'comment length']
+      use_configuration(config)
+
+      anonymity_file = File.join(config.output_base_directory, 'test', 'anonymity.arff')
+
+      # create file manually, so it is existent when building dataset
+      data = [10000, 123456, 234567]
+      anonymity = Wikipedia::VandalismDetection::Instances.empty_for_test_feature('anonymity')
+      6.times { anonymity.add_instance(data) }
+      anonymity.to_ARFF(anonymity_file)
+
+      Wikipedia::VandalismDetection::TestDataset.build!
+
+      # anonymity should not be overwritten
+      Core::Parser.parse_ARFF(anonymity_file).to_a2d.first.should == data
     end
 
     describe "internal algorithm" do

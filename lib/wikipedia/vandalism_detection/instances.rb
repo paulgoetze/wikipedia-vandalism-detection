@@ -85,19 +85,12 @@ module Wikipedia
       #   datset = Wikipedia::VandalismDetection::Instances.empty_for_test
       #   => #<Java::WekaCore::Instances::Base:0xf0f9a00
       #      @positions=[
-      #        #<Java::WekaCore::Attribute:0x17207a76>,
-      #        #<Java::WekaCore::Attribute:0x5547e4d6>,
-      #        #<Java::WekaCore::Attribute:0x6300c957>,
-      #        ...,
-      #        #<Java::WekaCore::Attribute:0x5a74fae4>]>
-      def self.empty_for_test
+      #        #<Java::WekaCore::Attribute:0x17207a76>]>
+      def self.empty_for_test_feature(name)
         features = Wikipedia::VandalismDetection.configuration.features
 
         dataset = Core::Type::Instances::Base.new do
-          features.each do |name|
-            numeric :"#{name.gsub(' ', '_')}"
-          end
-
+          numeric :"#{name.gsub(' ', '_')}"
           numeric OLD_REVISION_ID.to_sym
           numeric NEW_REVISION_ID.to_sym
         end
