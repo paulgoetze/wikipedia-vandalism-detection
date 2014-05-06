@@ -56,6 +56,29 @@ module Wikipedia
 
       # Returns an empty instances dataset of type Java::WekaCore::Instances::Base.
       # This dataset is used for feature computation and classification for Wikipedia vandalism detection
+      # while training.
+      #
+      # @example
+      #   datset = Wikipedia::VandalismDetection::Instances.empty
+      #   => #<Java::WekaCore::Instances::Base:0xf0f9a00
+      #      @positions=[
+      #        #<Java::WekaCore::Attribute:0x17207a76>
+      def self.empty_for_feature(name)
+        dataset_classes = Array.new
+        dataset_classes[VANDALISM_CLASS_INDEX] = VANDALISM
+        dataset_classes[REGULAR_CLASS_INDEX] = REGULAR
+
+        dataset = Core::Type::Instances::Base.new do
+          numeric :"#{name.gsub(' ', '_')}"
+          nominal :class, dataset_classes
+        end
+
+        dataset.class_index = 1
+        dataset
+      end
+
+      # Returns an empty instances dataset of type Java::WekaCore::Instances::Base.
+      # This dataset is used for feature computation and classification for Wikipedia vandalism detection
       # while testing.
       #
       # @example

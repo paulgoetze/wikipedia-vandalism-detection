@@ -82,6 +82,39 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
     end
   end
 
+  describe "#claculate_feature_for" do
+    before do
+      @edit = build :edit
+      @feature_name = "anonymity"
+      @random_number = rand(1000)
+      Wikipedia::VandalismDetection::Features::Anonymity.any_instance.stub(calculate: @random_number)
+    end
+
+    it { should respond_to :calculate_feature_for }
+
+    it "takes an edit and feature name as parameter" do
+      expect { @calculator.calculate_feature_for(@edit, @feature_name) }.not_to raise_error
+    end
+
+    it "raises an error if called with wrong parameter type edit" do
+      revision = build :empty_revision
+      expect { @calculator.calculate_feature_for(revision, @feature_name) }.to raise_error ArgumentError
+    end
+
+    it "raises an error if called with wrong parameter type feature name" do
+      revision = build :empty_revision
+      expect { @calculator.calculate_feature_for(@edit, revision) }.to raise_error ArgumentError
+    end
+
+    it "returns a Numeric" do
+      @calculator.calculate_feature_for(@edit, @feature_name).should be_a Numeric
+    end
+
+    it "returns the value calculated by the feature class" do
+      @calculator.calculate_feature_for(@edit, @feature_name).should == @random_number
+    end
+  end
+
   describe "#used_features" do
     it { should respond_to :used_features }
 

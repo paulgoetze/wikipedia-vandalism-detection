@@ -1,12 +1,15 @@
 require 'find'
 require 'yaml'
 require 'fileutils'
+require 'active_support/core_ext/string'
+require 'ruby-band'
 
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/text'
 require 'wikipedia/vandalism_detection/revision'
 require 'wikipedia/vandalism_detection/edit'
 require 'wikipedia/vandalism_detection/feature_calculator'
+require 'wikipedia/vandalism_detection/features'
 require 'wikipedia/vandalism_detection/instances'
 require 'wikipedia/vandalism_detection/wikitext_extractor'
 
@@ -19,7 +22,7 @@ module Wikipedia
       def self.instances
         config = Wikipedia::VandalismDetection.configuration
         arff_file = config.training_output_arff_file
-        dataset = (File.exist?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
+        dataset = (File.exists?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
 
         dataset = remove_invalid_instances(dataset)
         dataset.class_index = config.features.count
@@ -203,9 +206,7 @@ module Wikipedia
       # Creates and returns an instance dataset from the configured gold annotation file using the
       # configured features from feature_calculator parameter.
       def self.create_dataset!(feature_calculator)
-        print "\ncreating datset..."
-
-        dataset = Instances.empty
+        print "\ncreating training datset..."
 
         annotations_file = @config.training_corpus_annotations_file
         raise AnnotationsFileNotConfiguredError unless annotations_file
@@ -213,44 +214,82 @@ module Wikipedia
         annotations = CSV.parse(File.read(annotations_file), headers: true)
         annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
 
-        arff_file = @config.training_output_arff_file
-        dataset.to_ARFF(arff_file)
+        output_directory = File.join(@config.output_base_directory, 'training')
+        FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
+        FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
 
-        processed_edits = 0
-        skipped_edits = 0
+        merged_dataset = nil
 
-        File.open(arff_file, 'a') do |f|
-          annotation_data.each do |row|
-            edit_id = row[:edit_id]
-            vandalism = row[:class]
+        @config.features.each do |feature|
+          feature_name = feature.gsub(' ', '_')
+          file_name = "#{feature_name.downcase}.arff"
+          arff_file = File.join(output_directory, file_name)
 
-            edit = create_edit_from edit_id
-            feature_values = feature_calculator.calculate_features_for(edit)
-            f.puts([*feature_values, vandalism].join(',')) unless feature_values.empty?
+          unless File.exists?(arff_file)
+            dataset = Instances.empty_for_feature(feature_name)
+            dataset.to_ARFF(arff_file)
 
-            skipped_edits += 1 if feature_values.empty?
-            processed_edits += 1
+            processed_edits = 0
+            skipped_edits = 0
 
-            message = "        \t\t\t (#{edit.old_revision.id}, #{edit.new_revision.id}) "
-            print_progress(processed_edits, @edits_csv.count, message)
-            print " | redirects: #{skipped_edits}" if skipped_edits > 0
+            File.open(arff_file, 'a') do |f|
+              annotation_data.each do |row|
+                edit_id = row[:edit_id]
+                vandalism = row[:class]
 
-            #if processed_edits % 100 == 0
-            #  print_progress(processed_edits, @edits_csv.count, "computing features")
-            #  print " | redirects: #{skipped_edits}" if skipped_edits > 0
-            #end
+                edit = get_or_create_edit(edit_id)
+                feature_value = feature_calculator.calculate_feature_for(edit, feature)
+                f.puts([feature_value, vandalism].join(','))
+
+                skipped_edits += 1 if (feature_value == -1)
+                processed_edits += 1
+
+                if processed_edits % 50 == 0
+                  print_progress(processed_edits, @edits_csv.count, "#{feature} :")
+                  print " | redirects: #{skipped_edits}" if skipped_edits > 0
+                end
+              end
+            end
+
+            puts "\n'#{File.basename(arff_file)}' saved to #{File.dirname(arff_file)}"
+          end
+
+          puts "using #{File.basename(arff_file)}"
+          feature_dataset = Core::Parser.parse_ARFF(arff_file)
+
+          if merged_dataset
+            filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+
+            filter.set do
+              data merged_dataset
+              filter_options '-R last'
+            end
+
+            merged_dataset = filter.use
+            merged_dataset = merged_dataset.merge_with(feature_dataset)
+          else
+            merged_dataset = feature_dataset
           end
         end
 
-        puts "\nYour '#{File.basename arff_file}' was saved to #{File.dirname arff_file}"
+        merged_dataset.to_ARFF(@config.training_output_arff_file)
+        merged_dataset
+      end
 
-        dataset = Core::Parser.parse_ARFF(arff_file)
+      def self.get_or_create_edit(edit_id)
+        @edits ||= Hash.new
+
+        if @edits[edit_id].nil?
+          @edits[edit_id] = create_edit_from(edit_id)
+        end
+
+        @edits[edit_id]
       end
 
       # Creates a Wikipedia::Edit out of an annotation's edit id using files form config.yml
       def self.create_edit_from(edit_id)
         @file_index ||= load_corpus_file_index
-        edit_data = find_edits_data_for edit_id
+        edit_data = find_edits_data_for(edit_id)
 
         old_revision_id = edit_data['oldrevisionid'].to_i
         new_revision_id = edit_data['newrevisionid'].to_i
@@ -298,7 +337,7 @@ module Wikipedia
 
       # Returns the line array of the edits.csv file with given edit id.
       def self.find_edits_data_for(edit_id)
-        edits_file = @config.training_corpus_edits_file
+        edits_file = Wikipedia::VandalismDetection.configuration.training_corpus_edits_file
         raise EditsFileNotConfiguredError unless edits_file
 
         @edits_file_content ||= File.read(edits_file)

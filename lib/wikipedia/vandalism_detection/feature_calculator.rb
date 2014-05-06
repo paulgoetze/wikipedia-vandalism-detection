@@ -39,19 +39,39 @@ module Wikipedia
             print "\r | #{feature.class.name.demodulize}        \t\t\t"
             feature.calculate(edit)
           rescue WikitextExtractionError => e
-            $stderr.puts e.message
             $stderr.print %Q{
-            Error while calculating features for edit with
-              old revision: #{edit.old_revision.id}
-              new revision: #{edit.new_revision.id}
-
-            This edit could not be parsed by the WikitextExtractor and will be discarded.\n}
+              Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
+              by the WikitextExtractor and will be discarded.\n""}
 
             -1
           end
         end
 
         features
+      end
+
+      # Returns the calculated Numeric feature value for given edti and feature with given name
+      def calculate_feature_for(edit, feature_name)
+        raise ArgumentError, "First parameter has to be an Edit." unless edit.is_a? Edit
+        raise ArgumentError, "Second parameter has to be a feature name String (e.g. 'anonymity')." unless \
+          feature_name.is_a? String
+
+        edit_contains_redirect = edit.old_revision.redirect? || edit.new_revision.redirect?
+
+        value = -1
+
+        unless edit_contains_redirect
+          begin
+            feature = feature_class_from_name(feature_name)
+            value = feature.calculate(edit)
+          rescue WikitextExtractionError
+            $stderr.print %Q{
+              Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
+              by the WikitextExtractor and will be discarded.\n""}
+          end
+        end
+
+        value
       end
 
       # Returns the feature names as defined in conf/config.yml under 'features:'.
@@ -64,9 +84,14 @@ module Wikipedia
       # Returns an array of all configured Feature class instances.
       def build_feature_classes(feature_names)
         feature_names.map do |name|
-          camelcased_name = name.split(/[\s-]/).map{ |s| s.capitalize! }.join('')
-          "Wikipedia::VandalismDetection::Features::#{camelcased_name}".constantize.new
+          feature_class_from_name(name)
         end
+      end
+
+      # Returns the Feature class of the given name
+      def feature_class_from_name(name)
+        camelcased_name = name.split(/[\s-]/).map{ |s| s.capitalize! }.join('')
+        "Wikipedia::VandalismDetection::Features::#{camelcased_name}".constantize.new
       end
     end
   end

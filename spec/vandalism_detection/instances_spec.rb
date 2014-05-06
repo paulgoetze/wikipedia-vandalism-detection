@@ -47,6 +47,43 @@ describe Wikipedia::VandalismDetection::Instances do
     end
   end
 
+  describe "#empty_for_feature" do
+    before do
+      @dataset = Wikipedia::VandalismDetection::Instances.empty_for_feature('comment length')
+      @attributes = @dataset.enumerate_attributes
+      @class_attribute = @dataset.class_attribute
+    end
+
+    it "returns a weka dataset" do
+      @dataset.class.should == Java::WekaCore::Instances::Base
+    end
+
+    it "returns an empty dataset" do
+      @dataset.n_rows.should == 0
+    end
+
+    it "has only given feature and class as attributes" do
+      attribute_names = @attributes.map{ |attr| "#{attr.name.gsub('_', ' ')}" }
+      features = ['comment length']
+
+      attribute_names.should == features
+    end
+
+    it "has feature attributes of type 'numeric'" do
+      attribute = (@attributes.to_a)[0]
+      attribute.numeric?.should be_true
+    end
+
+    it "has a class attribute of type 'nominal'" do
+      @class_attribute.nominal?.should be_true
+    end
+
+    it "has a class attribute with values 'vandalism' and 'regular'" do
+      values = @class_attribute.num_values.times.collect {|index| @class_attribute.value(index) }
+      values.should == ['regular','vandalism']
+    end
+  end
+
   describe "#empty_for_test" do
 
     before do

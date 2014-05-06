@@ -11,6 +11,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     @arff_file = @config.training_output_arff_file
     @index_file = @config.training_output_index_file
     @annotations_file = @config.training_corpus_annotations_file
+
+    @arff_files_dir = File.join(@config.output_base_directory, 'training')
   end
 
   after do
@@ -20,6 +22,16 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     File.delete(@index_file) if File.exists?(@index_file)
+
+    # remove feature arff files
+    @config.features.each do |name|
+      file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+
+      if File.exists?(file)
+        File.delete(file)
+        FileUtils.rm_r(File.dirname file)
+      end
+    end
   end
 
   describe "#instances" do
@@ -113,7 +125,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     describe "exceptions" do
       it "raises an EditsFileNotConfiguredError if no edits file is configured" do
         config = test_config
-        config.instance_variable_set :@training_corpus_edits_file, nil
+        config.instance_variable_set(:@training_corpus_edits_file, nil)
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.build! }.to raise_error \
@@ -122,7 +134,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
       it "raises an AnnotationsFileNotConfiguredError if no annotations file is configured" do
         config = test_config
-        config.instance_variable_set :@training_corpus_annotations_file, nil
+        config.instance_variable_set(:@training_corpus_annotations_file, nil)
         use_configuration(config)
 
         expect { Wikipedia::VandalismDetection::TrainingDataset.build! }.to raise_error \
@@ -134,6 +146,39 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       File.exist?(@arff_file).should be_false
       Wikipedia::VandalismDetection::TrainingDataset.build!
       File.exist?(@arff_file).should be_true
+    end
+
+    Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
+      it "creates an arff file for the feature '#{name}'" do
+        config = test_config
+        config.instance_variable_set :@features, [name]
+        use_configuration(config)
+
+        file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+
+        File.exist?(file).should be_false
+        Wikipedia::VandalismDetection::TrainingDataset.build!
+        File.exist?(file).should be_true
+      end
+    end
+
+    it "creates only feature files that are not available yet" do
+      config = test_config
+      config.instance_variable_set :@features, ['anonymity', 'comment length']
+      use_configuration(config)
+
+      anonymity_file = File.join(config.output_base_directory, 'training', 'anonymity.arff')
+
+      # create file manually, so it is existent when building dataset
+      data = [10000, 'vandalism']
+      anonymity = Wikipedia::VandalismDetection::Instances.empty_for_feature('anonymity')
+      6.times { anonymity.add_instance(data) }
+      anonymity.to_ARFF(anonymity_file)
+
+      Wikipedia::VandalismDetection::TrainingDataset.build!
+
+      # anonymity should not be overwritten
+      Core::Parser.parse_ARFF(anonymity_file).to_a2d.first.should == data
     end
 
     describe "internal algorithm" do
