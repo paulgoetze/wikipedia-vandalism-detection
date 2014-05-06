@@ -49,6 +49,24 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
       dataset.to_a2d.should == filtered_dataset
     end
+
+    it "overwrites existing test arff file" do
+      use_test_configuration
+
+      # test config uses 3 features + 2 edit id columns = 5
+      Wikipedia::VandalismDetection::TestDataset.instances
+      first_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
+      first_parsed_dataset.n_col.should == 5
+
+      config = test_config
+      config.instance_variable_set(:@features, ['anonymity'])
+      use_configuration(config)
+
+      # uses only 1 feature + 2 edit id columns = 3
+      Wikipedia::VandalismDetection::TestDataset.instances
+      second_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
+      second_parsed_dataset.n_col.should == 3
+    end
   end
 
   describe "#create_corpus_index_file!" do

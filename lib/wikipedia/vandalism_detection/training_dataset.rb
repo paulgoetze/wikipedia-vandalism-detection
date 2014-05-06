@@ -20,8 +20,7 @@ module Wikipedia
 
       def self.instances
         config = Wikipedia::VandalismDetection.configuration
-        arff_file = config.training_output_arff_file
-        dataset = (File.exists?(arff_file) ? Core::Parser.parse_ARFF(arff_file) : build!)
+        dataset = build!
 
         dataset = remove_invalid_instances(dataset)
         dataset.class_index = config.features.count

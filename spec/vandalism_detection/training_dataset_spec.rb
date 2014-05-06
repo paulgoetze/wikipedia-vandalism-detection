@@ -58,6 +58,24 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
       dataset.to_s.should == parsed_dataset.to_s
     end
+
+    it "overwrites existing test arff file" do
+      use_test_configuration
+
+      # test config uses 3 features + 1 class columns = 4
+      Wikipedia::VandalismDetection::TrainingDataset.instances
+      first_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
+      first_parsed_dataset.n_col.should == 4
+
+      config = test_config
+      config.instance_variable_set(:@features, ['anonymity'])
+      use_configuration(config)
+
+      # uses only 1 feature + 1 class columns = 2
+      Wikipedia::VandalismDetection::TrainingDataset.instances
+      second_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
+      second_parsed_dataset.n_col.should == 2
+    end
   end
 
   describe "#uniform_instances" do
