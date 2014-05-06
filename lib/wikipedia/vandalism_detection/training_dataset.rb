@@ -9,7 +9,6 @@ require 'wikipedia/vandalism_detection/text'
 require 'wikipedia/vandalism_detection/revision'
 require 'wikipedia/vandalism_detection/edit'
 require 'wikipedia/vandalism_detection/feature_calculator'
-require 'wikipedia/vandalism_detection/features'
 require 'wikipedia/vandalism_detection/instances'
 require 'wikipedia/vandalism_detection/wikitext_extractor'
 
@@ -237,9 +236,9 @@ module Wikipedia
                 edit_id = row[:edit_id]
                 vandalism = row[:class]
 
-                edit = get_or_create_edit(edit_id)
+                edit = create_edit_from(edit_id)
                 feature_value = feature_calculator.calculate_feature_for(edit, feature)
-                f.puts([feature_value, vandalism].join(','))
+                f.puts [feature_value, vandalism].join(',')
 
                 skipped_edits += 1 if (feature_value == -1)
                 processed_edits += 1
@@ -274,16 +273,6 @@ module Wikipedia
 
         merged_dataset.to_ARFF(@config.training_output_arff_file)
         merged_dataset
-      end
-
-      def self.get_or_create_edit(edit_id)
-        @edits ||= Hash.new
-
-        if @edits[edit_id].nil?
-          @edits[edit_id] = create_edit_from(edit_id)
-        end
-
-        @edits[edit_id]
       end
 
       # Creates a Wikipedia::Edit out of an annotation's edit id using files form config.yml
