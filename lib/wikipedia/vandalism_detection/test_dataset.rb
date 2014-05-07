@@ -44,51 +44,63 @@ module Wikipedia
         FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
         FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
 
-        merged_dataset = nil
-
-        @config.features.each do |feature|
-          feature_name = feature.gsub(' ', '_')
-          file_name = "#{feature_name.downcase}.arff"
+        # create feature file hash with io objects
+        feature_files = @config.features.inject({}) do |hash, feature_name|
+          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
           arff_file = File.join(output_directory, file_name)
 
           unless File.exists?(arff_file)
             dataset = Instances.empty_for_test_feature(feature_name)
             dataset.to_ARFF(arff_file)
-
-            processed_edits = 0
-            skipped_edits = 0
-
-            File.open(arff_file, 'a') do |f|
-              edits.each do |edit_data|
-
-                old_revision_id = edit_data['oldrevisionid']
-                new_revision_id = edit_data['newrevisionid']
-
-                next unless annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id)
-                edit = create_edit_from(edit_data)
-
-                feature_value = feature_calculator.calculate_feature_for(edit, feature)
-                f.puts [feature_value, old_revision_id, new_revision_id].join(',')
-
-                skipped_edits += 1 if (feature_value == -1)
-                processed_edits += 1
-
-                if processed_edits % 10 == 0
-                  print_progress(processed_edits, edits.count, "#{feature}:")
-                  print " | redirects: #{skipped_edits}" if skipped_edits > 0
-                end
-              end
-            end
-
-            puts "\n'#{File.basename(arff_file)}' saved to #{File.dirname(arff_file)}"
+            hash[feature_name] = File.open(arff_file, 'a')
           end
+
+          hash
+        end
+
+        processed_edits = 0
+        edits_count = edits.count
+
+        edits.each do |edit_data|
+          old_revision_id = edit_data['oldrevisionid']
+          new_revision_id = edit_data['newrevisionid']
+
+          processed_edits += 1
+          print_progress(processed_edits, edits_count, "computing features")
+
+          next unless (annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id))
+          edit = create_edit_from(edit_data)
+
+          feature_files.each do |feature_name, file|
+            value = feature_calculator.calculate_feature_for(edit, feature_name)
+            file.puts [value, old_revision_id, new_revision_id].join(',')
+          end
+        end
+
+        # close all io objects
+        feature_files.each do |feature_name, file|
+          file.close
+          puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+        end
+
+        merged_dataset = merge_feature_arffs(@config.features, output_directory)
+        merged_dataset.to_ARFF(@config.test_output_arff_file)
+        merged_dataset
+      end
+
+      # Loads arff files of given features and merge them into one arff file.
+      # Returns the merged arff file.
+      def self.merge_feature_arffs(features, output_directory)
+        filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+        merged_dataset = nil
+
+        features.each do |feature_name|
+          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
+          arff_file = File.join(output_directory, file_name)
 
           feature_dataset = Core::Parser.parse_ARFF(arff_file)
 
           if merged_dataset
-            filter = Weka::Filters::Unsupervised::Attribute::Remove.new
-
-            # remove two last columns (edit ids)
             2.times do
               filter.set do
                 data merged_dataset
@@ -104,7 +116,6 @@ module Wikipedia
           end
         end
 
-        merged_dataset.to_ARFF(@config.test_output_arff_file)
         merged_dataset
       end
 
@@ -142,8 +153,6 @@ module Wikipedia
 
         file_index
       end
-
-      private
 
       # Returns whether the
       def self.annotated_revision?(revision_file)
@@ -236,6 +245,13 @@ module Wikipedia
         processed_percentage = "%0.2f%" % ((processed_count * 100.00) / total_count).round(2)
         print "\r#{message}... #{processed_absolute} | #{processed_percentage}"
       end
+
+      private_class_method :annotated_revision?,
+                           :annotated_revisions,
+                           :remove_invalid_instances,
+                           :create_edit_from,
+                           :load_corpus_file_index,
+                           :print_progress
     end
   end
 end

@@ -87,8 +87,6 @@ module Wikipedia
       #      @positions=[
       #        #<Java::WekaCore::Attribute:0x17207a76>]>
       def self.empty_for_test_feature(name)
-        features = Wikipedia::VandalismDetection.configuration.features
-
         dataset = Core::Type::Instances::Base.new do
           numeric :"#{name.gsub(' ', '_')}"
           numeric OLD_REVISION_ID.to_sym
