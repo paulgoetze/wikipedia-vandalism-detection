@@ -67,7 +67,7 @@ module Wikipedia
       # Creates and returns an instance dataset from the configured gold annotation file using the
       # configured features from feature_calculator parameter.
       def self.create_dataset!(feature_calculator)
-        print "\ncreating training datset..."
+        print "\ncreating training dataset..."
 
         annotations_file = @config.training_corpus_annotations_file
         raise AnnotationsFileNotConfiguredError unless annotations_file
