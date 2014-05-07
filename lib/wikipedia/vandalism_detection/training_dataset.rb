@@ -205,6 +205,7 @@ module Wikipedia
 
         editor = edit_data['editor']
         comment = edit_data['editcomment']
+        new_timestamp = edit_data['edittime']
 
         old_revision_file = @file_index["#{old_revision_id}.txt"]
         new_revision_file = @file_index["#{new_revision_id}.txt"]
@@ -227,6 +228,7 @@ module Wikipedia
         new_revision.parent_id = old_revision_id
         new_revision.comment = Text.new(comment)
         new_revision.contributor = editor
+        new_revision.timestamp = new_timestamp
 
         Edit.new old_revision, new_revision
       end

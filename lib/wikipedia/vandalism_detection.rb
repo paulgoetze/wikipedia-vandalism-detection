@@ -1,3 +1,4 @@
+require 'wikipedia'
 require 'wikipedia/vandalism_detection/version'
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/exceptions'

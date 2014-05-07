@@ -128,6 +128,7 @@ describe Wikipedia::VandalismDetection do
           "same editor",
           "size ratio",
           "term frequency",
+          "time interval",
           "upper case ratio",
           "upper to lower case ratio",
           "vulgarism frequency",
