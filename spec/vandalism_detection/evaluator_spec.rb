@@ -125,7 +125,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       @curve_data.should be_a Hash
     end
 
-    [:recalls, :precisions,:fp_rates, :auprc, :auroc].each do |attribute|
+    [:recalls, :precisions,:fp_rates, :pr_auc, :roc_auc].each do |attribute|
       it "returns a Hash including #{attribute}" do
         @curve_data.should have_key(attribute)
       end
@@ -170,25 +170,25 @@ describe Wikipedia::VandalismDetection::Evaluator do
         recalls = @curve_data[:precisions]
         fp_rates = @curve_data[:fp_rates]
 
-        @auprc = @evaluator.area_under_curve(recalls, precisions)
-        @auroc = @evaluator.area_under_curve(fp_rates, recalls)
+        @pr_auc = @evaluator.area_under_curve(recalls, precisions)
+        @roc_auc = @evaluator.area_under_curve(fp_rates, recalls)
       end
 
       it "returns a numeric value for auprc" do
-        @auprc.should be_a Numeric
+        @pr_auc.should be_a Numeric
       end
 
       it "returns a numeric value between 0.0 & 1.0 for auprc" do
-        is_between_zero_and_one = @auprc >= 0.0 && @auprc <= 1.0
+        is_between_zero_and_one = @pr_auc >= 0.0 && @pr_auc <= 1.0
         is_between_zero_and_one.should be_true
       end
 
-      it "returns a numeric value for auroc" do
-        @auroc.should be_a Numeric
+      it "returns a numeric value for roc_auc" do
+        @roc_auc.should be_a Numeric
       end
 
       it "returns a numeric value between 0.0 & 1.0 for auroc" do
-        is_between_zero_and_one = @auroc >= 0.0 && @auroc <= 1.0
+        is_between_zero_and_one = @roc_auc >= 0.0 && @roc_auc <= 1.0
         is_between_zero_and_one.should be_true
       end
 
@@ -275,8 +275,8 @@ describe Wikipedia::VandalismDetection::Evaluator do
     [ :fp_rates,
       :precisions,
       :recalls,
-      :auprc,
-      :auroc,
+      :pr_auc,
+      :roc_auc,
       :total_precision,
       :total_recall
     ].each do |attr|

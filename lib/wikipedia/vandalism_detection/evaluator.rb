@@ -198,10 +198,10 @@ module Wikipedia
           fp_rates.push performance_params[:fp_rate]
         end
 
-        auprc = area_under_curve(recalls, precisions)
-        auroc = area_under_curve(fp_rates, recalls)
+        pr_auc = area_under_curve(recalls, precisions)
+        roc_auc = area_under_curve(fp_rates, recalls)
 
-        { precisions: precisions, recalls: recalls, fp_rates: fp_rates, auprc: auprc, auroc: auroc }
+        { precisions: precisions, recalls: recalls, fp_rates: fp_rates, pr_auc: pr_auc, roc_auc: roc_auc }
       end
 
       # Returns the predictive values (TP,FP, TN, FN) for a certain threshold.
