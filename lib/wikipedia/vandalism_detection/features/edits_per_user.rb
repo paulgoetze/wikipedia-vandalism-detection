@@ -15,12 +15,7 @@ module Wikipedia
           super
 
           revision = edit.new_revision
-          user = revision.contributor
-          url = "http://en.wikipedia.org/w/api.php?action=query&format=xml&list=usercontribs&ucuser=#{user}&ucprop=ids"
-
-          content = URI.parse(URI::encode(url)).read
-          xml = Nokogiri::XML(content)
-
+          xml = Wikipedia::api_request({ list: 'usercontribs', ucuser: revision.contributor, ucprop: 'ids' })
           page_item =  xml.xpath("//item[@revid='#{revision.id}']").first
 
           if page_item

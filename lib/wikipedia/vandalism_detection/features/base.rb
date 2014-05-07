@@ -1,3 +1,5 @@
+require 'wikipedia'
+
 module Wikipedia
   module VandalismDetection
     module Features
