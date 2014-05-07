@@ -11,7 +11,17 @@ module Wikipedia
         def calculate(edit)
           super
 
-          edit.old_revision.anonymous_contributor? ? 0 : 1
+          old_revision = edit.old_revision
+
+          if old_revision.contributor.blank?
+            xml = Wikipedia::api_request({ prop: 'revisions', rvprop: 'user',revids: old_revision.id })
+            contributor = xml.xpath('//rev/@user').text
+            return -1 if contributor.blank?
+
+            old_revision.contributor = contributor
+          end
+
+          old_revision.anonymous_contributor? ? 0 : 1
         end
       end
     end
