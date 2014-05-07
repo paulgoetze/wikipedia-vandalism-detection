@@ -33,5 +33,18 @@ describe Wikipedia::VandalismDetection::Features::TimeInterval do
 
       @feature.calculate(edit).should == 0.5
     end
+
+    it "returns -1 if old reivision is not available anymore" do
+      # to get api call, see:
+      # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=325218985
+      # <rev revid="325218985"/>
+      new_revision_time = '2011-11-11T01:00:00Z'
+
+      old_revision = build(:old_revision, id: '325218985', timestamp: nil)
+      new_revision = build(:new_revision, id: '326980599', parent_id: '325218985', timestamp: new_revision_time)
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+
+      @feature.calculate(edit).should == -1
+    end
   end
 end
