@@ -106,7 +106,7 @@ module Wikipedia
           end
 
           processed_edits += 1
-          print_progress(processed_edits, @edits_csv.count, "computing features")
+          print_progress(processed_edits, @edits_csv.count, "computing training features")
         end
 
         # close all io objects

@@ -66,7 +66,7 @@ module Wikipedia
           new_revision_id = edit_data['newrevisionid']
 
           processed_edits += 1
-          print_progress(processed_edits, edits_count, "computing features")
+          print_progress(processed_edits, edits_count, "computing test features")
 
           next unless (annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id))
           edit = create_edit_from(edit_data)
