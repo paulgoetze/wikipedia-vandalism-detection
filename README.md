@@ -161,8 +161,8 @@ Evaluate test corpus classification:
     recall_values = performance_data[:recalls]           # recall values for e.g. x-values of PRC or y-values of ROC
     precision_values = performance_data[:precisions]     # precision values for e.g. y-values of PRC
     fp_rate_values = performance_data[:fp_rates]         # false positive rate values for e.g. x-values of ROC
-    area_under_curve_pr = performance_data[:auprc]       # computed from the precision and recall values
-    area_under_curve_ro = performance_data[:auroc]       # computed from the recall and fp-rate values
+    area_under_curve_pr = performance_data[:pr_auc]      # computed from the precision and recall values
+    area_under_curve_ro = performance_data[:roc_auc]     # computed from the recall and fp-rate values
     total_recall = performance_data[:total_recall]       # precison and recall values with maximum area (rectangle area)
     total_precision = performance_data[:total_precision]
 
