@@ -174,12 +174,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
         @roc_auc = @evaluator.area_under_curve(fp_rates, recalls)
       end
 
-      it "returns a numeric value for auprc" do
+      it "returns a numeric value for pr_auc" do
         @pr_auc.should be_a Numeric
       end
 
-      it "returns a numeric value between 0.0 & 1.0 for auprc" do
-        is_between_zero_and_one = @pr_auc >= 0.0 && @pr_auc <= 1.0
+      it "returns a numeric value between 0.0 & 1.0 for pr_auc" do
+        is_between_zero_and_one = (@pr_auc >= 0.0 && @pr_auc <= 1.0)
         is_between_zero_and_one.should be_true
       end
 
@@ -187,7 +187,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         @roc_auc.should be_a Numeric
       end
 
-      it "returns a numeric value between 0.0 & 1.0 for auroc" do
+      it "returns a numeric value between 0.0 & 1.0 for roc_auc" do
         is_between_zero_and_one = @roc_auc >= 0.0 && @roc_auc <= 1.0
         is_between_zero_and_one.should be_true
       end
@@ -235,6 +235,30 @@ describe Wikipedia::VandalismDetection::Evaluator do
       lines = content.lines.to_a
       lines.shift # remove header
       lines.count.should == samples_count
+    end
+
+    it "overwrites the old classification file if existent" do
+      config = test_config
+
+      config.instance_variable_set(:@features, ['comment length'])
+      use_configuration(config)
+
+      classifier = Wikipedia::VandalismDetection::Classifier.new
+      evaluator_old = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+
+      Wikipedia::VandalismDetection::TrainingDataset.build!
+      evaluator_old.create_testcorpus_classification_file!
+      content_old = File.open(@test_classification_file, 'r')
+
+      config.instance_variable_set(:@features, ['anonymity'])
+      use_configuration(config)
+      evaluator_new = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+
+      Wikipedia::VandalismDetection::TrainingDataset.build!
+      evaluator_new.create_testcorpus_classification_file!
+      content_new = File.open(@test_classification_file, 'r')
+
+      content_old.should_not == content_new
     end
   end
 
