@@ -211,12 +211,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it "creates a classification file in the base output directory" do
       File.exists?(@test_classification_file).should be_false
-      @evaluator.create_testcorpus_classification_file!
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
       File.exists?(@test_classification_file).should be_true
     end
 
     it "creates a file with an appropriate header" do
-      @evaluator.create_testcorpus_classification_file!
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
       content = File.open(@test_classification_file, 'r')
 
       features = Core::Parser.parse_ARFF(@test_arff_file).enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
@@ -227,7 +227,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "creates a file with an appropriate number of lines" do
-      @evaluator.create_testcorpus_classification_file!
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
       content = File.open(@test_classification_file, 'r')
 
       samples_count = Core::Parser.parse_ARFF(@test_arff_file).n_rows
@@ -235,30 +235,6 @@ describe Wikipedia::VandalismDetection::Evaluator do
       lines = content.lines.to_a
       lines.shift # remove header
       lines.count.should == samples_count
-    end
-
-    it "overwrites the old classification file if existent" do
-      config = test_config
-
-      config.instance_variable_set(:@features, ['comment length'])
-      use_configuration(config)
-
-      classifier = Wikipedia::VandalismDetection::Classifier.new
-      evaluator_old = Wikipedia::VandalismDetection::Evaluator.new(classifier)
-
-      Wikipedia::VandalismDetection::TrainingDataset.build!
-      evaluator_old.create_testcorpus_classification_file!
-      content_old = File.open(@test_classification_file, 'r')
-
-      config.instance_variable_set(:@features, ['anonymity'])
-      use_configuration(config)
-      evaluator_new = Wikipedia::VandalismDetection::Evaluator.new(classifier)
-
-      Wikipedia::VandalismDetection::TrainingDataset.build!
-      evaluator_new.create_testcorpus_classification_file!
-      content_new = File.open(@test_classification_file, 'r')
-
-      content_old.should_not == content_new
     end
   end
 
@@ -310,10 +286,34 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
     end
 
-    it "runs the classification file creation if not available yet" do
+    it "runs the classification file creation" do
       File.exists?(@test_classification_file).should be_false
       @evaluator.evaluate_testcorpus_classification
       File.exists?(@test_classification_file).should be_true
+    end
+
+    it "overwrites the old classification file" do
+      config = test_config
+
+      config.instance_variable_set(:@features, ['comment length'])
+      use_configuration(config)
+
+      classifier = Wikipedia::VandalismDetection::Classifier.new
+      evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+
+      evaluator.evaluate_testcorpus_classification
+      content_old = File.read(@test_classification_file)
+
+      config.instance_variable_set(:@features, ['anonymity'])
+      use_configuration(config)
+
+      classifier = Wikipedia::VandalismDetection::Classifier.new
+      evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+
+      evaluator.evaluate_testcorpus_classification
+      content_new = File.read(@test_classification_file)
+
+      content_old.should_not == content_new
     end
   end
 

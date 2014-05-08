@@ -127,50 +127,10 @@ module Wikipedia
 
         classifier_name = @config.classifier_type.split('::').last.downcase
         classification_file_path = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt")
-        create_testcorpus_classification_file! unless File.exists?(classification_file_path)
+        create_testcorpus_classification_file!(classification_file_path)
 
-        # generate classification hash
-        classification_file = File.read(classification_file_path)
-        classification_samples = classification_file.lines.to_a
-        classification_samples.shift # remove header line
-
-        classification = {}
-
-        classification_samples.each do |line|
-          line_parts = line.split(' ')
-
-          old_revision_id = line_parts[0].to_i
-          new_revision_id = line_parts[1].to_i
-          class_short = line_parts[2]
-          confidence = line_parts[3].to_f
-
-          classification[:"#{old_revision_id}-#{new_revision_id}"] = {
-              old_revision_id: old_revision_id,
-              new_revision_id: new_revision_id,
-              class: class_short,
-              confidence: confidence
-          }
-        end
-
-        # generate ground truth hash
-        ground_truth_file = File.read(ground_truth_file_path)
-        ground_truth_samples = ground_truth_file.lines.to_a
-
-        ground_truth = {}
-
-        ground_truth_samples.each do |line|
-          line_parts = line.split(' ')
-
-          old_revision_id = line_parts[0].to_i
-          new_revision_id = line_parts[1].to_i
-          class_short = line_parts[2]
-
-          ground_truth[:"#{old_revision_id}-#{new_revision_id}"] = {
-              old_revision_id: old_revision_id,
-              new_revision_id: new_revision_id,
-              class: class_short
-          }
-        end
+        classification = classification_hash(classification_file_path)
+        ground_truth = ground_truth_hash(ground_truth_file_path)
 
         curves = test_performance_curves(ground_truth, classification, sample_count)
         precision_recall = maximum_precision_recall(curves[:precisions], curves[:recalls])
@@ -297,11 +257,8 @@ module Wikipedia
 
       # Creates the test corpus text file by classifying the configured test samples
       # All sub steps (as creating the test arff file, etc.) are run automattically if needed.
-      def create_testcorpus_classification_file!
+      def create_testcorpus_classification_file!(file_path)
         dataset = TestDataset.instances
-
-        classifier_name = @config.classifier_type.split('::').last.downcase
-        file_path = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt")
         file = File.open(file_path, 'w')
 
         feature_names = dataset.enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
@@ -327,6 +284,57 @@ module Wikipedia
       end
 
       private
+
+      # Returns a hash for classification data from given classification file
+      def classification_hash(classification_file)
+        file = File.read(classification_file)
+        classification_samples = file.lines.to_a
+        classification_samples.shift # remove header line
+
+        classification = {}
+
+        classification_samples.each do |line|
+          line_parts = line.split(' ')
+
+          old_revision_id = line_parts[0].to_i
+          new_revision_id = line_parts[1].to_i
+          class_short = line_parts[2]
+          confidence = line_parts[3].to_f
+
+          classification[:"#{old_revision_id}-#{new_revision_id}"] = {
+              old_revision_id: old_revision_id,
+              new_revision_id: new_revision_id,
+              class: class_short,
+              confidence: confidence
+          }
+        end
+
+        classification
+      end
+
+      # Returns a hash for classification data from given ground truth file
+      def ground_truth_hash(ground_truth_file)
+        file = File.read(ground_truth_file)
+        ground_truth_samples = file.lines.to_a
+
+        ground_truth = {}
+
+        ground_truth_samples.each do |line|
+          line_parts = line.split(' ')
+
+          old_revision_id = line_parts[0].to_i
+          new_revision_id = line_parts[1].to_i
+          class_short = line_parts[2]
+
+          ground_truth[:"#{old_revision_id}-#{new_revision_id}"] = {
+              old_revision_id: old_revision_id,
+              new_revision_id: new_revision_id,
+              class: class_short
+          }
+        end
+
+        ground_truth
+      end
 
       # Cross validates classifier over full dataset with <fold>-fold cross validation
       def cross_validate_all_instances(fold)
