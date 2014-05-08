@@ -58,33 +58,39 @@ module Wikipedia
           hash
         end
 
-        processed_edits = 0
-        edits_count = edits.count
+        unless feature_files.empty?
+          processed_edits = 0
+          edits_count = edits.count
 
-        edits.each do |edit_data|
-          old_revision_id = edit_data['oldrevisionid']
-          new_revision_id = edit_data['newrevisionid']
+          edits.each do |edit_data|
+            old_revision_id = edit_data['oldrevisionid']
+            new_revision_id = edit_data['newrevisionid']
 
-          processed_edits += 1
-          print_progress(processed_edits, edits_count, "computing test features")
+            processed_edits += 1
+            print_progress(processed_edits, edits_count, "computing test features")
 
-          next unless (annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id))
-          edit = create_edit_from(edit_data)
+            next unless (annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id))
+            edit = create_edit_from(edit_data)
 
+            feature_files.each do |feature_name, file|
+              value = feature_calculator.calculate_feature_for(edit, feature_name)
+              file.puts [value, old_revision_id, new_revision_id].join(',')
+            end
+          end
+
+          # close all io objects
           feature_files.each do |feature_name, file|
-            value = feature_calculator.calculate_feature_for(edit, feature_name)
-            file.puts [value, old_revision_id, new_revision_id].join(',')
+            file.close
+            puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
           end
         end
 
-        # close all io objects
-        feature_files.each do |feature_name, file|
-          file.close
-          puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
-        end
-
         merged_dataset = merge_feature_arffs(@config.features, output_directory)
-        merged_dataset.to_ARFF(@config.test_output_arff_file)
+
+        output_file = @config.training_output_arff_file
+        merged_dataset.to_ARFF(output_file)
+        puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
+
         merged_dataset
       end
 
@@ -99,6 +105,7 @@ module Wikipedia
           arff_file = File.join(output_directory, file_name)
 
           feature_dataset = Core::Parser.parse_ARFF(arff_file)
+          puts "using #{File.basename(arff_file)}"
 
           if merged_dataset
             2.times do

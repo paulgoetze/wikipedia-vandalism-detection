@@ -93,30 +93,36 @@ module Wikipedia
           hash
         end
 
-        processed_edits = 0
+        unless feature_files.empty?
+          processed_edits = 0
 
-        annotation_data.each do |row|
-          edit_id = row[:edit_id]
-          vandalism = row[:class]
-          edit = create_edit_from(edit_id)
+          annotation_data.each do |row|
+            edit_id = row[:edit_id]
+            vandalism = row[:class]
+            edit = create_edit_from(edit_id)
 
-          feature_files.each do |feature_name, file|
-            value = feature_calculator.calculate_feature_for(edit, feature_name)
-            file.puts [value, vandalism].join(',')
+            feature_files.each do |feature_name, file|
+              value = feature_calculator.calculate_feature_for(edit, feature_name)
+              file.puts [value, vandalism].join(',')
+            end
+
+            processed_edits += 1
+            print_progress(processed_edits, @edits_csv.count, "computing training features")
           end
 
-          processed_edits += 1
-          print_progress(processed_edits, @edits_csv.count, "computing training features")
-        end
-
-        # close all io objects
-        feature_files.each do |feature_name, file|
-          file.close
-          puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+          # close all io objects
+          feature_files.each do |feature_name, file|
+            file.close
+            puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+          end
         end
 
         merged_dataset = merge_feature_arffs(@config.features, output_directory)
-        merged_dataset.to_ARFF(@config.training_output_arff_file)
+
+        output_file = @config.training_output_arff_file
+        merged_dataset.to_ARFF(output_file)
+        puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
+
         merged_dataset
       end
 
@@ -178,6 +184,7 @@ module Wikipedia
           arff_file = File.join(output_directory, file_name)
 
           feature_dataset = Core::Parser.parse_ARFF(arff_file)
+          puts "using #{File.basename(arff_file)}"
 
           if merged_dataset
             filter.set do
