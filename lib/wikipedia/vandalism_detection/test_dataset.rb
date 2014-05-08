@@ -87,7 +87,7 @@ module Wikipedia
 
         merged_dataset = merge_feature_arffs(@config.features, output_directory)
 
-        output_file = @config.training_output_arff_file
+        output_file = @config.test_output_arff_file
         merged_dataset.to_ARFF(output_file)
         puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
 
