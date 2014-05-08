@@ -10,9 +10,9 @@ describe Wikipedia::VandalismDetection::Features::DigitRatio do
 
   describe "#calculate" do
 
-    it "returns the digit to all letters ratio of the edit's new revision inserted clean text" do
-      old_text = Wikipedia::VandalismDetection::Text.new('text')
-      new_text = Wikipedia::VandalismDetection::Text.new 'text [[1A4 B6 8Cd]]' # 3 digit letters of total 8 letters
+    it "returns the digit to all letters ratio of the edit's new revision inserted text" do
+      old_text = Wikipedia::VandalismDetection::Text.new('text1')
+      new_text = Wikipedia::VandalismDetection::Text.new 'text1 [[1A4 B6 8Cd]]' # 3 digit letters of total 8 letters
 
       old_revision = build(:old_revision, text: old_text)
       new_revision = build(:new_revision, text: new_text)

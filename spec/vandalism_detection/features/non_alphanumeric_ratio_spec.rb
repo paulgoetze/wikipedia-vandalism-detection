@@ -11,8 +11,8 @@ describe Wikipedia::VandalismDetection::Features::NonAlphanumericRatio do
   describe "#calculate" do
 
     it "returns the non-alphanumeric to all letters ratio of the edit's new revision uncleaned inserted text" do
-      old_text = Wikipedia::VandalismDetection::Text.new('text')
-      new_text = Wikipedia::VandalismDetection::Text.new 'text [[1A$% 4B6]] 8Cd?' # 7 non-alphanumeric letters of total 15 letters
+      old_text = Wikipedia::VandalismDetection::Text.new('t$xt')
+      new_text = Wikipedia::VandalismDetection::Text.new 't$xt [[1A$% 4B6]] 8Cd?' # 7 non-alphanumeric letters of total 15 letters
 
       old_revision = build(:old_revision, text: old_text)
       new_revision = build(:new_revision, text: new_text)

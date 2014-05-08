@@ -1,5 +1,6 @@
 require 'wikipedia/vandalism_detection/features/frequency_base'
 require 'wikipedia/vandalism_detection/word_lists'
+require 'wikipedia/vandalism_detection/text'
 
 module Wikipedia
   module VandalismDetection
@@ -13,7 +14,7 @@ module Wikipedia
         def calculate(edit)
           super
 
-          text = edit.new_revision.text.clean
+          text = Text.new(edit.inserted_words.join("\n")).clean
           frequency(text, WordLists.all)
         end
       end

@@ -11,15 +11,23 @@ describe Wikipedia::VandalismDetection::Features::LongestWord do
   describe "#calculate" do
 
     it "returns the length of the edit's new revisions text's longest word" do
-      text = Wikipedia::VandalismDetection::Text.new "1 22 33 a2c4e 4444 55555\n\n===head===\nfffff"
-      edit = build :edit, new_revision: build(:new_revision, text: text)
+      old_text = Wikipedia::VandalismDetection::Text.new "1 7777777"
+      new_text = Wikipedia::VandalismDetection::Text.new "1 7777777 22 a2c4e 4444 55555\n\n======head======\nfffff"
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
       @feature.calculate(edit).should == 5
     end
 
-    it "returns 0 on emtpy clean text" do
-      text = Wikipedia::VandalismDetection::Text.new "{{speedy deletion}}"
-      edit = build :edit, new_revision: build(:new_revision, text: text)
+    it "returns 0 on non inserted clean text" do
+      old_text = Wikipedia::VandalismDetection::Text.new "1 22"
+      new_text = Wikipedia::VandalismDetection::Text.new "1 22 {{speedy deletion}}"
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
       @feature.calculate(edit).should == 0
     end

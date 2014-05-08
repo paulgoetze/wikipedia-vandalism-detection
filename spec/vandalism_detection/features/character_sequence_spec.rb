@@ -11,15 +11,25 @@ describe Wikipedia::VandalismDetection::Features::CharacterSequence do
   describe "#calculate" do
 
     it "returns the number of the new revision's longest sequence of the same character" do
-      text = Wikipedia::VandalismDetection::Text.new "a 22 4444ccc eeeefffff gggg g \n===hhhh===\n''fffaffff''"
-      edit = build :edit, new_revision: build(:new_revision, text: text)
+      old_text = Wikipedia::VandalismDetection::Text.new "a 666666"
+      new_text = Wikipedia::VandalismDetection::Text.new "a 666666 4444ccc eeeefffff gggg g \n===hhhh===\n''fffaffff''"
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
+
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
       @feature.calculate(edit).should == 5
     end
 
-    it "returns 0 on emtpy clean text" do
-      text = Wikipedia::VandalismDetection::Text.new "{{speedy deletion}}"
-      edit = build :edit, new_revision: build(:new_revision, text: text)
+    it "returns 0 on non inserted text" do
+      old_text = Wikipedia::VandalismDetection::Text.new "a 666666 4444ccc eeeefffff gggg g"
+      new_text = Wikipedia::VandalismDetection::Text.new "a 666666 "
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
+
+      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
       @feature.calculate(edit).should == 0
     end
