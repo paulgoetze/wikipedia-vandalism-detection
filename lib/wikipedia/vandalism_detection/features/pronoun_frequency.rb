@@ -6,11 +6,11 @@ module Wikipedia
   module VandalismDetection
     module Features
 
-      # This feature computes the frequency of pronouns in the text of the new revision.
+      # This feature computes the frequency of pronouns in the insetred text.
       class PronounFrequency < FrequencyBase
 
-        # Returns the percentage of pronoun words in the new revision's text.
-        # Returns 0.0 if text is of zero length.
+        # Returns the percentage of pronoun words in the inserted text.
+        # Returns 0.0 if inserted clean text is of zero length.
         def calculate(edit)
           super
 

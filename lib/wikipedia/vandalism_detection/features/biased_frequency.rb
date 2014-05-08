@@ -10,7 +10,7 @@ module Wikipedia
       class BiasedFrequency < FrequencyBase
 
         # Returns the percentage of biased words in the inserted text.
-        # Returns 0.0 if clean text is of zero length.
+        # Returns 0.0 if inserted clean text is of zero length.
         def calculate(edit)
           super
 
