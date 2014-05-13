@@ -6,14 +6,26 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
 
   before do
     @config = test_config
-    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM } -cvr 2 -cvf 50 " +
-        "-W weka.classifiers.meta.Bagging -W weka.classifiers.trees.RandomForest -D"
+    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM }"
 
     @config.instance_variable_set :@classifier_type, 'Meta::OneClassClassifier'
     @config.instance_variable_set :@classifier_options, options
     @config.instance_variable_set :@cross_validation_fold, 2
 
     use_configuration(@config)
+
+    # add more test instances because instances number must higher than cross validation fold
+    instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+    dataset = Wikipedia::VandalismDetection::Instances.empty
+
+    2.times do
+      instances.each do |row|
+        dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[rand((0..1))]])
+      end
+    end
+
+    Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
+    puts Wikipedia::VandalismDetection::TrainingDataset.instances
   end
 
   after do
@@ -35,7 +47,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
       classifier = Wikipedia::VandalismDetection::Classifier.new
       features = [0.0, 25, 5]
       confidence = classifier.classify features
-      puts "confidence: #{confidence}"
+      puts "vandalism confidence: #{confidence}}"
     }.not_to raise_error
   end
 end

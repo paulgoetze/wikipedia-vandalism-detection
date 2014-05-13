@@ -30,17 +30,17 @@ module Wikipedia
         @classifier
       end
 
-      # Classifies an edit or a set of features and returns the vandalism consensus by default
-      # If 'return_all_params = true' is set, it returns a Hash of form
-      # { consensus => ..., class_index => ...}
+      # Classifies an edit or a set of features and returns the vandalism confidence by default
+      # If option 'return_all_params: true' is set, it returns a Hash of form
+      # { confidence => ..., class_index => ...}
       #
       # @example
       #   # suppose you have a dataset with 2 feature or 'edit' as an instance of Wikipedia::VandalismDetection::Edit
       #   classifier = Wikipedia::VandalsimDetection::Classifier.new
       #   features = [0.45, 0.67]
       #
-      #   consensus = classifier.classify(features)
-      #   consensus = classifier.classify(edit)
+      #   confidence = classifier.classify(features)
+      #   confidence = classifier.classify(edit)
       def classify(edit_or_features, options = {})
         features = @config.features
         param_is_features = edit_or_features.is_a?(Array) && (edit_or_features.size == features.count)
@@ -55,14 +55,16 @@ module Wikipedia
 
         dataset = Instances.empty
         dataset.set_class_index(feature_values.count)
-        #dataset.add_instance([*feature_values, 'vandalism'])
-        dataset.add_instance(feature_values)
+        dataset.add_instance([*feature_values, Instances::VANDALISM])
 
         instance = dataset.instance(0)
+        instance.set_class_missing
+
         confidence = (@classifier.distribution_for_instance(instance).to_a)[Instances::VANDALISM_CLASS_INDEX]
 
         if options[:return_all_params]
-          class_index = @classifier.classify_instance(instance).to_i
+          class_index = @classifier.classify_instance(instance)
+          class_index = class_index.nan? ? Instances::REGULAR_CLASS_INDEX : class_index.to_i
           results = { confidence: confidence, class_index: class_index }
         else
           results = confidence
@@ -114,7 +116,7 @@ module Wikipedia
 
           classifier
         rescue => e
-          raise "Error while loading classfier: #{e}"
+          raise "Error while loading classfier: #{e.class}: #{e.message}"
         end
       end
     end

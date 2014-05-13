@@ -19,6 +19,7 @@ module Weka
 
         def initialize
           super
+
           self.m_TargetClassLabel = Wikipedia::VandalismDetection::Instances::VANDALISM
         end
       end

@@ -167,6 +167,30 @@ describe Wikipedia::VandalismDetection::Classifier do
     it "raises an argument error if given features are an empty array" do
       expect { @classifier.classify([]) }.to raise_error ArgumentError
     end
+
+    it "does not raise an exception if classifier's classify method returns NaN (i.e. is not implemented)" do
+      config = test_config
+      config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
+      config.instance_variable_set(:@classifier_options, "-tcl #{Wikipedia::VandalismDetection::Instances::VANDALISM}")
+
+      use_configuration(config)
+
+      # add more test instances because instances number must higher than cross validation fold
+      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+      dataset = Wikipedia::VandalismDetection::Instances.empty
+
+      2.times do
+        instances.each do |row|
+          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[rand((0..1))]])
+        end
+      end
+
+      Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
+
+      classifier = Wikipedia::VandalismDetection::Classifier.new
+
+      expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
+    end
   end
 
   describe "#cross_validate" do
