@@ -20,7 +20,11 @@ module Weka
         def initialize
           super
 
-          self.m_TargetClassLabel = Wikipedia::VandalismDetection::Instances::VANDALISM
+          #self.m_TargetClassLabel = Wikipedia::VandalismDetection::Instances::VANDALISM
+        end
+
+        def self.type
+          "Meta::OneClassClassifier"
         end
       end
     end

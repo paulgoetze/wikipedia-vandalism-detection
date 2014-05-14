@@ -50,4 +50,10 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
       puts "vandalism confidence: #{confidence}}"
     }.not_to raise_error
   end
+
+  describe "#type" do
+    it "returns the classifier's type name" do
+      Weka::Classifiers::Meta::OneClassClassifier.type.should == 'Meta::OneClassClassifier'
+    end
+  end
 end
