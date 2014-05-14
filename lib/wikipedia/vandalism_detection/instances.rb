@@ -10,12 +10,12 @@ module Wikipedia
       VANDALISM_CLASS_INDEX = 1
       NOT_KNOWN_INDEX = 2
 
-      VANDALISM = "vandalism"
-      REGULAR = "regular"
-      NOT_KNOWN = "?"
+      VANDALISM = 'vandalism'
+      REGULAR = 'regular'
+      NOT_KNOWN = '?'
 
-      VANDALISM_SHORT= "V"
-      REGULAR_SHORT = "R"
+      VANDALISM_SHORT= 'V'
+      REGULAR_SHORT = 'R'
 
       OLD_REVISION_ID = 'oldrevisionid'
       NEW_REVISION_ID = 'newrevisionid'
