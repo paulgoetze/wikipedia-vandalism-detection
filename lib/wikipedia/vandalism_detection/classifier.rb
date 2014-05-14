@@ -64,7 +64,7 @@ module Wikipedia
 
         if options[:return_all_params]
           class_index = @classifier.classify_instance(instance)
-          class_index = class_index.nan? ? Instances::REGULAR_CLASS_INDEX : class_index.to_i
+          class_index = class_index.nan? ? Instances::NOT_KNOWN_INDEX : class_index.to_i
           results = { confidence: confidence, class_index: class_index }
         else
           results = confidence
