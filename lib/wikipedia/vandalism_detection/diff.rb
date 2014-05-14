@@ -2,7 +2,7 @@ module Wikipedia
   module VandalismDetection
 
     require 'java'
-    require 'java/diffutils-1.2.1.jar'
+    require 'java/diffutils-1.3.0.jar'
 
     java_import 'difflib.DiffUtils'
 
