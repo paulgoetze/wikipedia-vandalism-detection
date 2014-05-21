@@ -164,7 +164,7 @@ module Wikipedia
         { precisions: precisions, recalls: recalls, fp_rates: fp_rates, pr_auc: pr_auc, roc_auc: roc_auc }
       end
 
-      # Returns the predictive values (TP,FP, TN, FN) for a certain threshold.
+      # Returns the predictive values hash (TP,FP, TN, FN) for a certain threshold.
       def predictive_values(ground_truth, classification, threshold)
         tp = 0 # vandalism which is classified as vandalism
         fp = 0 # regular that is classified as vandalism
@@ -285,7 +285,97 @@ module Wikipedia
         file.close
       end
 
+      # Returns a hash comprising each feature's predictive values analysis for different thresholds.
+      # The Hash structure is following:
+      # {
+      #   { feature_name_1:
+      #     0.0 => {fp: , fn: , tp: , tn: },
+      #     ... => {fp: , fn: , tp: , tn: },
+      #     1.0 => {fp: , fn: , tp: , tn: }
+      #   },
+      #   ...,
+      #   { feature_name_n:
+      #     0.0 => {fp: , fn: , tp: , tn: },
+      #     ... => {fp: , fn: , tp: , tn: },
+      #     1.0 => {fp: , fn: , tp: , tn: }
+      #   },
+      # }
+      def feature_analysis(options = {})
+        sample_count = options[:sample_count] || 100
+        thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
+
+        ground_truth_file_path = @config.test_corpus_ground_truth_file
+        full_dataset = TrainingDataset.instances
+
+        analysis = {}
+
+        @config.features.each_with_index do |feature_name, index |
+          dataset = filter_single_attribute(full_dataset, index)
+          classifier = Classifier.new(dataset)
+
+          classification = classification_data(classifier)
+          ground_truth = ground_truth_hash(ground_truth_file_path)
+
+          values = {}
+
+          thresholds.each do |threshold|
+            values[threshold] = predictive_values(ground_truth, classification, threshold)
+          end
+
+          analysis[feature_name] = values
+        end
+
+        analysis
+      end
+
       private
+
+      # Returns a dataset only holding the attribute at the given index.
+      # Weka Unsupervised Attribute Remove filter is used.
+      def filter_single_attribute(dataset, attribute_index)
+        filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+
+        puts "class index: #{dataset.class_index}"
+
+        filter.set do
+          data dataset
+          filter_options "-V -R #{attribute_index + 1},#{dataset.class_index + 1}"
+        end
+
+        filtered  = filter.use
+        filtered.class_index = filtered.n_col - 1
+        puts filtered
+        filtered
+      end
+
+      # Returns an array of classification confidences of the test corpus' classification with the given classifier
+      def classification_data(classifier)
+        dataset = TestDataset.instances
+        classification = {}
+
+        dataset.to_a2d.each do |instance|
+          features = instance[0...-2]
+          next if features.include? -1
+
+          old_revision_id = instance[-2].to_i
+          new_revision_id = instance[-1].to_i
+
+          params = @classifier.classify(features, return_all_params: true)
+          class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
+
+          must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
+          confidence =  must_be_inverted ? (1.0 - params[:confidence]) : params[:confidence]
+
+          classification[:"#{old_revision_id}-#{new_revision_id}"] = {
+              old_revision_id: old_revision_id,
+              new_revision_id: new_revision_id,
+              class: class_short_name,
+              confidence: confidence
+          }
+        end
+
+        classification
+      end
 
       # Returns a hash for classification data from given classification file
       def classification_hash(classification_file)

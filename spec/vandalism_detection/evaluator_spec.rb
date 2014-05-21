@@ -397,4 +397,32 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
     end
   end
+
+  describe "#feature_analysis" do
+
+    it "returns a hash with feature count size" do
+      analysis = @evaluator.feature_analysis(sample_count: 100)
+      analysis.should be_a Hash
+      analysis.count.should == @config.features.count
+    end
+
+    it "returns a hash with sample count number of data hashes" do
+      sample_count = 5
+      analysis = @evaluator.feature_analysis(sample_count: sample_count)
+
+      analysis.each do |key, threshold_hash|
+        threshold_hash.count.should == sample_count
+      end
+    end
+
+    it "returns the four predictive values in each features threshold hash" do
+      analysis = @evaluator.feature_analysis
+      threshold_hash = analysis[@config.features.first][0.0]
+
+      threshold_hash.should have_key(:fp)
+      threshold_hash.should have_key(:fn)
+      threshold_hash.should have_key(:tp)
+      threshold_hash.should have_key(:tn)
+    end
+  end
 end
