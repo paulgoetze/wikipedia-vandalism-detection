@@ -30,6 +30,17 @@ describe Wikipedia::VandalismDetection::Classifier do
     @classifier.classifier_instance.should be_a class_type
   end
 
+  it "loads the configured classifier with given dataset" do
+    classifier_name =  @config.classifier_type
+    class_type = "Weka::Classifiers::#{classifier_name}::Base".constantize
+    dataset = Wikipedia::VandalismDetection::Instances.empty_for_feature('anonymity')
+    dataset.add_instance([1.0, Wikipedia::VandalismDetection::Instances::REGULAR])
+
+    classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
+    classifier.classifier_instance.should be_a class_type
+    classifier.dataset .should == dataset
+  end
+
   it "raises an error if no classifier is configured" do
     config = test_config
     config.instance_variable_set :@classifier_type, nil

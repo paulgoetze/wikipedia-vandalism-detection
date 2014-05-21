@@ -15,10 +15,10 @@ module Wikipedia
       attr_reader :evaluator, :dataset
 
       # Loads the classifier instance configured in the config file.
-      def initialize
+      def initialize(dataset = nil)
         @config = Wikipedia::VandalismDetection.configuration
         @feature_calculator = FeatureCalculator.new
-        @classifier = load_classifier
+        @classifier = load_classifier(dataset)
         @evaluator = Evaluator.new(self)
       end
 
@@ -98,7 +98,7 @@ module Wikipedia
       private
 
       # Loads the (Weka-) Classifier set in the Configuration
-      def load_classifier
+      def load_classifier(dataset)
         classifier_name = @config.classifier_type
 
         raise ClassifierNotConfiguredError, "You have to define a classifier type in config.yml" unless classifier_name
@@ -112,7 +112,7 @@ module Wikipedia
         raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
-        dataset = @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
+        dataset ||= @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
 
         if @config.use_occ?
           dataset.rename_attribute_value(dataset.class_index, Instances::REGULAR_CLASS_INDEX, Instances::OUTLIER)
