@@ -1,5 +1,6 @@
 require 'ruby-band'
 require 'wikipedia/vandalism_detection/configuration'
+require 'weka/classifiers/meta/one_class_classifier'
 
 module Wikipedia
   module VandalismDetection
@@ -10,9 +11,11 @@ module Wikipedia
       VANDALISM_CLASS_INDEX = 1
       NOT_KNOWN_INDEX = 2
 
+      CLASS = 'class'
       VANDALISM = 'vandalism'
       REGULAR = 'regular'
       NOT_KNOWN = '?'
+      OUTLIER = Weka::Classifiers::Meta::OneClassClassifier::OUTLIER_LABEL
 
       VANDALISM_SHORT= 'V'
       REGULAR_SHORT = 'R'
@@ -48,17 +51,14 @@ module Wikipedia
       #        #<Java::WekaCore::Attribute:0x5a74fae4>]>
       def self.empty
         features = Wikipedia::VandalismDetection.configuration.features
-
-        dataset_classes = Array.new
-        dataset_classes[VANDALISM_CLASS_INDEX] = VANDALISM
-        dataset_classes[REGULAR_CLASS_INDEX] = REGULAR
+        classes = dataset_classes
 
         dataset = Core::Type::Instances::Base.new do
           features.each do |name|
             numeric :"#{name.gsub(' ', '_')}"
           end
 
-          nominal :class, dataset_classes
+          nominal :class, classes
         end
 
         dataset.class_index = features.count
@@ -75,13 +75,11 @@ module Wikipedia
       #      @positions=[
       #        #<Java::WekaCore::Attribute:0x17207a76>
       def self.empty_for_feature(name)
-        dataset_classes = Array.new
-        dataset_classes[VANDALISM_CLASS_INDEX] = VANDALISM
-        dataset_classes[REGULAR_CLASS_INDEX] = REGULAR
+        classes = dataset_classes
 
         dataset = Core::Type::Instances::Base.new do
           numeric :"#{name.gsub(' ', '_')}"
-          nominal :class, dataset_classes
+          nominal :class, classes
         end
 
         dataset.class_index = 1
@@ -106,6 +104,15 @@ module Wikipedia
 
         dataset
       end
+
+      def self.dataset_classes
+        classes = Array.new
+        classes[VANDALISM_CLASS_INDEX] = VANDALISM
+        classes[REGULAR_CLASS_INDEX] = REGULAR
+        classes
+      end
+
+      private_class_method :dataset_classes
     end
   end
 end

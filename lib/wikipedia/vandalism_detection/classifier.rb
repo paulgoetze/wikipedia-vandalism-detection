@@ -57,6 +57,16 @@ module Wikipedia
         dataset.set_class_index(feature_values.count)
         dataset.add_instance([*feature_values, Instances::VANDALISM])
 
+        if @config.use_occ?
+          if @config.classifier_options =~ Instances::VANDALISM_CLASS_INDEX
+            index = Instances::VANDALISM_CLASS_INDEX
+          else
+            index = Instances::REGULAR_CLASS_INDEX
+          end
+
+          dataset.rename_attribute_value(dataset.class_index, index, Instances::OUTLIER)
+        end
+
         instance = dataset.instance(0)
         instance.set_class_missing
 
@@ -102,9 +112,14 @@ module Wikipedia
         raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
-        @dataset = @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
+        dataset = @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
 
-        dataset = @dataset
+        if @config.use_occ?
+          dataset.rename_attribute_value(dataset.class_index, Instances::REGULAR_CLASS_INDEX, Instances::OUTLIER)
+        end
+
+        @dataset = dataset
+
         options = @config.classifier_options
 
         begin

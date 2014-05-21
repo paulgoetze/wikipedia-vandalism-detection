@@ -1,3 +1,5 @@
+require 'weka/classifiers/meta/one_class_classifier'
+
 module Wikipedia
   module VandalismDetection
 
@@ -29,6 +31,11 @@ module Wikipedia
 
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
+      end
+
+      # Returns whether the classifier uses one class classification
+      def use_occ?
+        @classifier_type == Weka::Classifiers::Meta::OneClassClassifier.type
       end
 
       # Returns a boolean value whether a uniform data set is used for classifier training.

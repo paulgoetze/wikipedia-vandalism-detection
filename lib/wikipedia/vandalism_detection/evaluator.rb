@@ -275,7 +275,9 @@ module Wikipedia
 
           params = @classifier.classify(features, return_all_params: true)
           class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
-          confidence = params[:confidence]
+
+          must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
+          confidence =  must_be_inverted ? (1.0 - params[:confidence]) : params[:confidence]
 
           file.puts [old_revision_id, new_revision_id, class_short_name, confidence, *features].join(" ")
         end

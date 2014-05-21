@@ -186,7 +186,36 @@ describe Wikipedia::VandalismDetection::Classifier do
       end
 
       Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
+      classifier = Wikipedia::VandalismDetection::Classifier.new
 
+      expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
+    end
+
+    it "does not raise an exception if classifier uses one class classification with 'outlier' ast target class" do
+      vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM
+      outlier = Wikipedia::VandalismDetection::Instances::OUTLIER
+
+      config = test_config
+      config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
+      config.instance_variable_set(:@classifier_options, "-tcl #{outlier}")
+
+      use_configuration(config)
+
+      # add more test instances because instances number must higher than cross validation fold
+      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+      dataset = Wikipedia::VandalismDetection::Instances.empty
+      dataset.rename_attribute_value(dataset.class_index,
+                                     Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX,
+                                     outlier)
+
+      2.times do
+        instances.each do |row|
+          class_label = [vandalism, outlier][rand((0..1))]
+          dataset.add_instance([*row, class_label])
+        end
+      end
+
+      Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
       classifier = Wikipedia::VandalismDetection::Classifier.new
 
       expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
@@ -206,10 +235,6 @@ describe Wikipedia::VandalismDetection::Classifier do
       evaluations.each do |evaluation|
         evaluation.class.should == Java::WekaClassifiers::Evaluation
       end
-
-      #@classifier.cross_validate(equally_distributed: true)[:precision].should be_a Numeric
-      #@classifier.cross_validate(equally_distributed: true)[:recall].should be_a Numeric
-      #@classifier.cross_validate(equally_distributed: true)[:area_under_prc].should be_a Numeric
     end
   end
 end

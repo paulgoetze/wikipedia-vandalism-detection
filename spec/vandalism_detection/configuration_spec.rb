@@ -36,6 +36,21 @@ describe Wikipedia::VandalismDetection do
       @configuration.cross_validation_fold.should be_a Numeric
     end
 
+    describe "#use_occ?" do
+      it "returns true if used classifier is a one class classifier (occ)" do
+        config = test_config
+        config.instance_variable_set(:@classifier_type, Weka::Classifiers::Meta::OneClassClassifier.type)
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.use_occ?.should be_true
+      end
+
+      it "returns false if used classifier is not a one class classifier (occ)" do
+        use_test_configuration
+        Wikipedia::VandalismDetection.configuration.use_occ?.should be_false
+      end
+    end
+
     describe "#uniform_training_data?" do
 
       it "returns true for if it is set in config" do
