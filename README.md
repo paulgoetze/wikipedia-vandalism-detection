@@ -128,6 +128,8 @@ So, the `<page>...</page>` tags should not be included in a namespaced xml tag!
 
 **Use a classifier of configured type:**
 
+Create the classifier:
+
     classifier = Wikipedia::VandalismDetection::Classifier.new
 
 Evaluation of the classifier against the configured training corpus:
@@ -151,11 +153,11 @@ Classify a new edit:
 Evaluate test corpus classification:
 
     evaluator = classifier.evaluator
-    #or create a new evaluator
+    # or create a new evaluator
     evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
 
     performance_data = evaluator.evaluate_testcorpus_classification #default sample_count = 100
-    performance_data = evaluator.evaluate_testcorpus_classification(sample_count: sample_count)
+    performance_data = evaluator.evaluate_testcorpus_classification(sample_count: 200)
 
     # following attributes can be used for further computations
     recall_values = performance_data[:recalls]           # recall values for e.g. x-values of PRC or y-values of ROC
@@ -165,6 +167,33 @@ Evaluate test corpus classification:
     area_under_curve_ro = performance_data[:roc_auc]     # computed from the recall and fp-rate values
     total_recall = performance_data[:total_recall]       # precison and recall values with maximum area (rectangle area)
     total_precision = performance_data[:total_precision]
+
+Get each features predictive value for analysis:
+    
+    evaluator = classifier.evaluator
+    # or create a new evaluator
+    evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
+    
+    analysis_data = evaluator.feature_analysis #default sample_count = 100
+    analysis_data = evaluator.feature_analysis(sample_count: 200)
+    
+This returns a hash comrpising all feature names as configured as keys and the threshold hashes as values.
+
+    {
+      feature_name_1:
+        {
+          0.0 => {fp:... , fn:... , tp:... , tn:... },
+          ...,
+          1.0 => {fp:... , fn:... , tp:... , tn:... }
+        },
+      ...,
+      feature_name_n:
+        {
+          0.0 => {fp:... , fn:... , tp:... , tn:... },
+          ...,
+          1.0 => {fp:... , fn:... , tp:... , tn:... }
+        },
+    }
 
 ## Contributing
 

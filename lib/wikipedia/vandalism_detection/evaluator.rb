@@ -286,34 +286,41 @@ module Wikipedia
       end
 
       # Returns a hash comprising each feature's predictive values analysis for different thresholds.
-      # The Hash structure is following:
+      # The Hash structure is the following one:
       # {
-      #   { feature_name_1:
-      #     0.0 => {fp: , fn: , tp: , tn: },
-      #     ... => {fp: , fn: , tp: , tn: },
-      #     1.0 => {fp: , fn: , tp: , tn: }
-      #   },
+      #   feature_name_1:
+      #    {
+      #       0.0 => {fp: , fn: , tp: , tn: },
+      #       ... => {fp: , fn: , tp: , tn: },
+      #       1.0 => {fp: , fn: , tp: , tn: }
+      #    },
       #   ...,
-      #   { feature_name_n:
-      #     0.0 => {fp: , fn: , tp: , tn: },
-      #     ... => {fp: , fn: , tp: , tn: },
-      #     1.0 => {fp: , fn: , tp: , tn: }
-      #   },
+      #   feature_name_n:
+      #    {
+      #       0.0 => {fp: , fn: , tp: , tn: },
+      #       ... => {fp: , fn: , tp: , tn: },
+      #       1.0 => {fp: , fn: , tp: , tn: }
+      #    },
       # }
       def feature_analysis(options = {})
         sample_count = options[:sample_count] || 100
         thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
 
         ground_truth_file_path = @config.test_corpus_ground_truth_file
-        full_dataset = TrainingDataset.instances
+        training_dataset = TrainingDataset.instances
+        test_dataset = TestDataset.instances
 
         analysis = {}
 
         @config.features.each_with_index do |feature_name, index |
-          dataset = filter_single_attribute(full_dataset, index)
-          classifier = Classifier.new(dataset)
+          puts "analyzing feature... '#{feature_name}'"
 
-          classification = classification_data(classifier)
+          dataset = filter_single_attribute(training_dataset, index)
+          print " | train classifier with feature data..."
+          classifier = Classifier.new(dataset)
+          print "done \n"
+
+          classification = classification_data(classifier, test_dataset)
           ground_truth = ground_truth_hash(ground_truth_file_path)
 
           values = {}
@@ -335,8 +342,6 @@ module Wikipedia
       def filter_single_attribute(dataset, attribute_index)
         filter = Weka::Filters::Unsupervised::Attribute::Remove.new
 
-        puts "class index: #{dataset.class_index}"
-
         filter.set do
           data dataset
           filter_options "-V -R #{attribute_index + 1},#{dataset.class_index + 1}"
@@ -344,23 +349,21 @@ module Wikipedia
 
         filtered  = filter.use
         filtered.class_index = filtered.n_col - 1
-        puts filtered
         filtered
       end
 
       # Returns an array of classification confidences of the test corpus' classification with the given classifier
-      def classification_data(classifier)
-        dataset = TestDataset.instances
+      def classification_data(classifier, test_dataset)
         classification = {}
 
-        dataset.to_a2d.each do |instance|
+        test_dataset.to_a2d.each do |instance|
           features = instance[0...-2]
           next if features.include? -1
 
           old_revision_id = instance[-2].to_i
           new_revision_id = instance[-1].to_i
 
-          params = @classifier.classify(features, return_all_params: true)
+          params = classifier.classify(features, return_all_params: true)
           class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
 
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
