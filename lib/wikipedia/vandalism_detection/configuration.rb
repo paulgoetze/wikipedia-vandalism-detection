@@ -20,7 +20,8 @@ module Wikipedia
                   :classifier_options,
                   :classifier_type,
                   :cross_validation_fold,
-                  :output_base_directory
+                  :output_base_directory,
+                  :training_data_options
 
       def initialize
         config = DefaultConfiguration[DefaultConfiguration::DEFAULTS]

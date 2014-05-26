@@ -17,6 +17,7 @@ describe Wikipedia::VandalismDetection do
       :classifier_type,
       :classifier_options,
       :cross_validation_fold,
+      :training_data_options,
       :balanced_training_data?,
       :unbalanced_training_data?,
       :oversampled_training_data?
