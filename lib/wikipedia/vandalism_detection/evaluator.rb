@@ -335,6 +335,33 @@ module Wikipedia
         analysis
       end
 
+      # Returns a hash comprising the classifiers predictive values for using all configured features for
+      # different thresholds.
+      def full_analysis(options = {})
+        sample_count = options[:sample_count] || 100
+        thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
+
+        ground_truth_file_path = @config.test_corpus_ground_truth_file
+
+        puts "train classifier..."
+        classifier = Classifier.new
+
+        test_dataset = TestDataset.instances
+
+        puts "computing classification..."
+        classification = classification_data(classifier, test_dataset)
+        ground_truth = ground_truth_hash(ground_truth_file_path)
+
+        analysis = {}
+
+        thresholds.each do |threshold|
+          analysis[threshold] = predictive_values(ground_truth, classification, threshold)
+        end
+
+        print "done \n"
+        analysis
+      end
+
       private
 
       # Returns a dataset only holding the attribute at the given index.
@@ -464,7 +491,7 @@ module Wikipedia
 
           # run n times validation
           (1..times).each do |i|
-            uniform_dataset = TrainingDataset.uniform_instances
+            uniform_dataset = TrainingDataset.balanced_instances
 
             print "\rcross validate dataset  (equally distributed) ... #{i}/#{times} | instances: #{uniform_dataset.n_rows}"
             @classifier_instance.set_data(uniform_dataset)

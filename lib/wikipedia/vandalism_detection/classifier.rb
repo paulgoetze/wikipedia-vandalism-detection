@@ -102,6 +102,7 @@ module Wikipedia
         classifier_name = @config.classifier_type
 
         raise ClassifierNotConfiguredError, "You have to define a classifier type in config.yml" unless classifier_name
+        raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
 
         begin
           "Weka::Classifiers::#{classifier_name}::Base".constantize
@@ -109,17 +110,21 @@ module Wikipedia
           raise ClassifierUnknownError, "The configured classifier type '#{classifier_name}' is unknown."
         end
 
-        raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
-
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
-        dataset ||= @config.uniform_training_data? ? TrainingDataset.uniform_instances : TrainingDataset.instances
 
-        if @config.use_occ?
-          dataset.rename_attribute_value(dataset.class_index, Instances::REGULAR_CLASS_INDEX, Instances::OUTLIER)
+        if dataset.nil?
+          if @config.balanced_training_data?
+            dataset = TrainingDataset.balanced_instances
+          elsif @config.unbalanced_training_data?
+            dataset = TrainingDataset.instances
+          elsif @config.oversampled_training_data?
+            dataset = TrainingDataset.oversampled_instances
+          end
         end
 
         @dataset = dataset
 
+        dataset.rename_attribute_value(dataset.class_index, Instances::REGULAR_CLASS_INDEX, Instances::OUTLIER) if @config.use_occ?
         options = @config.classifier_options
 
         begin

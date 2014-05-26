@@ -17,7 +17,9 @@ describe Wikipedia::VandalismDetection do
       :classifier_type,
       :classifier_options,
       :cross_validation_fold,
-      :uniform_training_data?
+      :balanced_training_data?,
+      :unbalanced_training_data?,
+      :oversampled_training_data?
     ].each do |attribute|
       it "responds to ##{attribute}" do
         @configuration.should respond_to attribute
@@ -51,30 +53,92 @@ describe Wikipedia::VandalismDetection do
       end
     end
 
-    describe "#uniform_training_data?" do
+    describe "#balanced_training_data?" do
 
-      it "returns true for if it is set in config" do
+      it "returns true if it is set in config" do
         config = test_config
-        config.instance_variable_set(:@uniform_training_data, 'true')
+        config.instance_variable_set(:@training_data_options, 'balanced')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_true
+        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_true
       end
 
       it "returns false if it is not set in config" do
         config = test_config
-        config.instance_variable_set(:@uniform_training_data, nil)
+        config.instance_variable_set(:@training_data_options, nil)
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_false
+        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_false
       end
 
-      it "returns false for if it is set to 'false'" do
+      it "returns false if it is set to other value than 'balanced'" do
         config = test_config
-        config.instance_variable_set(:@uniform_training_data, 'false')
+        config.instance_variable_set(:@training_data_options, 'other')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.uniform_training_data?.should be_false
+        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_false
+      end
+    end
+
+    describe "#unbalanced_training_data?" do
+
+      it "returns true if it is set in config" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'unbalanced')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+      end
+
+      it "returns true if it is not set in config" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, nil)
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+      end
+
+      it "returns true if it is set to other value than 'unbalanced' or 'oversampled'" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'other value')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+      end
+
+      it "returns false if it is set to other value than 'unbalanced'" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'balanced')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_false
+      end
+    end
+
+    describe "#oversampled_training_data?" do
+
+      it "returns true if it is set in config" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'oversampled')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_true
+      end
+
+      it "returns false if it is not set in config" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, nil)
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_false
+      end
+
+      it "returns false if it is set to other value than 'balanced'" do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'other')
+        use_configuration(config)
+
+        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_false
       end
     end
 
@@ -259,8 +323,8 @@ describe Wikipedia::VandalismDetection do
         Wikipedia::VandalismDetection.configuration['classifier']['cross-validation-fold'].should == 10
       end
 
-      it "has a default 'uniform-training-data' config of false for classifier training" do
-        Wikipedia::VandalismDetection.configuration['classifier']['uniform-training-data'].should be_false
+      it "has a default 'training-data-options' config of unbalanced for classifier training" do
+        Wikipedia::VandalismDetection.configuration['classifier']['training-data-options'].should == 'unbalanced'
       end
     end
   end

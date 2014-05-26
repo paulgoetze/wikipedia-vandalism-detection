@@ -11,6 +11,10 @@ module Wikipedia
 
     class Configuration
 
+      TRAINING_DATA_BALANCED = 'balanced'
+      TRAINING_DATA_UNBALANCED = 'unbalanced'
+      TRAINING_DATA_OVERSAMPLED = 'oversampled'
+
       attr_reader :data,
                   :features,
                   :classifier_options,
@@ -27,7 +31,7 @@ module Wikipedia
         @classifier_type = @data['classifier']['type']
         @classifier_options = @data['classifier']['options']
         @cross_validation_fold = @data['classifier']['cross-validation-fold']
-        @uniform_training_data = @data['classifier']['uniform-training-data']
+        @training_data_options = @data['classifier']['training-data-options']
 
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
@@ -38,11 +42,24 @@ module Wikipedia
         @classifier_type == Weka::Classifiers::Meta::OneClassClassifier.type
       end
 
-      # Returns a boolean value whether a uniform data set is used for classifier training.
-      # (uniform means: same number of vandalism and regular samples)
-      # If 'uniform-training-data' is set in config, all values other than 'false' lead to true value
-      def uniform_training_data?
-        !!@uniform_training_data && @uniform_training_data != 'false'
+      # Returns a boolean value whether a balanced data set is used for classifier training.
+      # (balanced means: same number of vandalism and regular samples)
+      def balanced_training_data?
+        @training_data_options == TRAINING_DATA_BALANCED
+      end
+
+      # Returns a boolean value whether an unbalanced data set is used for classifier training.
+      # (unbalanced means: vandalism and regular samples are used as given in arff file)
+      def unbalanced_training_data?
+        @training_data_options == TRAINING_DATA_UNBALANCED || @training_data_options.nil? ||
+            (@training_data_options != TRAINING_DATA_BALANCED && @training_data_options != TRAINING_DATA_OVERSAMPLED)
+      end
+
+      # Returns a boolean value whether a oversampled data set is used for classifier training.
+      # (oversampled means: a balanced dataset is enriched through vandalism instances
+      # if vandalism number is less than regular number)
+      def oversampled_training_data?
+        @training_data_options == TRAINING_DATA_OVERSAMPLED
       end
 
       # Returns file/path string for corpora files/directories and output files
@@ -158,7 +175,7 @@ module Wikipedia
               "type"    => nil,
               "options" => nil,
               "cross-validation-fold" => 10,
-              "uniform-training-data" => false
+              "training-data-options" => 'unbalanced'
           }
       }
 

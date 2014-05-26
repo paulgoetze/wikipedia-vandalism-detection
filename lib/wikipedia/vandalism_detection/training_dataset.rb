@@ -11,6 +11,7 @@ require 'wikipedia/vandalism_detection/edit'
 require 'wikipedia/vandalism_detection/feature_calculator'
 require 'wikipedia/vandalism_detection/instances'
 require 'wikipedia/vandalism_detection/wikitext_extractor'
+require 'weka/filters/supervised/instance/smote'
 
 module Wikipedia
   module VandalismDetection
@@ -18,6 +19,7 @@ module Wikipedia
     # This class provides methods for getting and creating a training ARFF file from a configured training corpus.
     class TrainingDataset
 
+      # Returns the unbalanced dataset as given by the training arff file
       def self.instances
         config = Wikipedia::VandalismDetection.configuration
         dataset = build!
@@ -27,7 +29,8 @@ module Wikipedia
         dataset
       end
 
-      def self.uniform_instances
+      # Returns the balanced training dataset (same number of vandalism & regular instances)
+      def self.balanced_instances
         dataset = instances
 
         dataset_vandalism = Instances.empty
@@ -54,6 +57,22 @@ module Wikipedia
         end
 
         smaller_dataset
+      end
+
+      # Returns an oversampled training dataset with more vandalism than regular edits.
+      # For oversampling Weka SMOTE package is used.
+      # For SMOTE method see paper: http://arxiv.org/pdf/1106.1813.pdf
+      # Doc: http://weka.sourceforge.net/doc.packages/SMOTE/weka/filters/supervised/instance/SMOTE.html
+      def self.oversampled_instances(options = nil)
+        filter = Weka::Filters::Supervised::Instance::SMOTE.new
+        dataset = instances
+
+        filter.set do
+          data dataset
+          filter_options options if options
+        end
+
+        filter.use
       end
 
       # Builds the dataset as ARFF file which can be used by a classifier.

@@ -68,27 +68,69 @@ describe Wikipedia::VandalismDetection::Classifier do
       Wikipedia::VandalismDetection::FeaturesNotConfiguredError
   end
 
-  it "load the classifier and learns it regarding a uniform distributed training set if set in config" do
+  it "load the classifier and learns it regarding a balanced training set if set in config" do
     config = test_config
-    config.instance_variable_set(:@uniform_training_data, 'yaahaaap!')
+    config.instance_variable_set(:@training_data_options, 'balanced')
     use_configuration(config)
 
     classifier = Wikipedia::VandalismDetection::Classifier.new
 
     # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
     classifier.dataset.n_rows.should == 4
-
   end
 
-  it "load the classifier and learns it regarding the full configured training set" do
+  it "load the classifier and learns it regarding the full configured (unbalanced) training set" do
     config = test_config
-    config.instance_variable_set(:@uniform_training_data, 'false')
+    config.instance_variable_set(:@training_data_options, nil)
     use_configuration(config)
 
     classifier = Wikipedia::VandalismDetection::Classifier.new
+    dataset = classifier.dataset
+
+    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+      count
+    end
+
+    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == regular_class_index)
+      count
+    end
 
     # 2 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-    classifier.dataset.n_rows.should == 6
+    dataset.n_rows.should == 6
+    regular_count.should == 4
+    vandalism_count.should == 2
+  end
+
+  it "loads the classifier and learns it regarding an oversampled training set if set in config" do
+    config = test_config
+    config.instance_variable_set(:@training_data_options, 'oversampled')
+    use_configuration(config)
+
+    classifier = Wikipedia::VandalismDetection::Classifier.new
+    dataset = classifier.dataset
+
+    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+      count
+    end
+
+    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == regular_class_index)
+      count
+    end
+
+    # 4 vandalism, 4 regular, due to SMOTE oversampling
+    dataset.n_rows.should == 8
+    regular_count.should == 4
+    vandalism_count.should == 4
   end
 
   describe "attribute readers" do

@@ -400,9 +400,13 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
   describe "#feature_analysis" do
 
-    it "returns a hash with feature count size" do
+    it "returns a hash" do
       analysis = @evaluator.feature_analysis(sample_count: 100)
       analysis.should be_a Hash
+    end
+
+    it "returns a hash with feature count size" do
+      analysis = @evaluator.feature_analysis(sample_count: 100)
       analysis.count.should == @config.features.count
     end
 
@@ -418,6 +422,30 @@ describe Wikipedia::VandalismDetection::Evaluator do
     it "returns the four predictive values in each features threshold hash" do
       analysis = @evaluator.feature_analysis
       threshold_hash = analysis[@config.features.first][0.0]
+
+      threshold_hash.should have_key(:fp)
+      threshold_hash.should have_key(:fn)
+      threshold_hash.should have_key(:tp)
+      threshold_hash.should have_key(:tn)
+    end
+  end
+
+  describe "#full_analysis" do
+
+    it "returns a hash" do
+      analysis = @evaluator.full_analysis(sample_count: 100)
+      analysis.should be_a Hash
+    end
+
+    it "returns a hash with smaple count number of threshold hashes" do
+      sample_count = 5
+      analysis = @evaluator.full_analysis(sample_count: sample_count)
+      analysis.count.should == sample_count
+    end
+
+    it "returns the four predictive values in each features threshold hash" do
+      analysis = @evaluator.full_analysis
+      threshold_hash = analysis[0.0]
 
       threshold_hash.should have_key(:fp)
       threshold_hash.should have_key(:fn)

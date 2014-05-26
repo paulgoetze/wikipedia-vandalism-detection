@@ -23,3 +23,5 @@ require 'wikipedia/vandalism_detection/evaluator'
 
 require 'weka/classifiers/meta/one_class_classifier'
 require 'weka/classifiers/functions/lib_svm'
+
+require 'weka/filters/supervised/instance/smote'
