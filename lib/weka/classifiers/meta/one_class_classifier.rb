@@ -1,3 +1,4 @@
+require 'active_support/core_ext/module'
 require 'ruby-band'
 require 'ruby-band/weka/classifiers/class_builder'
 
@@ -14,14 +15,6 @@ module Weka
       build_classes :OneClassClassifier
 
       class OneClassClassifier
-
-        field_writer :m_TargetClassLabel
-
-        def initialize
-          super
-
-          #self.m_TargetClassLabel = Wikipedia::VandalismDetection::Instances::VANDALISM
-        end
 
         def self.type
           "Meta::OneClassClassifier"
