@@ -89,7 +89,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     it "returns a weka dataset" do
-      @dataset.class.should == Java::WekaCore::Instances::Base
+      @dataset.class.should == Java::WekaCore::Instances
     end
 
     it "returns a dataset built from the configured corpus" do
@@ -116,7 +116,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       config.instance_variable_set(:@training_data_options, 'oversampled')
       use_configuration(config)
 
-      @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances
+      @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances # default -P 100
     end
 
     it "returns a weka dataset" do
@@ -139,11 +139,11 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
     end
 
-    it "returns a dataset of size 10 for 200% 'SMOTEING' built from the configured corpus" do
+    it "returns a dataset of size 8 for 200% 'SMOTEING' built from the configured corpus" do
       # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
       dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances("-P 200")
       puts dataset
-      dataset.n_rows.should == 10
+      dataset.n_rows.should == 8
     end
   end
 

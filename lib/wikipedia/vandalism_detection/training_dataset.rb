@@ -32,31 +32,15 @@ module Wikipedia
       # Returns the balanced training dataset (same number of vandalism & regular instances)
       def self.balanced_instances
         dataset = instances
+        filter = Weka::Filters::Supervised::Instance::SpreadSubsample.new
 
-        dataset_vandalism = Instances.empty
-        dataset_regular = Instances.empty
-
-        dataset.each_row do |instance|
-          label = Instances::CLASSES[instance.class_value.to_i]
-          (label == Instances::VANDALISM) ? dataset_vandalism.add(instance) : dataset_regular.add(instance)
+        #uniform distribution (remove majority instances)
+        filter.set do
+          data dataset
+          filter_options '-M 1'
         end
 
-        vandalism_count = dataset_vandalism.n_rows
-        regular_count = dataset_regular.n_rows
-        min_count = [vandalism_count, regular_count].min
-
-        smaller_dataset = (vandalism_count >= regular_count) ? dataset_regular : dataset_vandalism
-        bigger_dataset = (vandalism_count >= regular_count) ? dataset_vandalism : dataset_regular
-
-        while smaller_dataset.n_rows < (2 * min_count)
-          random_index = SecureRandom.random_number(bigger_dataset.n_rows)
-          instance = bigger_dataset.instance(random_index)
-
-          smaller_dataset.add(instance)
-          bigger_dataset.delete(random_index)
-        end
-
-        smaller_dataset
+        filter.use
       end
 
       # Returns an oversampled training dataset with more vandalism than regular edits.
@@ -64,15 +48,23 @@ module Wikipedia
       # For SMOTE method see paper: http://arxiv.org/pdf/1106.1813.pdf
       # Doc: http://weka.sourceforge.net/doc.packages/SMOTE/weka/filters/supervised/instance/SMOTE.html
       def self.oversampled_instances(options = nil)
-        filter = Weka::Filters::Supervised::Instance::SMOTE.new
+        smote = Weka::Filters::Supervised::Instance::SMOTE.new
         dataset = instances
 
-        filter.set do
+        smote.set do
           data dataset
           filter_options options if options
         end
 
-        filter.use
+        subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
+
+        #uniform distribution (remove majority instances)
+        subsample.set do
+          data smote.use
+          filter_options '-M 1'
+        end
+
+        subsample.use
       end
 
       # Builds the dataset as ARFF file which can be used by a classifier.
