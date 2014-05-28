@@ -63,6 +63,17 @@ module Wikipedia
         @training_data_options == TRAINING_DATA_OVERSAMPLED
       end
 
+      # Returns the path to the classification file.
+      # Automatically sub directories for classifier and training data options are added.
+      # Thus it results in <output base dir>/<classifier name>/<training data options>/<file name>
+      def test_output_classification_file
+        classifiction_file_name = @data['output']['test']['classification_file']
+        classifier_name = @classifier_type.split('::').last.downcase
+
+        File.join(@output_base_directory, classifier_name,
+                  @training_data_options.gsub(/\s+/, '_'), classifiction_file_name)
+      end
+
       # Returns file/path string for corpora files/directories and output files
       # after following schema: <corpus type>_<progress stage>_<file name>.
       #

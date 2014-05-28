@@ -20,7 +20,8 @@ describe Wikipedia::VandalismDetection do
       :training_data_options,
       :balanced_training_data?,
       :unbalanced_training_data?,
-      :oversampled_training_data?
+      :oversampled_training_data?,
+      :test_output_classification_file
     ].each do |attribute|
       it "responds to ##{attribute}" do
         @configuration.should respond_to attribute
@@ -37,6 +38,13 @@ describe Wikipedia::VandalismDetection do
 
     it "returns a numeric for #cross-validation-fold" do
       @configuration.cross_validation_fold.should be_a Numeric
+    end
+
+    describe "#test_output_classification_file" do
+      it "returns the classification file path extended by classifier name and training data options" do
+        file_path = @configuration.test_output_classification_file
+
+      end
     end
 
     describe "#use_occ?" do
@@ -153,7 +161,6 @@ describe Wikipedia::VandalismDetection do
       :training_output_index_file,
       :test_output_arff_file,
       :test_output_index_file,
-      :test_output_classification_file,
       :classifier_type,
       :classifier_options,
       :output_base_directory

@@ -26,6 +26,8 @@ module Wikipedia
     #   puts evaluation[:area_under_prc]
     class Evaluator
 
+      DEFAULT_SAMPLE_COUNT = 200.freeze
+
       def initialize(classifier)
         raise(ArgumentError, "Classifier param has to be a Wikipedia::VandalismDetection::Classifier instance") unless
             classifier.is_a?(Wikipedia::VandalismDetection::Classifier)
@@ -123,15 +125,11 @@ module Wikipedia
         raise(GroundTruthFileNotFoundError, 'Configured ground truth file is not available.') \
           unless File.exist?(ground_truth_file_path)
 
-        sample_count = options[:sample_count] || 100
-
-        classifier_name = @config.classifier_type.split('::').last.downcase
-        classification_file_path = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt")
-        create_testcorpus_classification_file!(classification_file_path)
-
-        classification = classification_hash(classification_file_path)
         ground_truth = ground_truth_hash(ground_truth_file_path)
+        create_testcorpus_classification_file!(@config.test_output_classification_file, ground_truth)
+        classification = classification_hash(@config.test_output_classification_file)
 
+        sample_count = options[:sample_count] || DEFAULT_SAMPLE_COUNT
         curves = test_performance_curves(ground_truth, classification, sample_count)
         precision_recall = maximum_precision_recall(curves[:precisions], curves[:recalls])
 
@@ -153,7 +151,8 @@ module Wikipedia
           values = predictive_values(ground_truth, classification, threshold)
           performance_params = performance_parameters(values[:tp], values[:fp], values[:tn], values[:fn])
 
-          precisions.push performance_params[:precision]
+          precision = performance_params[:precision].nan? ? 1.0 : performance_params[:precision]
+          precisions.push precision
           recalls.push performance_params[:recall]
           fp_rates.push performance_params[:fp_rate]
         end
@@ -257,8 +256,13 @@ module Wikipedia
 
       # Creates the test corpus text file by classifying the configured test samples
       # All sub steps (as creating the test arff file, etc.) are run automattically if needed.
-      def create_testcorpus_classification_file!(file_path)
+      def create_testcorpus_classification_file!(file_path, ground_truth_data)
+        raise(ArgumentError, "Ground truth data hash is not allowed to be nil!") if ground_truth_data.nil?
+
         dataset = TestDataset.instances
+
+        dir_name = File.dirname(file_path)
+        FileUtils.mkdir_p(dir_name) unless Dir.exists?(dir_name)
         file = File.open(file_path, 'w')
 
         feature_names = dataset.enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
@@ -273,13 +277,15 @@ module Wikipedia
           old_revision_id = instance[-2].to_i
           new_revision_id = instance[-1].to_i
 
-          params = @classifier.classify(features, return_all_params: true)
-          class_short_name = Instances::CLASSES_SHORT[params[:class_index]]
+          key = :"#{old_revision_id}-#{new_revision_id}"
+          next unless ground_truth_data.has_key?(key)
+          ground_truth_class_name = ground_truth_data[key][:class]
 
+          confidence = @classifier.classify(features)
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
-          confidence =  must_be_inverted ? (1.0 - params[:confidence]) : params[:confidence]
+          confidence_value =  must_be_inverted ? (1.0 - confidence) : confidence
 
-          file.puts [old_revision_id, new_revision_id, class_short_name, confidence, *features].join(" ")
+          file.puts [old_revision_id, new_revision_id, ground_truth_class_name, confidence_value, *features].join(" ")
         end
 
         file.close
@@ -303,7 +309,7 @@ module Wikipedia
       #    },
       # }
       def feature_analysis(options = {})
-        sample_count = options[:sample_count] || 100
+        sample_count = options[:sample_count] || DEFAULT_SAMPLE_COUNT
         thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
 
         ground_truth_file_path = @config.test_corpus_ground_truth_file
@@ -338,7 +344,7 @@ module Wikipedia
       # Returns a hash comprising the classifiers predictive values for using all configured features for
       # different thresholds.
       def full_analysis(options = {})
-        sample_count = options[:sample_count] || 100
+        sample_count = options[:sample_count] || DEFAULT_SAMPLE_COUNT
         thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
 
         ground_truth_file_path = @config.test_corpus_ground_truth_file

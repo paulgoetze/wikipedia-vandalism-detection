@@ -9,9 +9,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
     @training_arff_file = @config.training_output_arff_file
     @test_arff_file = @config.test_output_arff_file
     @build_dir = @config.output_base_directory
-
-    classifier_name = @config.classifier_type.split('::').last.downcase
-    @test_classification_file = @config.test_output_classification_file.gsub('.txt', "-#{classifier_name}.txt" )
+    @test_classification_file = @config.test_output_classification_file
   end
 
   after do
@@ -209,14 +207,43 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
   describe "#create_testcorpus_classification_file!" do
 
+    before do
+      @ground_truth = { # see resources file ground_truth.csv
+          :"0-1" => { # this is a sample that is not used!
+              old_revision_id: 0,
+              new_revision_id: 1,
+              class: "R"
+          },
+          :"307084144-326873205" => {
+              old_revision_id: 307084144,
+              new_revision_id: 326873205,
+              class: "R"
+          },
+          :"326471754-326978767" => {
+              old_revision_id: 326471754,
+              new_revision_id: 326978767,
+              class: "V"
+          },
+          :"328774035-328774110" => {
+              old_revision_id: 328774035,
+              new_revision_id: 328774110,
+              class: "R"
+          }
+      }
+    end
+
+    it "raises an argument error if ground_truth param is nil" do
+      expect { @evaluator.create_testcorpus_classification_file!(@test_classification_file, nil) }.to raise_error ArgumentError
+    end
+
     it "creates a classification file in the base output directory" do
       File.exists?(@test_classification_file).should be_false
-      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
       File.exists?(@test_classification_file).should be_true
     end
 
     it "creates a file with an appropriate header" do
-      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
       content = File.open(@test_classification_file, 'r')
 
       features = Core::Parser.parse_ARFF(@test_arff_file).enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
@@ -227,7 +254,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "creates a file with an appropriate number of lines" do
-      @evaluator.create_testcorpus_classification_file!(@test_classification_file)
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
       content = File.open(@test_classification_file, 'r')
 
       samples_count = Core::Parser.parse_ARFF(@test_arff_file).n_rows
