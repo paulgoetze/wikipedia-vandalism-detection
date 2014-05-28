@@ -480,4 +480,116 @@ describe Wikipedia::VandalismDetection::Evaluator do
       threshold_hash.should have_key(:tn)
     end
   end
+
+  describe "#true_positive?" do
+    before do
+      @vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM_SHORT
+      @regular = Wikipedia::VandalismDetection::Instances::REGULAR_SHORT
+      @threshold = 0.7
+    end
+
+    it "returns true if the given confidence is higher than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.8, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.5, @threshold).should be_false
+    end
+
+    it "returns false for the same confidence and threshold if ground truth is 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, @threshold, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.8, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.5, @threshold).should be_false
+    end
+  end
+
+  describe "#true_negative?" do
+    before do
+      @vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM_SHORT
+      @regular = Wikipedia::VandalismDetection::Instances::REGULAR_SHORT
+      @threshold = 0.7
+    end
+
+    it "returns true if the given confidence is lower than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.5, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.8, @threshold).should be_false
+    end
+
+    it "returns false for the same confidence and threshold if ground truth is 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, @threshold, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.5, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.8, @threshold).should be_false
+    end
+  end
+
+  describe "#false_positive?" do
+    before do
+      @vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM_SHORT
+      @regular = Wikipedia::VandalismDetection::Instances::REGULAR_SHORT
+      @threshold = 0.7
+    end
+
+    it "returns true if the given confidence is higher than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.8, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.5, @threshold).should be_false
+    end
+
+    it "returns true for the same confidence and threshold if ground truth is 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, @threshold, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.8, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.5, @threshold).should be_false
+    end
+  end
+
+  describe "#false_negative?" do
+    before do
+      @vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM_SHORT
+      @regular = Wikipedia::VandalismDetection::Instances::REGULAR_SHORT
+      @threshold = 0.7
+    end
+
+    it "returns true if the given confidence is lower than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.5, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.8, @threshold).should be_false
+    end
+
+    it "returns true for the same confidence and threshold if ground truth is 'V'" do
+      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, @threshold, @threshold).should be_true
+    end
+
+    it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.5, @threshold).should be_false
+    end
+
+    it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
+      Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.8, @threshold).should be_false
+    end
+  end
 end

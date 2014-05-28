@@ -45,7 +45,7 @@ module Wikipedia
       #   evaluation = classifier.cross_validate
       #   evaluation = classifier.cross_validate(equally_distributed: true)
       #
-      def cross_validate(options = {})
+      def   cross_validate(options = {})
         equally_distributed = options[:equally_distributed]
 
         fold_defaults = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['classifier']['cross-validation-fold']
@@ -179,17 +179,37 @@ module Wikipedia
 
           confidence = classification[key][:confidence]
 
-          case target_class
-            when Instances::VANDALISM_SHORT
-              tp += 1 if confidence > threshold  # True Positives
-              fn += 1 if confidence <= threshold   # False Negatives
-            when Instances::REGULAR_SHORT
-              fp += 1 if confidence >= threshold   # False Positives
-              tn += 1 if confidence < threshold  # True Negatives
-          end
+          tp += 1 if Evaluator.true_positive?(target_class, confidence, threshold)  # True Positives
+          fn += 1 if Evaluator.false_negative?(target_class, confidence, threshold) # False Negatives
+          fp += 1 if Evaluator.false_positive?(target_class, confidence, threshold) # False Positives
+          tn += 1 if Evaluator.true_negative?(target_class, confidence, threshold)  # True Negatives
         end
 
         { tp: tp, fp: fp, tn: tn, fn: fn }
+      end
+
+      # Returns whether the given confidence value represents a true positive (TP) regarding the given ground truth
+      # label and threshold.
+      def self.true_positive?(ground_truth_label, confidence, threshold)
+        ground_truth_label == Instances::VANDALISM_SHORT && confidence.to_f > threshold.to_f
+      end
+
+      # Returns whether the given confidence value represents a true negative (TN) regarding the given ground truth
+      # label and threshold.
+      def self.true_negative?(ground_truth_label, confidence, threshold)
+        ground_truth_label == Instances::REGULAR_SHORT && confidence.to_f < threshold.to_f
+      end
+
+      # Returns whether the given confidence value represents a false positive (FP) regarding the given ground truth
+      # label and threshold.
+      def self.false_positive?(ground_truth_label, confidence, threshold)
+        ground_truth_label == Instances::REGULAR_SHORT && confidence.to_f >= threshold.to_f
+      end
+
+      # Returns whether the given confidence value represents a false negative (FN) regarding the given ground truth
+      # label and threshold.
+      def self.false_negative?(ground_truth_label, confidence, threshold)
+        ground_truth_label == Instances::VANDALISM_SHORT && confidence.to_f <= threshold.to_f
       end
 
       # Returns a hash with performance parameters computed from given TP, FP, TN, FN
