@@ -175,4 +175,30 @@ describe Wikipedia::VandalismDetection::TestDataset do
       end
     end
   end
+
+  describe "#edit" do
+    it "raises an EditsFileNotConfiguredError if no edits file is configured" do
+      config = test_config
+      config.instance_variable_set :@test_corpus_edits_file, nil
+      use_configuration(config)
+
+      expect { Wikipedia::VandalismDetection::TestDataset.edit('1', '2') }.to raise_error \
+          Wikipedia::VandalismDetection::EditsFileNotConfiguredError
+    end
+
+    it "returns nil if Edit could not be found" do
+      edit = Wikipedia::VandalismDetection::TestDataset.edit('1', '2')
+      edit.should be_nil
+    end
+
+    it "returns an Edit" do
+      edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
+      edit.should be_a Wikipedia::VandalismDetection::Edit
+    end
+
+    it "returns nil for a not annotated edit with given revision ids" do
+      edit = Wikipedia::VandalismDetection::TestDataset.edit('328774088', '328774188')
+      edit.should be_nil
+    end
+  end
 end

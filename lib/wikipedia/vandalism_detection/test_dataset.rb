@@ -198,6 +198,24 @@ module Wikipedia
         filter.use
       end
 
+      # Returns the Edit with the given revision ids.
+      # Test corpus is searched for the revisions' data.
+      def self.edit(old_revision_id, new_revision_id)
+        @config = Wikipedia::VandalismDetection.configuration
+        edits_file = @config.test_corpus_edits_file
+        raise EditsFileNotConfiguredError unless edits_file
+
+        @edits_csv ||= CSV.parse(File.read(edits_file), headers: true)
+
+        edit_data = @edits_csv.find do |row|
+          row['oldrevisionid'] == old_revision_id && row['newrevisionid'] == new_revision_id
+        end
+
+        if (annotated_revision?(old_revision_id) && annotated_revision?(new_revision_id)) && edit_data
+          create_edit_from(edit_data)
+        end
+      end
+
       # Creates a Wikipedia::Edit out of an edit's data from edit_file configured in config.yml
       def self.create_edit_from(edit_data)
         @file_index ||= load_corpus_file_index
