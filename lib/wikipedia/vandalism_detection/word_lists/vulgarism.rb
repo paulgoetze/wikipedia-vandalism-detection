@@ -88,8 +88,9 @@ module Wikipedia
           :muthafuckaz, :gigolo, :pussypounder, :herp, :herpy, :transsexual, :orgasmic,
           :cunilingus, :anilingus, :dickdipper, :dickwhipper, :dicksipper, :dickripper, :dickflipper,
           :dickzipper, :homoey, :queero, :freex, :cunthunter, :shamedame, :slutkiss, :shiteater,
-          :fuckass, :"fucka$$", :clitorus, :assfucker, :dillweed, :cracker, :teabagging,
-          :shitt, :azz, :fuk, :fucknugget, :cuntlick, :"g@y", :"@ss", :beotch
+          :fuckass, :"fucka$$", :clitorus, :assfucker, :assfuckers, :dillweed, :cracker, :teabagging,
+          :shitt, :azz, :fuk, :fucknugget, :cuntlick, :"g@y", :"@ss", :beotch, :pussys, :'s***', :paedophile,
+          :pedophiles, :pedophile, :sucks, :licker, :lickers, :bitchface
         ]
     end
   end

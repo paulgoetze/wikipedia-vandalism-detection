@@ -12,7 +12,8 @@ module Wikipedia
             :memorable, :notable, :outstanding, :pioneer, :popular, :prestigious, :really, :remarkable,
             :renowned, :respected, :seminal, :significant, :skillful, :solution, :"single-handedly", :staunch,
             :talented, :most, :top, :transcendent, :undoubtedly, :unique, :visionary, :virtually,
-            :virtuoso, :"well-known", :"well-established", :"world-class", :worst, :coolest
+            :virtuoso, :"well-known", :"well-established", :"world-class", :worst, :coolest, :super, :probably,
+            :hate, :hot, :ugly, :fat, :lame
         ]
     end
   end
