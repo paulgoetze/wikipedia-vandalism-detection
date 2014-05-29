@@ -226,6 +226,7 @@ describe Wikipedia::VandalismDetection do
           "term frequency",
           "time interval",
           "upper case ratio",
+          "upper case words ratio",
           "upper to lower case ratio",
           "vulgarism frequency",
           "vulgarism impact"
