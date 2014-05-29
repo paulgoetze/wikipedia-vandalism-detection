@@ -11,6 +11,8 @@ module Wikipedia
           super
 
           text = edit.inserted_text
+          return 0.0 if text.empty?
+
           uppercase_count = text.scan(/[[:upper:]]/).size
           lowercase_count = text.scan(/[[:lower:]]/).size
 

@@ -11,6 +11,8 @@ module Wikipedia
           super
 
           text = edit.inserted_text
+          return 0.0 if text.empty?
+
           non_alpha_count = text.scan(/[^a-zA-Z0-9\s]/).size
           all_letters_count = text.scan(/[^\s]/).size
 

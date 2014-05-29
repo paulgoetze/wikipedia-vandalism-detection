@@ -10,9 +10,11 @@ module Wikipedia
         def calculate(edit)
           super
 
-          inserted_letters = edit.inserted_text
-          all_letters_count = inserted_letters.scan(/[[:alnum:]]/).size
-          digit_count = inserted_letters.scan(/[[:digit:]]/).size
+          text = edit.inserted_text
+          return 0.0 if text.empty?
+
+          all_letters_count = text.scan(/[[:alnum:]]/).size
+          digit_count = text.scan(/[[:digit:]]/).size
 
           (1.0 + digit_count) / (1.0 + all_letters_count)
         end

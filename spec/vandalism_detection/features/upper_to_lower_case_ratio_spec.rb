@@ -21,7 +21,7 @@ describe Wikipedia::VandalismDetection::Features::UpperToLowerCaseRatio do
       @feature.calculate(edit).should == (1.0 + 3) / (1.0 + 4)
     end
 
-    it "returns 1.0 if no text inserted" do
+    it "returns 0.0 if no text inserted" do
       old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
       new_text = Wikipedia::VandalismDetection::Text.new("text")
 
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::UpperToLowerCaseRatio do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 1.0
+      @feature.calculate(edit).should == 0.0
     end
   end
 end
