@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::UpperCaseWordsRatio do
@@ -12,8 +13,8 @@ describe Wikipedia::VandalismDetection::Features::UpperCaseWordsRatio do
 
     it "returns the uppercase to all words ratio of the edit's new revision cleaned inserted text" do
       old_text = Wikipedia::VandalismDetection::Text.new('text')
-      # 2 two capital words of total 4 inserted, template {{23A}} is removed while cleaning!
-      new_text = Wikipedia::VandalismDetection::Text.new 'text [[HELLO you]] NICE boy {{23A}}'
+      # 2 two capital (not numbers!) words of total 4 inserted, template {{23A}} is removed while cleaning!
+      new_text = Wikipedia::VandalismDetection::Text.new "text [[HELLO you]] NICE boyß3 1990 {{23A}}"
 
       old_revision = build(:old_revision, text: old_text)
       new_revision = build(:new_revision, text: new_text)

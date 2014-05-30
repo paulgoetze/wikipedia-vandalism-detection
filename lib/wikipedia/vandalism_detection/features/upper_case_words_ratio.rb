@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'wikipedia/vandalism_detection/features/base'
 require 'wikipedia/vandalism_detection/text'
 
@@ -11,7 +13,9 @@ module Wikipedia
         def calculate(edit)
           super
 
-          words = Text.new(edit.inserted_words.join("\n")).clean.gsub(/[^\w\s]/, '').split
+          inserted_alpha_text = edit.inserted_words.delete_if{ |w| w.gsub(/[^A-Za-z]/, '').empty? }.join("\n")
+          words = Text.new(inserted_alpha_text).clean.gsub(/[^\w\s]/, '').split
+
           return 0.0 if words.empty?
 
           uppercase_words_count = words.reduce(0) do |count, word|
