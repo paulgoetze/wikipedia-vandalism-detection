@@ -151,16 +151,30 @@ module Wikipedia
           values = predictive_values(ground_truth, classification, threshold)
           performance_params = performance_parameters(values[:tp], values[:fp], values[:tn], values[:fn])
 
-          precision = performance_params[:precision].nan? ? 1.0 : performance_params[:precision]
-          precisions.push precision
-          recalls.push performance_params[:recall]
-          fp_rates.push performance_params[:fp_rate]
+          if performance_params[:precision] == 0.0 && performance_params[:recall] == 0.0
+            precisions.push 1.0
+          else
+            precisions.push performance_params[:precision]
+          end
+            recalls.push performance_params[:recall]
+            fp_rates.push performance_params[:fp_rate]
         end
 
-        pr_auc = area_under_curve(recalls, precisions)
-        roc_auc = area_under_curve(fp_rates, recalls)
+        tp_rates = recalls
+        pr_sorted = sort_curve_values(recalls, precisions, { x: 0.0, y: 1.0 }, { x: 1.0, y: 0.0 })
+        roc_sorted = sort_curve_values(fp_rates, tp_rates, { x: 0.0, y: 0.0 }, { x: 1.0, y: 1.0 })
 
-        { precisions: precisions, recalls: recalls, fp_rates: fp_rates, pr_auc: pr_auc, roc_auc: roc_auc }
+        recalls = pr_sorted[:x]
+        precisions = pr_sorted[:y]
+        fp_rates = roc_sorted[:x]
+        tp_rates = roc_sorted[:y]
+
+        pr_auc = area_under_curve(recalls, precisions)
+        roc_auc = area_under_curve(fp_rates, tp_rates)
+
+        { precisions: precisions, recalls: recalls,
+          fp_rates: fp_rates, tp_rates: tp_rates,
+          pr_auc: pr_auc, roc_auc: roc_auc }
       end
 
       # Returns the predictive values hash (TP,FP, TN, FN) for a certain threshold.
@@ -175,7 +189,7 @@ module Wikipedia
           target_class = values[:class]
 
           key = :"#{values[:old_revision_id]}-#{values[:new_revision_id]}"
-          next unless classification.has_key? key # go on if not in annotated not in classification
+          next unless classification.has_key? key # go on if annotated is not in classification
 
           confidence = classification[key][:confidence]
 
@@ -188,35 +202,35 @@ module Wikipedia
         { tp: tp, fp: fp, tn: tn, fn: fn }
       end
 
-      # Returns whether the given confidence value represents a true positive (TP) regarding the given ground truth
-      # label and threshold.
-      def self.true_positive?(ground_truth_label, confidence, threshold)
-        ground_truth_label == Instances::VANDALISM_SHORT && confidence.to_f > threshold.to_f
+      # Returns whether the given confidence value represents a true positive (TP) regarding the given target class
+      # and threshold.
+      def self.true_positive?(target_class, confidence, threshold)
+        target_class == Instances::VANDALISM_SHORT && confidence.to_f > threshold.to_f
       end
 
-      # Returns whether the given confidence value represents a true negative (TN) regarding the given ground truth
-      # label and threshold.
-      def self.true_negative?(ground_truth_label, confidence, threshold)
-        ground_truth_label == Instances::REGULAR_SHORT && confidence.to_f < threshold.to_f
+      # Returns whether the given confidence value represents a true negative (TN) regarding the given target class
+      # and threshold.
+      def self.true_negative?(target_class, confidence, threshold)
+        target_class == Instances::REGULAR_SHORT && confidence.to_f < threshold.to_f
       end
 
-      # Returns whether the given confidence value represents a false positive (FP) regarding the given ground truth
-      # label and threshold.
-      def self.false_positive?(ground_truth_label, confidence, threshold)
-        ground_truth_label == Instances::REGULAR_SHORT && confidence.to_f >= threshold.to_f
+      # Returns whether the given confidence value represents a false positive (FP) regarding the given target class
+      # and threshold.
+      def self.false_positive?(target_class, confidence, threshold)
+        target_class == Instances::REGULAR_SHORT && confidence.to_f >= threshold.to_f
       end
 
-      # Returns whether the given confidence value represents a false negative (FN) regarding the given ground truth
-      # label and threshold.
-      def self.false_negative?(ground_truth_label, confidence, threshold)
-        ground_truth_label == Instances::VANDALISM_SHORT && confidence.to_f <= threshold.to_f
+      # Returns whether the given confidence value represents a false negative (FN) regarding the given target class
+      # and threshold.
+      def self.false_negative?(target_class, confidence, threshold)
+        target_class == Instances::VANDALISM_SHORT && confidence.to_f <= threshold.to_f
       end
 
       # Returns a hash with performance parameters computed from given TP, FP, TN, FN
       def performance_parameters(tp, fp, tn, fn)
-        precision = tp.to_f / (tp.to_f + fp.to_f)
-        recall = tp.to_f / (tp.to_f + fn.to_f)
-        fp_rate = fp.to_f / (fp.to_f + tn.to_f)
+        precision = ((tp + fp == 0) ? 1.0 : (tp.to_f / (tp.to_f + fp.to_f)))
+        recall = ((tp + fn == 0) ? 1.0 : (tp.to_f / (tp.to_f + fn.to_f)))
+        fp_rate = ((fp + tn == 0) ? 1.0: (fp.to_f / (fp.to_f + tn.to_f)))
 
         {
             precision: precision,
@@ -226,22 +240,20 @@ module Wikipedia
       end
 
       # Returns the calculated area under curve for given point values
-      # Recall and Precision values has to be float arrays of the same length.
-      def area_under_curve(recall_values, precision_values)
-        sorted = sort_curve_values(recall_values, precision_values)
-        recalls = sorted[:x]
-        precisions = sorted[:y]
+      # x and y values has to be float arrays of the same length.
+      def area_under_curve(x_values, y_values)
+        raise ArgumentError, "x and y values must have the same length!" unless x_values.count == y_values.count
 
         sum = 0.0
-        last_index = recalls.size - 1
+        last_index = x_values.size - 1
 
         # trapezoid area formular: A = 1/2 * (b1 + b2) * h
-        recalls.each_with_index do |x, index |
+        x_values.each_with_index do |x, index |
           break if index == last_index
 
-          h = recalls[index + 1] - x
-          b1 = precisions[index]
-          b2 = precisions[index + 1]
+          h = x_values[index + 1] - x
+          b1 = y_values[index]
+          b2 = y_values[index + 1]
 
           sum += 0.5 * (b1 + b2) * h
         end
@@ -250,14 +262,36 @@ module Wikipedia
       end
 
       # Returns given value array sorted by first array (x_values)
-      # Return value is a Hash { x: <x_values_sorted>, y: <y_values_sorted_after_x> }
-      def sort_curve_values(x_values, y_values)
-        merge_sorted = x_values.each_with_index.map { |x, index| [x, y_values[index]] }
-        merge_sorted.reject! { |b| !b.all? { |f| !f.to_f.nan? } } # remove value pairs with NaN values
-        merge_sorted.sort
+      # Return value is a Hash { x: <x_values_sorted>, y: <y_values_sorted_by_x> }
+      # start_value is added in front of arrays if set, e.g. {x: 0.0, y: 1.0}
+      # end_values is added to end of arrays if set, e.g. {x: 1.0, y: 1.0 }
+      #
+      # @example
+      #  evaluator.sort_curve_values(x, y, { x: 0.0, y: 0.0 }, { x: 1.0, y: 1.0 })
+      #  #=>Hash { x: [0.0, *x, 1.0], y: [0.0, *y, 1.0] }
+      def sort_curve_values(x_values, y_values, start_values = nil, end_values = nil)
+        merge_sorted = (x_values.each_with_index.map { |x, index| [x, y_values[index]] })
+        merge_sorted = merge_sorted.sort_by{ |values| [values[0], - values[1]] }
 
         x = merge_sorted.transpose[0]
         y = merge_sorted.transpose[1]
+
+        start_values_set = start_values && start_values.has_key?(:x) && start_values.has_key?(:y)
+        end_values_set = end_values && end_values.has_key?(:x) && end_values.has_key?(:y)
+
+        if start_values_set
+          unless (x.first == start_values[:x] && y.first == start_values[:y])
+            x.unshift start_values[:x]
+            y.unshift start_values[:y]
+          end
+        end
+
+        if end_values_set
+          unless (x.last == end_values[:x] && y.last == end_values[:y])
+            x.push end_values[:x]
+            y.push end_values[:y]
+          end
+        end
 
         { x: x, y: y }
       end

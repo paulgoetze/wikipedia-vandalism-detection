@@ -123,15 +123,16 @@ describe Wikipedia::VandalismDetection::Evaluator do
       @curve_data.should be_a Hash
     end
 
-    [:recalls, :precisions,:fp_rates, :pr_auc, :roc_auc].each do |attribute|
+    [:recalls, :precisions,:fp_rates, :tp_rates, :pr_auc, :roc_auc].each do |attribute|
       it "returns a Hash including #{attribute}" do
         @curve_data.should have_key(attribute)
       end
     end
 
-    [:recalls, :precisions,:fp_rates].each do |attribute|
+    [:recalls, :precisions,:fp_rates, :tp_rates].each do |attribute|
       it "returns a Hash including #{attribute} of length #{@sample_count}" do
-        @curve_data[attribute].count.should == @sample_count
+        #start and end value could be added => + 2
+        @curve_data[attribute].count.should be_between(@sample_count, @sample_count + 2)
       end
     end
 
@@ -161,15 +162,45 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
     end
 
+    describe "#sort_curve_values" do
+
+      before do
+        @x = [0.7, 0.4, 0.8, 0.4]
+        @y = [0.6, 0.8, 0.2, 0.6]
+
+        @x_sorted = [0.4, 0.4, 0.7, 0.8]
+        @y_sorted = [0.8, 0.6, 0.6, 0.2]
+      end
+
+      it "returns the sorted input values" do
+        hash = { x: @x_sorted, y: @y_sorted }
+        sorted = @evaluator.sort_curve_values(@x, @y)
+
+        sorted.should == hash
+      end
+
+      it "adds start values if given" do
+        start_values = { x: -1.0, y: -2.0 }
+        hash = { x: @x_sorted.unshift(start_values[:x]), y: @y_sorted.unshift(start_values[:y])}
+        sorted = @evaluator.sort_curve_values(@x, @y, start_values)
+
+        sorted.should == hash
+      end
+
+      it "adds end values if given" do
+        end_values = { x: -1.0, y: -2.0 }
+        hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(end_values[:y])}
+        sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
+
+        sorted.should == hash
+      end
+    end
+
     describe "#area_under_curve" do
 
       before do
-        precisions = @curve_data[:precisions]
-        recalls = @curve_data[:precisions]
-        fp_rates = @curve_data[:fp_rates]
-
-        @pr_auc = @evaluator.area_under_curve(recalls, precisions)
-        @roc_auc = @evaluator.area_under_curve(fp_rates, recalls)
+        @pr_auc = @evaluator.area_under_curve(@curve_data[:precisions], @curve_data[:precisions])
+        @roc_auc = @evaluator.area_under_curve(@curve_data[:fp_rates], @curve_data[:tp_rates])
       end
 
       it "returns a numeric value for pr_auc" do
@@ -300,6 +331,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     [ :fp_rates,
+      :tp_rates,
       :precisions,
       :recalls,
       :pr_auc,
