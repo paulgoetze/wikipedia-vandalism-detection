@@ -20,7 +20,7 @@ module Wikipedia
         # Returns the Symmetric Kullback-Leibler divergence with simple back-off of the given text's character
         # distribution. For implementation details, see: http://staff.science.uva.nl/~tsagias/?p=185
         def kullback_leibler_divergence(text_a, text_b)
-          return Float::MAX if text_a.size == 0 || text_b.size == 0
+          return Float::MAX unless !!text_a.match(/[[:alnum:]]/) && !!text_b.match(/[[:alnum:]]/)
 
           distribution_a = character_distribution(text_a)
           distribution_b = character_distribution(text_b)
@@ -57,7 +57,7 @@ module Wikipedia
           distribution = {}
           return distribution if text.empty?
 
-          characters = text.downcase.scan(/[[:alpha:]]/)
+          characters = text.downcase.scan(/[[:alnum:]]/)
 
           characters.each do |character|
             if distribution.has_key?(character.to_sym)
