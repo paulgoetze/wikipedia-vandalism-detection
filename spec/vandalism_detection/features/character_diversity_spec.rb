@@ -21,7 +21,7 @@ describe Wikipedia::VandalismDetection::Features::CharacterDiversity do
       @feature.calculate(edit).should == 14 ** (1.0 / 9)
     end
 
-    it "returns 1.0 if no text inserted" do
+    it "returns 0.0 if no text inserted" do
       old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
       new_text = Wikipedia::VandalismDetection::Text.new("text")
 
