@@ -207,6 +207,7 @@ describe Wikipedia::VandalismDetection do
           "digit ratio",
           "edits per user",
           "inserted size",
+          "inserted character distribution",
           "inserted external links",
           "inserted internal links",
           "longest word",
