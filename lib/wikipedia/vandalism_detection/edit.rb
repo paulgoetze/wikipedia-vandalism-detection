@@ -7,7 +7,7 @@ module Wikipedia
 
       attr_reader :old_revision, :new_revision, :page_id
 
-      def initialize(old_revision, new_revision, page_id = nil)
+      def initialize(old_revision, new_revision, page_id)
         message = "old revision: #{old_revision.id} | parent: #{old_revision.parent_id},
                   new revision: #{new_revision.id} | parent: #{new_revision.parent_id}"
 

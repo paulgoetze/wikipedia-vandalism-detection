@@ -41,7 +41,7 @@ module Wikipedia
 
         revisions.each do |id, new_revision|
           old_revision = revisions[new_revision.parent_id]
-          @edits.push Edit.new(old_revision, new_revision) unless old_revision.nil?
+          @edits.push Edit.new(old_revision, new_revision, @id) unless old_revision.nil?
         end
 
         @edits

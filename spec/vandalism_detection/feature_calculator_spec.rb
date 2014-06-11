@@ -53,8 +53,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       old_revision = build(:old_revision)
       new_revision = build(:new_revision)
 
-      edit_redirect_1 =  Wikipedia::VandalismDetection::Edit.new old_revision_redirect, new_revision
-      edit_redirect_2 =  Wikipedia::VandalismDetection::Edit.new old_revision, new_revision_redirect
+      edit_redirect_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_redirect, new_revision, nil)
+      edit_redirect_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_redirect, nil)
 
       @calculator.calculate_features_for(edit_redirect_1).should == []
       @calculator.calculate_features_for(edit_redirect_2).should == []
@@ -74,8 +74,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       old_revision = build(:old_revision)
       new_revision = build(:new_revision)
 
-      edit_1 =  Wikipedia::VandalismDetection::Edit.new old_revision_unparsable, new_revision
-      edit_2 =  Wikipedia::VandalismDetection::Edit.new old_revision, new_revision_unparsable
+      edit_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_unparsable, new_revision, nil)
+      edit_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_unparsable, nil)
 
       @calculator.calculate_features_for(edit_1).should include -1
       @calculator.calculate_features_for(edit_2).should include -1
