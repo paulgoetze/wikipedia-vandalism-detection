@@ -1,6 +1,7 @@
 require 'wikipedia/vandalism_detection/features/base'
 require 'open-uri'
 require 'nokogiri'
+require 'date'
 
 module Wikipedia
   module VandalismDetection
@@ -15,15 +16,27 @@ module Wikipedia
           super
 
           revision = edit.new_revision
-          xml = Wikipedia::api_request({ list: 'usercontribs', ucuser: revision.contributor, ucprop: 'ids' })
+          xml = Wikipedia::api_request({ list: 'usercontribs', ucuser: revision.contributor, ucprop: 'ids|timestamp' })
           page_item =  xml.xpath("//item[@revid='#{revision.id}']").first
 
           if page_item
             page_id = page_item.xpath("@pageid").text
-            xml.xpath("//item[@pageid='#{page_id}']").count
+
+            # count only edits before current
+            count = xml.xpath("//item[@pageid='#{page_id}']").reduce(0) do |count, item|
+              time = item.attr('timestamp')
+              count += 1 if time_diff_in_sec(revision.timestamp, time) > 0
+              count
+            end
           else
             0
           end
+        end
+
+        protected
+
+        def time_diff_in_sec(time1, time2)
+          ((DateTime.parse(time1) - DateTime.parse(time2)) * 24 * 60 * 60).to_i
         end
       end
     end
