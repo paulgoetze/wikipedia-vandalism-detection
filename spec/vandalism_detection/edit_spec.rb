@@ -5,8 +5,9 @@ describe Wikipedia::VandalismDetection::Edit do
   before do
     @old_revision = build :old_revision
     @new_revision = build :new_revision
+    @page_id = '1234'
 
-    @edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision)
+    @edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, @page_id)
   end
 
   it "has an old revision" do
@@ -17,13 +18,17 @@ describe Wikipedia::VandalismDetection::Edit do
     @edit.new_revision.should == @new_revision
   end
 
+  it "has a page_id" do
+    @edit.page_id.should_not be_nil
+  end
+
   describe "exception handling" do
     it "raises no error if revisions are not sequent" do
-      expect { Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision) }.not_to raise_error
+      expect { Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, @page_id) }.not_to raise_error
     end
 
     it "raises an error if revisions are not sequent" do
-      expect { Wikipedia::VandalismDetection::Edit.new(@new_revision, @old_revision) }.to raise_exception ArgumentError
+      expect { Wikipedia::VandalismDetection::Edit.new(@new_revision, @old_revision, @page_id) }.to raise_exception ArgumentError
     end
   end
 
