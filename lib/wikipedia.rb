@@ -7,11 +7,24 @@ module Wikipedia
     "https://en.wikipedia.org/w/api.php?format=xml&action=query&"
   end
 
+  def self.wikitrust_base_uri
+    "http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=wikimarkup&"
+  end
+
+  def self.param_string(params)
+    params.map{ |k, v| "#{k}=#{v}" }.join('&')
+  end
+
   def api_request(params = {})
-    uri = URI::encode(api_base_uri + params.map{ |k, v| "#{k}=#{v}" }.join('&'))
+    uri = URI::encode(api_base_uri + param_string(params))
     content = URI.parse(uri).read
     Nokogiri::XML(content)
   end
 
-  module_function :api_request
+  def wikitrust_request(params = {})
+    uri = URI::encode(wikitrust_base_uri + param_string(params))
+    URI.parse(uri).read
+  end
+
+  module_function :api_request, :wikitrust_request
 end

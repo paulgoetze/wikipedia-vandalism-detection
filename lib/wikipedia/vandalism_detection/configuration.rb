@@ -155,6 +155,7 @@ module Wikipedia
               "upper case ratio",
               "upper case words ratio",
               "upper to lower case ratio",
+              "user reputation",
               "vulgarism frequency",
               "vulgarism impact"
           ],
