@@ -4,7 +4,7 @@ require 'nokogiri'
 module Wikipedia
 
   def self.api_base_uri
-    "https://en.wikipedia.org/w/api.php?format=xml&action=query&"
+    "http://en.wikipedia.org/w/api.php?format=xml&action=query&"
   end
 
   def self.wikitrust_base_uri
