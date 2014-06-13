@@ -222,6 +222,7 @@ describe Wikipedia::VandalismDetection do
           "removed vulgarism frequency",
           "replacement similarity",
           "reverted",
+          "revisions character distribution",
           "same editor",
           "size ratio",
           "term frequency",
