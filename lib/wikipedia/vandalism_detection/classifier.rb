@@ -57,20 +57,17 @@ module Wikipedia
         dataset.set_class_index(feature_values.count)
         dataset.add_instance([*feature_values, Instances::VANDALISM])
 
-        if @config.use_occ?
-          if @config.classifier_options =~ Instances::VANDALISM_CLASS_INDEX
-            index = Instances::VANDALISM_CLASS_INDEX
-          else
-            index = Instances::REGULAR_CLASS_INDEX
-          end
-
-          dataset.rename_attribute_value(dataset.class_index, index, Instances::OUTLIER)
-        end
-
         instance = dataset.instance(0)
         instance.set_class_missing
 
-        confidence = (@classifier.distribution_for_instance(instance).to_a)[Instances::VANDALISM_CLASS_INDEX]
+        if @config.classifier_options =~ /#{Instances::VANDALISM}/
+          index = Instances::VANDALISM_CLASS_INDEX
+        else
+          index = Instances::REGULAR_CLASS_INDEX
+        end
+
+        puts @classifier.distribution_for_instance(instance).to_a.to_s
+        confidence = (@classifier.distribution_for_instance(instance).to_a)[index]
 
         if options[:return_all_params]
           class_index = @classifier.classify_instance(instance)
@@ -123,9 +120,9 @@ module Wikipedia
         end
 
         @dataset = dataset
-
-        dataset.rename_attribute_value(dataset.class_index, Instances::REGULAR_CLASS_INDEX, Instances::OUTLIER) if @config.use_occ?
         options = @config.classifier_options
+
+        dataset.rename_attribute_value(dataset.class_index, one_class_index, Instances::OUTLIER) if @config.use_occ?
 
         begin
           classifier = classifier_class.new do
@@ -137,6 +134,14 @@ module Wikipedia
           classifier
         rescue => e
           raise "Error while loading classfier: #{e.class}: #{e.message}"
+        end
+      end
+
+      def one_class_index
+        if @config.classifier_options =~ /#{Instances::VANDALISM}/
+          Instances::REGULAR_CLASS_INDEX
+        else
+          Instances::VANDALISM_CLASS_INDEX
         end
       end
     end

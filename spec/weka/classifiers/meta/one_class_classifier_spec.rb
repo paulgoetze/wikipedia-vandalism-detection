@@ -6,7 +6,8 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
 
   before do
     @config = test_config
-    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM }"
+    @w_options = "-W weka.classifiers.meta.Bagging -- -W weka.classifiers.trees.RandomForest -- -I 100"
+    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::VANDALISM } #{@w_options}"
 
     @config.instance_variable_set :@classifier_type, 'Meta::OneClassClassifier'
     @config.instance_variable_set :@classifier_options, options
@@ -45,9 +46,25 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
   it "can be used to classify vandalism" do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
-      features = [0.0, 25, 5]
+      features = [1.0, 2.0, 55.0]
       confidence = classifier.classify features
       puts "vandalism confidence: #{confidence}}"
+    }.not_to raise_error
+  end
+
+  it "can be used to classify vandalism using regulars" do
+    options = "-tcl #{ Wikipedia::VandalismDetection::Instances::REGULAR } #{@w_options}"
+
+    @config.instance_variable_set :@classifier_type, 'Meta::OneClassClassifier'
+    @config.instance_variable_set :@classifier_options, options
+
+    use_configuration(@config)
+
+    expect {
+      classifier = Wikipedia::VandalismDetection::Classifier.new
+      features = [1.0, 2.0, 8.0]
+      confidence = classifier.classify features
+      puts "regular confidence: #{confidence}}"
     }.not_to raise_error
   end
 

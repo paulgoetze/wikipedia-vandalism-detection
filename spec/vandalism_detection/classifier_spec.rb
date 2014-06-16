@@ -238,38 +238,33 @@ describe Wikipedia::VandalismDetection::Classifier do
         end
       end
 
-      Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
-      classifier = Wikipedia::VandalismDetection::Classifier.new
+      classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
 
       expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
     end
 
-    it "does not raise an exception if classifier uses one class classification with 'outlier' ast target class" do
+    it "does not raise an exception if classifier uses one class classification with 'regular' ast target class" do
       vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM
-      outlier = Wikipedia::VandalismDetection::Instances::OUTLIER
+      regular = Wikipedia::VandalismDetection::Instances::REGULAR
 
       config = test_config
       config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
-      config.instance_variable_set(:@classifier_options, "-tcl #{outlier}")
+      config.instance_variable_set(:@classifier_options, "-tcl #{regular}")
 
       use_configuration(config)
 
       # add more test instances because instances number must higher than cross validation fold
       instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
       dataset = Wikipedia::VandalismDetection::Instances.empty
-      dataset.rename_attribute_value(dataset.class_index,
-                                     Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX,
-                                     outlier)
 
       2.times do
         instances.each do |row|
-          class_label = [vandalism, outlier][rand((0..1))]
+          class_label = [vandalism, regular][rand((0..1))]
           dataset.add_instance([*row, class_label])
         end
       end
 
-      Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
-      classifier = Wikipedia::VandalismDetection::Classifier.new
+      classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
 
       expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
     end
