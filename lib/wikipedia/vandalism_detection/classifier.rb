@@ -60,11 +60,16 @@ module Wikipedia
         instance = dataset.instance(0)
         instance.set_class_missing
 
-        if @config.classifier_options =~ /#{Instances::VANDALISM}/
-          index = Instances::VANDALISM_CLASS_INDEX
+        if @config.use_occ?
+          if @config.classifier_options =~ /#{Instances::VANDALISM}/
+            index = Instances::VANDALISM_CLASS_INDEX
+          else
+            index = Instances::REGULAR_CLASS_INDEX
+          end
         else
-          index = Instances::REGULAR_CLASS_INDEX
+          index = Instances::VANDALISM_CLASS_INDEX
         end
+
 
         confidence = (@classifier.distribution_for_instance(instance).to_a)[index]
 
