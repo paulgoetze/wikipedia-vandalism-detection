@@ -236,12 +236,14 @@ describe Wikipedia::VandalismDetection do
           "size ratio",
           "term frequency",
           "time interval",
+          "time of day",
           "upper case ratio",
           "upper case words ratio",
           "upper to lower case ratio",
           "user reputation",
           "vulgarism frequency",
-          "vulgarism impact"
+          "vulgarism impact",
+          "weekday"
       ]
 
       Wikipedia::VandalismDetection.configuration['features'].should == features

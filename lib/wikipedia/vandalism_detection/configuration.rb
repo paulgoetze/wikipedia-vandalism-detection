@@ -162,12 +162,14 @@ module Wikipedia
               "size ratio",
               "term frequency",
               "time interval",
+              "time of day",
               "upper case ratio",
               "upper case words ratio",
               "upper to lower case ratio",
               "user reputation",
               "vulgarism frequency",
-              "vulgarism impact"
+              "vulgarism impact",
+              "weekday"
           ],
           "corpora" => {
             "base_directory" => nil,
