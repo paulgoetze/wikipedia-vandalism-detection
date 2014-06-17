@@ -24,7 +24,7 @@ module Wikipedia
         config = Wikipedia::VandalismDetection.configuration
         dataset = build!
 
-        dataset = remove_invalid_instances(dataset)
+        dataset = invalid_to_missing(dataset)
         dataset.class_index = config.features.count
         dataset
       end
@@ -172,14 +172,13 @@ module Wikipedia
         file_index
       end
 
-      # Removes instances including -1 values
-      def self.remove_invalid_instances(dataset)
-        filter = Weka::Filters::Unsupervised::Instance::RemoveWithValues.new
+      # Change attributes including -1 values to '?' (missing)
+      def self.invalid_to_missing(dataset)
+        filter = Weka::Filters::Unsupervised::Attribute::NumericCleaner.new
 
-        filter.set do
-          data dataset
-          filter_options '-S 0 -V'
-        end
+        filter.data(dataset)
+        filter.min_threshold = 0.0
+        filter.min_default = java.lang.Double.parse_double('NaN')
 
         filter.use
       end
@@ -291,7 +290,7 @@ module Wikipedia
                            :print_progress,
                            :find_edits_data_for,
                            :load_corpus_file_index,
-                           :remove_invalid_instances
+                           :invalid_to_missing
     end
   end
 end
