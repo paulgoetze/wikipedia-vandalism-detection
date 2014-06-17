@@ -150,6 +150,7 @@ module Wikipedia
               "removed all wordlists frequency",
               "removed bad frequency",
               "removed biased frequency",
+              "removed character distribution",
               "removed markup frequency",
               "removed pronoun frequency",
               "removed sex frequency",
