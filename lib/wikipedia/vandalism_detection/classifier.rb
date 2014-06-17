@@ -66,7 +66,6 @@ module Wikipedia
           index = Instances::REGULAR_CLASS_INDEX
         end
 
-        puts @classifier.distribution_for_instance(instance).to_a.to_s
         confidence = (@classifier.distribution_for_instance(instance).to_a)[index]
 
         if options[:return_all_params]
