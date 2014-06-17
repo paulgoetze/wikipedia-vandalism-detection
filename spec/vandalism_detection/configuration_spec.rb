@@ -198,6 +198,7 @@ describe Wikipedia::VandalismDetection do
           "bad impact",
           "biased frequency",
           "biased impact",
+          "blanking",
           "character sequence",
           "character diversity",
           "comment length",
