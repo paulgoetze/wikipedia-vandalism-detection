@@ -1,5 +1,5 @@
-require 'wikipedia/vandalism_detection/features/frequency_base'
-require 'wikipedia/vandalism_detection/word_lists/sex'
+require 'wikipedia/vandalism_detection/features/base'
+require 'wikipedia/vandalism_detection/word_lists/markup'
 require 'wikipedia/vandalism_detection/text'
 
 module Wikipedia
