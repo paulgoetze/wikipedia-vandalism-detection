@@ -53,6 +53,11 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       filter.min_default = java.lang.Double.parse_double('NaN')
 
       parsed_dataset = filter.use
+
+      parsed_dataset.each_column do |attribute|
+        parsed_dataset.delete_with_missing(attribute)
+      end
+
       puts parsed_dataset
 
       dataset.to_s.should == parsed_dataset.to_s

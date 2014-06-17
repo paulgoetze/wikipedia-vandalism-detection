@@ -24,7 +24,7 @@ module Wikipedia
         config = Wikipedia::VandalismDetection.configuration
         dataset = build!
 
-        dataset = invalid_to_missing(dataset)
+        dataset = remove_missing(dataset)
         dataset.class_index = config.features.count
         dataset
       end
@@ -181,6 +181,17 @@ module Wikipedia
         filter.min_default = java.lang.Double.parse_double('NaN')
 
         filter.use
+      end
+
+      # Removes all instances with missing attributes
+      def self.remove_missing(dataset)
+        dataset = invalid_to_missing(dataset)
+
+        dataset.each_column do |attribute|
+          dataset.delete_with_missing(attribute)
+        end
+
+        dataset
       end
 
       # Loads arff files of given features and merge them into one arff file.
