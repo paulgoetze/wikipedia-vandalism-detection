@@ -9,7 +9,7 @@ module Wikipedia
       # This feature computes frequency of bad words in the inserted text.
       class BadFrequency < FrequencyBase
 
-        # Returns the percentage of biased words in the inserted text.
+        # Returns the percentage of bad words in the inserted text.
         # Returns 0.0 if inserted clean text is of zero length.
         def calculate(edit)
           super
