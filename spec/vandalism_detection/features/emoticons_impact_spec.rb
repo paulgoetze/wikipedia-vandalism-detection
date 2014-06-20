@@ -12,10 +12,10 @@ describe Wikipedia::VandalismDetection::Features::EmoticonsImpact do
 
     it "returns the impact of emoticon words of the edit's new revision text" do
       # 3 emoticons
-      old_text = ":) Hi you I got some :-X you know ;)"
+      old_text = ":) Hi you I got some :-X, you know ;)"
 
       # 4 emoticons
-      new_text = ":) Hi (you)= I added another :-X you know ;) (="
+      new_text = ":) Hi (=you) I added another :-X you know ;)? (="
 
       old_revision = build(:old_revision, text: old_text)
       new_revision = build(:new_revision, text: new_text)

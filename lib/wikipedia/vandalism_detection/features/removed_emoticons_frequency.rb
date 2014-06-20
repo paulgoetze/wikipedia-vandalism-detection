@@ -14,7 +14,7 @@ module Wikipedia
           super
 
           removed_text = edit.removed_text
-          regex = /(^|\W)(#{WordLists::EMOTICONS.join('|')}(?=\s|$|\Z))/
+          regex = /(^|\s)(#{WordLists::EMOTICONS.join('|')})(?=\s|$|\Z|[\.,!?]\s|[\.!?]\Z)/
 
           emoticons_count = removed_text.scan(regex).flatten.reject { |c| c.size < 2 }.count
           total_count = removed_text.split.count

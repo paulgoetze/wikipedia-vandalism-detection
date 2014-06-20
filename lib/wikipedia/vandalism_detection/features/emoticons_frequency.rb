@@ -1,6 +1,5 @@
 require 'wikipedia/vandalism_detection/features/base'
 require 'wikipedia/vandalism_detection/word_lists/emoticons'
-require 'wikipedia/vandalism_detection/text'
 
 module Wikipedia
   module VandalismDetection
@@ -15,8 +14,8 @@ module Wikipedia
           super
 
           inserted_text = edit.inserted_text
+          regex = /(^|\s)(#{WordLists::EMOTICONS.join('|')})(?=\s|$|\Z|[\.,!?]\s|[\.!?]\Z)/
 
-          regex = /(^|\W)(#{WordLists::EMOTICONS.join('|')}(?=\s|$|\Z))/
           emoticons_count = inserted_text.scan(regex).flatten.reject { |c| c.size < 2 }.count
           total_count = inserted_text.split.count
 

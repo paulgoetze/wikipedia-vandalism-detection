@@ -15,7 +15,7 @@ module Wikipedia
           old_text = edit.old_revision.text
           new_text = edit.new_revision.text
 
-          regex = /(^|\W)(#{WordLists::EMOTICONS.join('|')}(?=\s|$|\Z))/
+          regex = /(^|\s)(#{WordLists::EMOTICONS.join('|')})(?=\s|$|\Z|[\.,!?]\s|[\.!?]\Z)/
 
           old_count = old_text.scan(regex).flatten.reject { |c| c.size < 2 }.count.to_f
           new_count = new_text.scan(regex).flatten.reject { |c| c.size < 2 }.count.to_f
