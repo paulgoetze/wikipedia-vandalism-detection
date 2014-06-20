@@ -10,7 +10,7 @@ module Wikipedia
         def calculate(edit)
           super
 
-          edit.inserted_text.scan(/\[(https?|ftp)\s?:\s?\/\/[^\s\/$.?#].[^\s]*\]/i).count
+          edit.inserted_text.scan(/\[?(https?|ftp)\s?:\s?\/\/[^\s\/$.?#].[^\s]*]?/i).count
         end
       end
     end

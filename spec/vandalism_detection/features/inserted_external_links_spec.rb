@@ -12,13 +12,13 @@ describe Wikipedia::VandalismDetection::Features::InsertedExternalLinks do
 
     it "returns the number of inserted external links" do
       old_revision_text = Wikipedia::VandalismDetection::Text.new '123'
-      new_revision_text = Wikipedia::VandalismDetection::Text.new '123 [http://google.com] https://example.com'
+      new_revision_text = Wikipedia::VandalismDetection::Text.new '123 [http://google.com Google] https://example.com'
 
       old_revision = build(:old_revision, text: old_revision_text)
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 1
+      @feature.calculate(edit).should == 2
     end
 
     it "returns 0 if no inserted text" do
