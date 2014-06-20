@@ -90,7 +90,7 @@ module Wikipedia
           :dickzipper, :homoey, :queero, :freex, :cunthunter, :shamedame, :slutkiss, :shiteater,
           :fuckass, :"fucka$$", :clitorus, :assfucker, :assfuckers, :dillweed, :cracker, :teabagging,
           :shitt, :azz, :fuk, :fucknugget, :cuntlick, :"g@y", :"@ss", :beotch, :pussys, :'s***', :paedophile,
-          :pedophiles, :pedophile, :sucks, :licker, :lickers, :bitchface
+          :pedophiles, :pedophile, :sucks, :licker, :lickers, :bitchface, :idiot, :tosser, :idiots, :tossers
         ]
     end
   end

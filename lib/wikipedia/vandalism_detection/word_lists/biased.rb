@@ -14,7 +14,7 @@ module Wikipedia
             :talented, :most, :top, :transcendent, :undoubtedly, :unique, :visionary, :virtually,
             :virtuoso, :"well-known", :"well-established", :"world-class", :worst, :coolest, :super, :probably,
             :hate, :ugly, :fat, :lame, :weird, :strange, :everyone, :cares, :boring, :boreing, :ever, :huge,
-            :like
+            :like, :idiotic, :absolute, :total, :totally
            ]
     end
   end
