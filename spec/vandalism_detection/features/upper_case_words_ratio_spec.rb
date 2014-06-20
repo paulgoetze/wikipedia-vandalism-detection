@@ -20,12 +20,23 @@ describe Wikipedia::VandalismDetection::Features::UpperCaseWordsRatio do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == (1.0 + 2) / (1.0 + 4)
+      @feature.calculate(edit).should == 2.0 / 4.0
     end
 
     it "returns 0.0 if no text inserted" do
       old_text = Wikipedia::VandalismDetection::Text.new("DELECTION text")
       new_text = Wikipedia::VandalismDetection::Text.new("text")
+
+      old_revision = build(:old_revision, text: old_text)
+      new_revision = build(:new_revision, text: new_text)
+      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+
+      @feature.calculate(edit).should == 0.0
+    end
+
+    it "returns 0.0 if no uppercase words are in inserted" do
+      old_text = Wikipedia::VandalismDetection::Text.new("text")
+      new_text = Wikipedia::VandalismDetection::Text.new("text insertion")
 
       old_revision = build(:old_revision, text: old_text)
       new_revision = build(:new_revision, text: new_text)

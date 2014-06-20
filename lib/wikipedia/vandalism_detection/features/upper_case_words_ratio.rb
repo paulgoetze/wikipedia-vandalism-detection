@@ -23,7 +23,7 @@ module Wikipedia
             count
           end
 
-          (1.0 + uppercase_words_count) / (1.0 + words.count)
+          uppercase_words_count.zero? ? 0.0 : (uppercase_words_count.to_f / words.count.to_f)
         end
       end
     end

@@ -16,7 +16,7 @@ module Wikipedia
           non_alpha_count = text.scan(/[^a-zA-Z0-9\s]/).size
           all_letters_count = text.scan(/[^\s]/).size
 
-          (1.0 + non_alpha_count) / (1.0 + all_letters_count)
+          non_alpha_count.zero? ? 0.0 : (non_alpha_count.to_f / all_letters_count.to_f)
         end
       end
     end
