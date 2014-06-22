@@ -53,14 +53,36 @@ module Wikipedia
       # (unbalanced means: vandalism and regular samples are used as given in arff file)
       def unbalanced_training_data?
         @training_data_options == TRAINING_DATA_UNBALANCED || @training_data_options.nil? ||
-            (@training_data_options != TRAINING_DATA_BALANCED && @training_data_options != TRAINING_DATA_OVERSAMPLED)
+            (!balanced_training_data? && !oversampled_training_data?)
       end
 
       # Returns a boolean value whether a oversampled data set is used for classifier training.
       # (oversampled means: a balanced dataset is enriched through vandalism instances
       # if vandalism number is less than regular number)
       def oversampled_training_data?
-        @training_data_options == TRAINING_DATA_OVERSAMPLED
+        puts @training_data_options
+        !@training_data_options.nil? && @training_data_options.include?(TRAINING_DATA_OVERSAMPLED)
+      end
+
+      # Returns a hash of the oversampled training data options.
+      # Allowed options are -p (-percent) and -u (-undersampling)
+      def oversampling_options
+        if oversampled_training_data?
+          params = @training_data_options.gsub(TRAINING_DATA_OVERSAMPLED, '').split('-')
+
+          percent_default = 100
+          undersampled_default = true
+
+          percent_option = params.select { |param| param.match /(p\s|percentage\s)\d+/i }[0]
+          undersampling_option = params.select { |param| param.match /(u\s|undersampling\s)/i }[0]
+
+          percent = percent_option.nil? ? percent_default : percent_option.split.last.to_f
+          undersampling = undersampling_option.nil? ? undersampled_default : !undersampling_option.match(/(true|t|yes|y|1)$/i).nil?
+
+          { percentage: percent, undersampling: undersampling }
+        else
+          {}
+        end
       end
 
       # Returns the path to the classification file.

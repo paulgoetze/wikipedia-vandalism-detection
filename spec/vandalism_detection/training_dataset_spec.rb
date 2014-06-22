@@ -114,40 +114,61 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
   end
 
   describe "#oversampled_instances" do
+    describe "with default options" do
+      before do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'oversampled')
+        use_configuration(config)
 
-    before do
-      config = test_config
-      config.instance_variable_set(:@training_data_options, 'oversampled')
-      use_configuration(config)
+        @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances # default -P 100 -U true
+      end
 
-      @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances # default -P 100
-    end
+      it "returns a weka dataset" do
+        @dataset.class.should == Java::WekaCore::Instances
+      end
 
-    it "returns a weka dataset" do
-      @dataset.class.should == Java::WekaCore::Instances
-    end
+      it "returns a dataset of size 8 built from the configured corpus" do
+        # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
+        @dataset.n_rows.should == 8
+      end
 
-    it "returns a dataset of size 8 built from the configured corpus" do
-      # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-      @dataset.n_rows.should == 8
-    end
+      [:VANDALISM, :REGULAR].each do |class_const|
+        it "has 4 '#{class_const.downcase}' samples in its instances" do
+          class_count = @dataset.enumerate_instances.reduce(0) do |count, instance|
+            label = Wikipedia::VandalismDetection::Instances::CLASSES[instance.class_value.to_i]
+            (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
+          end
 
-    [:VANDALISM, :REGULAR].each do |class_const|
-      it "has 4 '#{class_const.downcase}' samples in its instances" do
-        class_count = @dataset.enumerate_instances.reduce(0) do |count, instance|
-          label = Wikipedia::VandalismDetection::Instances::CLASSES[instance.class_value.to_i]
-          (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
+          class_count.should == 4
         end
+      end
 
-        class_count.should == 4
+      it "returns a dataset of size 8 for 200% 'SMOTEING' built from the configured corpus" do
+        # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
+        dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances(percentage: 200)
+        puts dataset
+        dataset.n_rows.should == 8
       end
     end
 
-    it "returns a dataset of size 8 for 200% 'SMOTEING' built from the configured corpus" do
-      # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-      dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances("-P 200")
-      puts dataset
-      dataset.n_rows.should == 8
+    describe "with custom options" do
+      before do
+        config = test_config
+        config.instance_variable_set(:@training_data_options, 'oversampled -p 300 -u false')
+        use_configuration(config)
+
+        @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances
+      end
+
+      it "returns a weka dataset" do
+        @dataset.class.should == Java::WekaCore::Instances
+      end
+
+      it "returns a dataset of size 12 built from the configured corpus" do
+        # 2 + 300 % = 8 vandalism, 4 regular, see resources/corpora/training/annotations.csv
+        puts @dataset
+        @dataset.n_rows.should == 12
+      end
     end
   end
 

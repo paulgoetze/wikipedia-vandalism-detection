@@ -133,6 +133,32 @@ describe Wikipedia::VandalismDetection::Classifier do
     vandalism_count.should == 4
   end
 
+  it "loads the classifier and learns it regarding a customized oversampled training set if set in config" do
+    config = test_config
+    config.instance_variable_set(:@training_data_options, 'oversampled -p 200 -u false')
+    use_configuration(config)
+
+    dataset = Wikipedia::VandalismDetection::Classifier.new.dataset
+
+    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+      count
+    end
+
+    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
+      count += 1 if (instance.class_value.to_i == regular_class_index)
+      count
+    end
+
+    # 2 + 200 % = 6 vandalism, 4 regular, due to SMOTE oversampling without undersampling
+    dataset.n_rows.should == 10
+    regular_count.should == 4
+    vandalism_count.should == 6
+  end
+
   describe "attribute readers" do
 
     [:classifier_instance, :evaluator, :dataset].each do |name|
@@ -232,9 +258,12 @@ describe Wikipedia::VandalismDetection::Classifier do
       instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
       dataset = Wikipedia::VandalismDetection::Instances.empty
 
-      2.times do
+      vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+      regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+      [vandalism_index, regular_index].each do |index|
         instances.each do |row|
-          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[rand((0..1))]])
+          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[index]])
         end
       end
 
@@ -244,12 +273,9 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     it "does not raise an exception if classifier uses one class classification with 'regular' ast target class" do
-      vandalism = Wikipedia::VandalismDetection::Instances::VANDALISM
-      regular = Wikipedia::VandalismDetection::Instances::REGULAR
-
       config = test_config
       config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
-      config.instance_variable_set(:@classifier_options, "-tcl #{regular}")
+      config.instance_variable_set(:@classifier_options, "-tcl #{Wikipedia::VandalismDetection::Instances::REGULAR}")
 
       use_configuration(config)
 
@@ -257,10 +283,12 @@ describe Wikipedia::VandalismDetection::Classifier do
       instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
       dataset = Wikipedia::VandalismDetection::Instances.empty
 
-      2.times do
+      vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+      regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+      [vandalism_index, regular_index].each do |index|
         instances.each do |row|
-          class_label = [vandalism, regular][rand((0..1))]
-          dataset.add_instance([*row, class_label])
+          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[index]])
         end
       end
 

@@ -43,28 +43,48 @@ module Wikipedia
         filter.use
       end
 
-      # Returns an oversampled training dataset with more vandalism than regular edits.
+      # Returns an oversampled training dataset.
+      # Oversampling options can be set by using e.g:
+      #   percentage: 200
+      #   undersampling: false
+      #
       # For oversampling Weka SMOTE package is used.
       # For SMOTE method see paper: http://arxiv.org/pdf/1106.1813.pdf
       # Doc: http://weka.sourceforge.net/doc.packages/SMOTE/weka/filters/supervised/instance/SMOTE.html
-      def self.oversampled_instances(options = nil)
+      def self.oversampled_instances(options = {})
+        config = Wikipedia::VandalismDetection.configuration
+        options = config.oversampling_options if options.empty?
+
         smote = Weka::Filters::Supervised::Instance::SMOTE.new
         dataset = instances
 
+        percentage = options[:percentage]
+        smote_options = "-P #{percentage.to_i}" if percentage
+
         smote.set do
           data dataset
-          filter_options options if options
+          filter_options smote_options if smote_options
         end
 
-        subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
+        undersampling = options[:undersampling]
+        use_undersampling = undersampling.nil? ? true : undersampling
 
-        #uniform distribution (remove majority instances)
-        subsample.set do
-          data smote.use
-          filter_options '-M 1'
+        smote_dataset = smote.use
+
+        if use_undersampling
+          subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
+
+
+          # balance (remove majority instances)
+          subsample.set do
+            data smote_dataset
+            filter_options '-M 1'
+          end
+
+          subsample.use
+        else
+          smote_dataset
         end
-
-        subsample.use
       end
 
       # Builds the dataset as ARFF file which can be used by a classifier.
@@ -124,7 +144,7 @@ module Wikipedia
           # close all io objects
           feature_files.each do |feature_name, file|
             file.close
-            puts "\n'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+            puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
           end
         end
 
@@ -132,7 +152,7 @@ module Wikipedia
 
         output_file = @config.training_output_arff_file
         merged_dataset.to_ARFF(output_file)
-        puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
+        puts "'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
 
         merged_dataset
       end
@@ -167,7 +187,7 @@ module Wikipedia
         FileUtils.mkdir(dirname) unless Dir.exists?(dirname)
 
         written = File.open(file, 'w') { |f| f.write(file_index.to_yaml) }
-        print "\nIndex file saved to #{file}.\n" if written > 0
+        print "Index file saved to #{file}.\n" if written > 0
 
         file_index
       end
@@ -268,7 +288,7 @@ module Wikipedia
         index_file = @config.training_output_index_file
 
         if File.exists? index_file
-          puts " (Using #{index_file}) \n"
+          puts "\n(Using #{index_file})\n"
           YAML.load_file index_file
         else
           create_corpus_file_index!

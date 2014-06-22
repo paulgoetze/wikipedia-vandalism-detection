@@ -112,20 +112,24 @@ module Wikipedia
         end
 
         classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
+        options = @config.classifier_options
+
+        puts "Loading classifier #{classifier_name} with options '#{options}'..."
 
         if dataset.nil?
           if @config.balanced_training_data?
+            puts "using BALANCED training dataset"
             dataset = TrainingDataset.balanced_instances
           elsif @config.unbalanced_training_data?
+            puts "using FULL (unbalanced) training dataset"
             dataset = TrainingDataset.instances
           elsif @config.oversampled_training_data?
+            puts "using OVERSAMPLED training dataset"
             dataset = TrainingDataset.oversampled_instances
           end
         end
 
         @dataset = dataset
-        options = @config.classifier_options
-
         dataset.rename_attribute_value(dataset.class_index, one_class_index, Instances::OUTLIER) if @config.use_occ?
 
         begin
@@ -137,7 +141,7 @@ module Wikipedia
 
           classifier
         rescue => e
-          raise "Error while loading classfier: #{e.class}: #{e.message}"
+          raise "Error while loading classifier: #{e.class}: #{e.message}"
         end
       end
 
