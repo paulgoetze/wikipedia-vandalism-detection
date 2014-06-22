@@ -43,7 +43,11 @@ describe Wikipedia::VandalismDetection do
     describe "#test_output_classification_file" do
       it "returns the classification file path extended by classifier name and training data options" do
         file_path = @configuration.test_output_classification_file
+        classifier_name = @configuration.classifier_type.split('::').last.downcase
+        dataset_options = @configuration.training_data_options
+        file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['test']['classification_file']
 
+        file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
       end
     end
 
