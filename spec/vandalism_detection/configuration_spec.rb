@@ -22,7 +22,9 @@ describe Wikipedia::VandalismDetection do
       :unbalanced_training_data?,
       :oversampled_training_data?,
       :test_output_classification_file,
-      :oversampling_options
+      :oversampling_options,
+      :training_output_arff_file,
+      :test_output_arff_file
     ].each do |attribute|
       it "responds to ##{attribute}" do
         @configuration.should respond_to attribute
@@ -49,6 +51,30 @@ describe Wikipedia::VandalismDetection do
         file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['test']['classification_file']
 
         file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+      end
+    end
+
+    describe "output arff files" do
+      describe "#training_output_arff_file" do
+        it "returns the arff file path extended by classifier name and training data options" do
+          file_path = @configuration.training_output_arff_file
+          classifier_name = @configuration.classifier_type.split('::').last.downcase
+          dataset_options = @configuration.training_data_options
+          file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['training']['arff_file']
+
+          file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+        end
+      end
+
+      describe "#test_output_arff_file" do
+        it "returns the arff file path extended by classifier name and training data options" do
+          file_path = @configuration.test_output_arff_file
+          classifier_name = @configuration.classifier_type.split('::').last.downcase
+          dataset_options = @configuration.training_data_options
+          file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['test']['arff_file']
+
+          file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+        end
       end
     end
 

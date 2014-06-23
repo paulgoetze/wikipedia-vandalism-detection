@@ -36,6 +36,8 @@ module Wikipedia
 
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
+        @training_arff_file_name = @data['output']['training']['arff_file']
+        @test_arff_file_name = @data['output']['test']['arff_file']
       end
 
       # Returns whether the classifier uses one class classification
@@ -60,7 +62,6 @@ module Wikipedia
       # (oversampled means: a balanced dataset is enriched through vandalism instances
       # if vandalism number is less than regular number)
       def oversampled_training_data?
-        puts @training_data_options
         !@training_data_options.nil? && @training_data_options.include?(TRAINING_DATA_OVERSAMPLED)
       end
 
@@ -94,6 +95,18 @@ module Wikipedia
 
         File.join(@output_base_directory, classifier_name,
                   @training_data_options.gsub(/\s+/, '_'), classifiction_file_name)
+      end
+
+      # Returns the training arff file name.
+      # The path is expanded by used classifier & options and is in the same directory as the classification file.
+      def training_output_arff_file
+        File.join(File.dirname(test_output_classification_file), @training_arff_file_name)
+      end
+
+      # Returns the test arff file name.
+      # The path is expanded by used classifier & options and is in the same directory as the classification file.
+      def test_output_arff_file
+        File.join(File.dirname(test_output_classification_file), @test_arff_file_name)
       end
 
       # Returns file/path string for corpora files/directories and output files
