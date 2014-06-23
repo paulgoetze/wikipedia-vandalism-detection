@@ -44,10 +44,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
       dataset = Wikipedia::VandalismDetection::TestDataset.instances
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
 
-      # remove those with -1 values
-      filtered_dataset = parsed_dataset.to_a2d.delete_if { |instance| instance.include?(-1) }
-
-      dataset.to_a2d.should == filtered_dataset
+      dataset.to_s.should == parsed_dataset.to_s
     end
 
     it "overwrites existing test arff file" do

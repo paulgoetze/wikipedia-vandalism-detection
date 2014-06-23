@@ -24,7 +24,6 @@ module Wikipedia
         config = Wikipedia::VandalismDetection.configuration
         dataset = build!
 
-        dataset = remove_missing(dataset)
         dataset.class_index = config.features.count
         dataset
       end
@@ -149,12 +148,13 @@ module Wikipedia
         end
 
         merged_dataset = merge_feature_arffs(@config.features, output_directory)
+        dataset = remove_missing(merged_dataset)
 
         output_file = @config.training_output_arff_file
-        merged_dataset.to_ARFF(output_file)
+        dataset.to_ARFF(output_file)
         puts "'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
 
-        merged_dataset
+        dataset
       end
 
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
@@ -321,7 +321,8 @@ module Wikipedia
                            :print_progress,
                            :find_edits_data_for,
                            :load_corpus_file_index,
-                           :invalid_to_missing
+                           :invalid_to_missing,
+                           :remove_missing
     end
   end
 end

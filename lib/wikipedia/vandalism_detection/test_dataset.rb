@@ -86,12 +86,13 @@ module Wikipedia
         end
 
         merged_dataset = merge_feature_arffs(@config.features, output_directory)
+        dataset = remove_missing(merged_dataset)
 
         output_file = @config.test_output_arff_file
-        merged_dataset.to_ARFF(output_file)
+        dataset.to_ARFF(output_file)
         puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
 
-        merged_dataset
+        dataset
       end
 
       # Loads arff files of given features and merge them into one arff file.
@@ -186,16 +187,26 @@ module Wikipedia
         @annotated_revisions ||= annotated_revisions
       end
 
-      # Removes instances including -1 values
-      def self.remove_invalid_instances(dataset)
-        filter = Weka::Filters::Unsupervised::Instance::RemoveWithValues.new
+      # Change attributes including -1 values to '?' (missing)
+      def self.invalid_to_missing(dataset)
+        filter = Weka::Filters::Unsupervised::Attribute::NumericCleaner.new
 
-        filter.set do
-          data dataset
-          filter_options '-S 0 -V'
-        end
+        filter.data(dataset)
+        filter.min_threshold = 0.0
+        filter.min_default = java.lang.Double.parse_double('NaN')
 
         filter.use
+      end
+
+      # Removes all instances with missing attributes
+      def self.remove_missing(dataset)
+        dataset = invalid_to_missing(dataset)
+
+        dataset.each_column do |attribute|
+          dataset.delete_with_missing(attribute)
+        end
+
+        dataset
       end
 
       # Returns the Edit with the given revision ids.
@@ -276,7 +287,8 @@ module Wikipedia
 
       private_class_method :annotated_revision?,
                            :annotated_revisions,
-                           :remove_invalid_instances,
+                           :invalid_to_missing,
+                           :remove_missing,
                            :create_edit_from,
                            :load_corpus_file_index,
                            :print_progress

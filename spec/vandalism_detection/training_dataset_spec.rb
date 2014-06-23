@@ -43,22 +43,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     it "returns a dataset built from the configured corpus" do
       dataset = Wikipedia::VandalismDetection::TrainingDataset.instances
-      filter = Weka::Filters::Unsupervised::Attribute::NumericCleaner.new
-
       parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
-
-      # replace attributes with -1 values in features with '?' (missing)
-      filter.data parsed_dataset
-      filter.min_threshold = 0.0
-      filter.min_default = java.lang.Double.parse_double('NaN')
-
-      parsed_dataset = filter.use
-
-      parsed_dataset.each_column do |attribute|
-        parsed_dataset.delete_with_missing(attribute)
-      end
-
-      puts parsed_dataset
 
       dataset.to_s.should == parsed_dataset.to_s
     end

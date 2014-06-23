@@ -326,7 +326,6 @@ module Wikipedia
 
         dataset.to_a2d.each do |instance|
           features = instance[0...-2]
-          next if features.include? -1
 
           old_revision_id = instance[-2].to_i
           new_revision_id = instance[-1].to_i
@@ -445,7 +444,6 @@ module Wikipedia
 
         test_dataset.to_a2d.each do |instance|
           features = instance[0...-2]
-          next if features.include? -1
 
           old_revision_id = instance[-2].to_i
           new_revision_id = instance[-1].to_i

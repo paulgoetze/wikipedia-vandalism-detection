@@ -81,7 +81,7 @@ describe Wikipedia::VandalismDetection::Classifier do
 
   it "load the classifier and learns it regarding the full configured (unbalanced) training set" do
     config = test_config
-    config.instance_variable_set(:@training_data_options, nil)
+    config.instance_variable_set(:@training_data_options, 'unbalanced')
     use_configuration(config)
 
     classifier = Wikipedia::VandalismDetection::Classifier.new
