@@ -85,8 +85,9 @@ module Wikipedia
           end
         end
 
-        merged_dataset = merge_feature_arffs(@config.features, output_directory)
-        dataset = remove_missing(merged_dataset)
+        dataset = merge_feature_arffs(@config.features, output_directory)
+        #merged_dataset = merge_feature_arffs(@config.features, output_directory)
+        #dataset = remove_missing(merged_dataset)
 
         output_file = @config.test_output_arff_file
         dataset.to_ARFF(output_file)

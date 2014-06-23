@@ -21,7 +21,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       @feature.calculate(edit).should == 1.6609633564650683
     end
 
-    it "returns maximum float value if no alphanumeric characters are removed" do
+    it "returns missing value if no alphanumeric characters are removed" do
       old_text = Wikipedia::VandalismDetection::Text.new("old text !* [[?]]")
       new_text = Wikipedia::VandalismDetection::Text.new("old text")
 
@@ -29,10 +29,10 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Float::MAX
+      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
 
-    it "returns Infinity if no text inserted" do
+    it "returns missing value if no text inserted" do
       old_text = Wikipedia::VandalismDetection::Text.new("text")
       new_text = Wikipedia::VandalismDetection::Text.new("deletion text")
 
@@ -40,7 +40,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Float::MAX
+      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
   end
 end

@@ -5,6 +5,13 @@ describe Wikipedia::VandalismDetection::Text do
   it { should be_a String }
   it { should respond_to :clean }
 
+  describe "#initialze" do
+    it "can removes invalid byte sequences" do
+      text = Wikipedia::VandalismDetection::Text.new("text \255".force_encoding('UTF-8'))
+      expect { text.scan('text') }.not_to raise_error
+    end
+  end
+
   describe "#clean" do
 
     it "raises an WikitextExtractionError if text cannot be parsed" do

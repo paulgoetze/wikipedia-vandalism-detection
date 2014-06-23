@@ -26,12 +26,17 @@ module Wikipedia
     # @author Paul Götze <paul.christoph.goetze@gmail.com>
     class WikitextExtractor
 
+      REDIRECT = '#REDIRECT'
+
       # Returns the extracted text from the given wiki markup preserving spacing with added section numbers.
       def self.extract(wiki_text)
         begin
+          wiki_text = wiki_text.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+          wiki_text = wiki_text.gsub(REDIRECT, '')
+
           WikitextExtractor.new.extract(wiki_text)
-        rescue
-          raise WikitextExtractionError, "Wikitext extraction failed.", caller
+        rescue => exception
+          raise WikitextExtractionError, "Wikitext extraction failed: \n#{exception.message}", caller
         end
       end
 

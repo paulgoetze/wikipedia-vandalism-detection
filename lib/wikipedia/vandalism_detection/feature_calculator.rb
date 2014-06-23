@@ -32,9 +32,7 @@ module Wikipedia
       def calculate_features_for(edit)
         raise ArgumentError, "Input has to be an Edit." unless edit.is_a? Edit
 
-        contains_redirect = edit.old_revision.redirect? || edit.new_revision.redirect?
-
-        features = contains_redirect ? [] : @feature_classes.map do |feature|
+        features = @feature_classes.map do |feature|
           begin
             print "\r | #{feature.class.name.demodulize}        \t\t\t"
             feature.calculate(edit)
@@ -43,7 +41,7 @@ module Wikipedia
               Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
               by the WikitextExtractor and will be discarded.\n""}
 
-            -1
+            Features::MISSING_VALUE
           end
         end
 
@@ -56,19 +54,15 @@ module Wikipedia
         raise ArgumentError, "Second parameter has to be a feature name String (e.g. 'anonymity')." unless \
           feature_name.is_a? String
 
-        edit_contains_redirect = edit.old_revision.redirect? || edit.new_revision.redirect?
+        value = Features::MISSING_VALUE
 
-        value = -1
-
-        unless edit_contains_redirect
-          begin
-            feature = feature_class_from_name(feature_name)
-            value = feature.calculate(edit)
-          rescue WikitextExtractionError
-            $stderr.print %Q{
-              Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
-              by the WikitextExtractor and will be discarded.\n""}
-          end
+        begin
+          feature = feature_class_from_name(feature_name)
+          value = feature.calculate(edit)
+        rescue WikitextExtractionError
+          $stderr.print %Q{
+            Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
+            by the WikitextExtractor and will be discarded.\n""}
         end
 
         value

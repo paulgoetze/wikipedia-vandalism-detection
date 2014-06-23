@@ -2,6 +2,11 @@ require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Diff do
 
+  it "can deal with invalid byte sequences" do
+    text = "text \255".force_encoding('UTF-8')
+    expect { Wikipedia::VandalismDetection::Diff.new("#{text} a", "#{text} b") }.not_to raise_error
+  end
+
   before do
     @old_text =  Wikipedia::VandalismDetection::Text.new "hello\nworld\nmy name is Luke\n"
     @new_text =  Wikipedia::VandalismDetection::Text.new "world\nhello\nmy name is Mr. Skywalker\n"

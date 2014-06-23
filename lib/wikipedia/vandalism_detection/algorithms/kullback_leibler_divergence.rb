@@ -1,13 +1,18 @@
+require 'wikipedia/vandalism_detection/features/base'
+
 module Wikipedia
   module VandalismDetection
     module Algorithms
 
-      class KullBackLeiblerDivergence
+      class KullbackLeiblerDivergence
 
         # Returns the Symmetric Kullback-Leibler divergence with simple back-off of the given text's character
         # distribution. For implementation details, see: http://staff.science.uva.nl/~tsagias/?p=185
         def of(text_a, text_b)
-          return Float::MAX unless !!text_a.match(/[[:alnum:]]/) && !!text_b.match(/[[:alnum:]]/)
+          text_a = text_a.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+          text_b = text_b.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+
+          return Features::MISSING_VALUE unless !!text_a.match(/[[:alnum:]]/) && !!text_b.match(/[[:alnum:]]/)
 
           distribution_a = character_distribution(text_a)
           distribution_b = character_distribution(text_b)
@@ -21,8 +26,8 @@ module Wikipedia
           gamma = 1 - character_diff.size * epsilon
 
           # check if values sum up to 1.0
-          sum_a_diff = 1.0 - distribution_a.values.inject(0) { |sum, value| sum += value / sum_a }.abs
-          sum_b_diff = 1.0 - distribution_b.values.inject(0) { |sum, value| sum += value / sum_b }.abs
+          sum_a_diff = 1.0 - distribution_a.values.inject(0) { |sum, value| sum += (value / sum_a) }.abs
+          sum_b_diff = 1.0 - distribution_b.values.inject(0) { |sum, value| sum += (value / sum_b) }.abs
 
           raise(Exception, "Text a distr. does not sum up to 1.0") if sum_a_diff > 9e-6
           raise(Exception, "Text b distr. does not sum up to 1.0") if sum_b_diff > 9e-6

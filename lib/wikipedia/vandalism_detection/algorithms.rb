@@ -8,7 +8,7 @@ module Wikipedia
 
       included do
         def kullback_leibler_divergence(text_a, text_b)
-          divergence = KullBackLeiblerDivergence.new
+          divergence = KullbackLeiblerDivergence.new
           divergence.of text_a, text_b
         end
       end

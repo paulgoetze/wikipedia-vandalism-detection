@@ -21,7 +21,7 @@ describe Wikipedia::VandalismDetection::Features::RevisionsCharacterDistribution
       @feature.calculate(edit).should == 0.6312751553366259
     end
 
-    it "returns maximum float value if new revision text is empty" do
+    it "returns missing value if new revision text is empty" do
       old_text = Wikipedia::VandalismDetection::Text.new("old text")
       new_text = Wikipedia::VandalismDetection::Text.new("")
 
@@ -29,10 +29,10 @@ describe Wikipedia::VandalismDetection::Features::RevisionsCharacterDistribution
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Float::MAX
+      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
 
-    it "returns maximum float value if old revision text is empty" do
+    it "returns missing value if old revision text is empty" do
       old_text = Wikipedia::VandalismDetection::Text.new("")
       new_text = Wikipedia::VandalismDetection::Text.new("new text")
 
@@ -40,7 +40,7 @@ describe Wikipedia::VandalismDetection::Features::RevisionsCharacterDistribution
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Float::MAX
+      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
   end
 end

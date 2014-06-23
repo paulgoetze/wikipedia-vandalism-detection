@@ -4,6 +4,8 @@ module Wikipedia
   module VandalismDetection
     module Features
 
+      MISSING_VALUE = '?'
+
       # This class should be the base class for all Wikipedia::Feature classes.
       class Base
 
@@ -45,18 +47,6 @@ module Wikipedia
           else
             terms.reduce(0) {|r, term| r + freq[term] }
           end
-
-=begin
-          # original version
-          terms_join = terms.is_a?(String) ? terms : terms.join("|")
-
-          regex = /\b(#{terms_join})\b/i
-          puts regex
-          text = options[:in]
-
-          matches = text.scan(regex)
-          matches ? matches.size : 0
-=end
         end
       end
     end

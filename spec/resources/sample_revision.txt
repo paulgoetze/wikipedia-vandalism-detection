@@ -5,21 +5,21 @@
 | Artist      = [[Stevie Nicks]]
 | Cover       = SS1.jpg
 | Released    = March 31, 2009
-| Recorded    = Oct. 2007–2008<br>Grainger Studio<br><small>([[Chicago, Illinois|Chicago]], [[Illinois]])</small> <br>[[Ocean Way Recording]]<br><small>([[Nashville, Tennessee|Nashville]], [[Tennessee]])</small> <br>[[Chicago Recording Company]]<br><small>([[Chicago, Illinois|Chicago]], [[Illinois]])</small> 
+| Recorded    = Oct. 2007–2008<br>Grainger Studio<br><small>([[Chicago, Illinois|Chicago]], [[Illinois]])</small> <br>[[Ocean Way Recording]]<br><small>([[Nashville, Tennessee|Nashville]], [[Tennessee]])</small> <br>[[Chicago Recording Company]]<br><small>([[Chicago, Illinois|Chicago]], [[Illinois]])</small>
 | Genre       = [[Rock music|Rock]]
 | Length      = 54:25
 | Label       = [[Reprise Records]]
-| Producer    = [[Joe Thomas (producer/director)|Joe Thomas]] <br> Stevie Nicks <br> [[Waddy Watchel]] 
-|Reviews = 
+| Producer    = [[Joe Thomas (producer/director)|Joe Thomas]] <br> Stevie Nicks <br> [[Waddy Watchel]]
+|Reviews =
 * [[Allmusic]] {{Rating|3|5}} [http://www.allmusic.com/cg/amg.dll?p=amg&sql=10:3xftxzrkldhe link]
 | Last album  = ''[[Crystal Visions - The Very Best of Stevie Nicks]]'' <br /> (2007)
 | This album  = '''''The Soundstage Sessions''''' <br /> (2009)
-| Next album  = 
+| Next album  =
 | Misc = {{Extra album cover 2
-| Upper caption = ''The Soundstage Sessions: Live in Chicago'' 
+| Upper caption = ''The Soundstage Sessions: Live in Chicago''
 | Type          =
 | Cover         = The_Soundstage_Sessions_-_Live_in_Chicago.jpg
-| Lower caption        = CD/DVD Deluxe Edition 
+| Lower caption        = CD/DVD Deluxe Edition
 }}
 }}
 
@@ -128,10 +128,10 @@ The [[Blu-Ray]] DVD of this performance has been available exclusively at Sears 
 *http://www.sears.com/shc/s/p_10153_12605_05801528000P?mv=rr
 *http://nickslive.blogspot.com/2009/04/live-in-chicago-first-week-sales.html
 
+
 {{DEFAULTSORT:Soundstage Sessions, The}}
 [[Category:2009 albums]]
 [[Category:Live albums]]
 [[Category:Reprise Records albums]]
 [[Category:Stevie Nicks albums]]
 [[Category:Albums produced by Waddy Wachtel]]
-

@@ -46,7 +46,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       @calculator.calculate_features_for(@edit).count.should == @calculator.used_features.count
     end
 
-    it "returns an empty array if the edit contains a #REDIRECT revision" do
+    it "uses the cleaned up text if revision contains a #REDIRECT" do
+      config = Wikipedia::VandalismDetection.configuration
       redirect_text =  Wikipedia::VandalismDetection::Text.new "#REDIRECT [[Redirect page]]"
       old_revision_redirect = build(:old_revision, text: redirect_text)
       new_revision_redirect = build(:new_revision, text: redirect_text)
@@ -56,8 +57,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       edit_redirect_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_redirect, new_revision, nil)
       edit_redirect_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_redirect, nil)
 
-      @calculator.calculate_features_for(edit_redirect_1).should == []
-      @calculator.calculate_features_for(edit_redirect_2).should == []
+      @calculator.calculate_features_for(edit_redirect_1).count.should == config.features.count
+      @calculator.calculate_features_for(edit_redirect_2).count.should == config.features.count
     end
 
     it "returns a array holding -1 for not extractable texts in either revision" do
@@ -77,8 +78,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       edit_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_unparsable, new_revision, nil)
       edit_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_unparsable, nil)
 
-      @calculator.calculate_features_for(edit_1).should include -1
-      @calculator.calculate_features_for(edit_2).should include -1
+      @calculator.calculate_features_for(edit_1).should include Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      @calculator.calculate_features_for(edit_2).should include Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
   end
 

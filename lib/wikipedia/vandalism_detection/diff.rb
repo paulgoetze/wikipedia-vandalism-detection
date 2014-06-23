@@ -9,8 +9,8 @@ module Wikipedia
     class Diff
 
       def initialize(original, current)
-        @original = original
-        @current = current
+        @original = original.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+        @current = current.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
 
         @patch = DiffUtils.diff @original.split, @current.split
       end

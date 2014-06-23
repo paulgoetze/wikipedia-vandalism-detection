@@ -2,6 +2,11 @@ require 'spec_helper'
 
 describe  Wikipedia::VandalismDetection::WikitextExtractor do
 
+  it "can handle invalid byte sequences" do
+    wiki_text = "{{speedy deletion}} \255".force_encoding('UTF-8')
+    expect { Wikipedia::VandalismDetection::WikitextExtractor.extract(wiki_text) }.not_to raise_error
+  end
+
   it "returns an empty string if the all the markup is extracted" do
     wiki_text = "{{speedy deletion}}"
 
@@ -19,7 +24,7 @@ describe  Wikipedia::VandalismDetection::WikitextExtractor do
     wiki_text = load_file('sample_revision.txt')
     plain_text = load_file('sample_revision_plain_text.txt')
 
-    Wikipedia::VandalismDetection::WikitextExtractor.extract(wiki_text).should == plain_text
+    (Wikipedia::VandalismDetection::WikitextExtractor.extract(wiki_text) << "\n").should == plain_text
   end
 
   it "can extract full cleaned text from wikitext" do
