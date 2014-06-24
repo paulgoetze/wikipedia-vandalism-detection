@@ -16,7 +16,7 @@ module Wikipedia
           uppercase_count = text.scan(/[[:upper:]]/).size
           all_letters_count = text.scan(/[[:alpha:]]/).size
 
-          uppercase_count.zero? ? 0.0 : (uppercase_count.to_f / all_letters_count.to_f)
+          (1.0 + uppercase_count) / (1.0 + all_letters_count)
         end
       end
     end

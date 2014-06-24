@@ -16,7 +16,7 @@ module Wikipedia
           all_letters_count = text.scan(/[[:alnum:]]/).size
           digit_count = text.scan(/[[:digit:]]/).size
 
-          digit_count.zero? ? 0.0 : (digit_count.to_f / all_letters_count.to_f)
+          (1.0 + digit_count) / (1.0 + all_letters_count)
         end
       end
     end
