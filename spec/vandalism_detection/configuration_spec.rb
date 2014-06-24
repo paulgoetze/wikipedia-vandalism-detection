@@ -354,6 +354,7 @@ describe Wikipedia::VandalismDetection do
           "sex frequency",
           "sex impact",
           "same editor",
+          "size increment",
           "size ratio",
           "term frequency",
           "time interval",

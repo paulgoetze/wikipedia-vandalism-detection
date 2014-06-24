@@ -52,6 +52,7 @@ require 'wikipedia/vandalism_detection/features/revisions_character_distribution
 require 'wikipedia/vandalism_detection/features/same_editor'
 require 'wikipedia/vandalism_detection/features/sex_frequency'
 require 'wikipedia/vandalism_detection/features/sex_impact'
+require 'wikipedia/vandalism_detection/features/size_increment'
 require 'wikipedia/vandalism_detection/features/size_ratio'
 require 'wikipedia/vandalism_detection/features/term_frequency'
 require 'wikipedia/vandalism_detection/features/time_interval'
