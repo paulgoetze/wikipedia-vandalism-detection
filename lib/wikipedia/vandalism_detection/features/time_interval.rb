@@ -16,7 +16,7 @@ module Wikipedia
           if edit.old_revision.timestamp.blank?
             xml = Wikipedia::api_request({ prop: 'revisions', rvprop: 'timestamp', revids: edit.old_revision.id })
             timestamp = xml.xpath('//rev/@timestamp').text
-            return -1 if timestamp.blank?
+            return Features::MISSING_VALUE if timestamp.blank?
 
             old_time = DateTime.parse(timestamp)
           else

@@ -44,7 +44,7 @@ describe Wikipedia::VandalismDetection::Features::SameEditor do
         @feature.calculate(edit).should == 0
       end
 
-      it "returns -1 if old reivision is not available anymore" do
+      it "returns missing if old reivision is not available anymore" do
         # to get api call, see:
         # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=325218985
         # <rev revid="325218985"/>
@@ -53,7 +53,7 @@ describe Wikipedia::VandalismDetection::Features::SameEditor do
         new_revision = build(:new_revision, id: '326980599', parent_id: '325218985')
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-        @feature.calculate(edit).should == -1
+        @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
       end
     end
   end
