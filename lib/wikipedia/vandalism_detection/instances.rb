@@ -105,6 +105,18 @@ module Wikipedia
         dataset
       end
 
+      # Returns an empty instances dataset of type Java::WekaCore::Instances::Base.
+      # This dataset is used for creating the ground truth classification.
+      def self.empty_for_test_class
+        classes = dataset_classes
+
+        dataset = Core::Type::Instances::Base.new do
+          nominal :class, classes
+        end
+
+        dataset
+      end
+
       def self.dataset_classes
         classes = Array.new
         classes[VANDALISM_CLASS_INDEX] = VANDALISM

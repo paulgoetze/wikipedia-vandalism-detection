@@ -18,21 +18,10 @@ module Wikipedia
     # This class provides methods for getting and creating a test ARFF file from a configured test corpus.
     class TestDataset
 
-      def self.instances
-        build!
-      end
-
-      # Builds the dataset as ARFF file which can be used by an Evaluator.
-      # As test data it uses the configured data corpus from /config/config.yml.
-      def self.build!
-        @config = Wikipedia::VandalismDetection.configuration
-        feature_calculator = FeatureCalculator.new
-        create_dataset!(feature_calculator)
-      end
-
-      # Creates and returns an instance dataset from the configured gold annotation file using the
+      # Returns an instance dataset from the configured gold annotation file using the
       # configured features from feature_calculator parameter.
-      def self.create_dataset!(feature_calculator)
+      def self.build
+        @config = Wikipedia::VandalismDetection.configuration
         print "\ncreating test dataset..."
 
         edits_file = @config.test_corpus_edits_file
@@ -57,6 +46,8 @@ module Wikipedia
 
           hash
         end
+
+        feature_calculator = FeatureCalculator.new
 
         unless feature_files.empty?
           processed_edits = 0
@@ -85,10 +76,19 @@ module Wikipedia
           end
         end
 
-        dataset = merge_feature_arffs(@config.features, output_directory)
-        #merged_dataset = merge_feature_arffs(@config.features, output_directory)
-        #dataset = remove_missing(merged_dataset)
+        merge_feature_arffs(@config.features, output_directory)
+      end
 
+      class << self
+        alias_method :instances, :build
+      end
+
+      # Saves and returns the dataset as ARFF file.
+      # As test data the configured data corpus from /config/config.yml is used.
+      def self.build!
+        @config = Wikipedia::VandalismDetection.configuration
+
+        dataset = self.instances
         output_file = @config.test_output_arff_file
         dataset.to_ARFF(output_file)
         puts "\n'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
@@ -107,7 +107,7 @@ module Wikipedia
           arff_file = File.join(output_directory, file_name)
 
           feature_dataset = Core::Parser.parse_ARFF(arff_file)
-          puts "using #{File.basename(arff_file)}"
+          print "."
 
           if merged_dataset
             2.times do
@@ -125,7 +125,62 @@ module Wikipedia
           end
         end
 
-        merged_dataset
+        add_ground_truth_class_to(merged_dataset)
+      end
+
+      # Adds the ground truth class attribute and values to the given dataset and returns the merged
+      def self.add_ground_truth_class_to(dataset)
+        config = Wikipedia::VandalismDetection.configuration
+
+        arff_file = File.join(config.output_base_directory, 'test', 'class.arff')
+        class_dataset = Instances.empty_for_test_class
+
+        if File.exists?(arff_file)
+          class_dataset = Core::Parser.parse_ARFF(arff_file)
+        else
+          ground_truth_file_path = config.test_corpus_ground_truth_file
+          ground_truth = ground_truth_hash(ground_truth_file_path)
+
+          dataset.to_a2d.each do |instance|
+            key = :"#{instance[-2].to_i}-#{instance[-1].to_i}"
+
+            if ground_truth.has_key?(key)
+              class_value = Instances::CLASSES[Instances::CLASSES_SHORT.key(ground_truth[key][:class])]
+              class_dataset.add_instance([class_value])
+            else
+              class_dataset.add(Core::Type::DenseInstance.new(1)) # missing
+            end
+          end
+
+          class_dataset.to_ARFF(arff_file)
+          puts "saved #{File.basename(arff_file)} to #{File.dirname(arff_file)}"
+        end
+
+        dataset.merge_with(class_dataset)
+      end
+
+      # Returns a hash for classification data from given ground truth file
+      def self.ground_truth_hash(ground_truth_file)
+        file = File.read(ground_truth_file)
+        ground_truth_samples = file.lines.to_a
+
+        ground_truth = {}
+
+        ground_truth_samples.each do |line|
+          line_parts = line.split(' ')
+
+          old_revision_id = line_parts[0].to_i
+          new_revision_id = line_parts[1].to_i
+          class_short = line_parts[2]
+
+          ground_truth[:"#{old_revision_id}-#{new_revision_id}"] = {
+              old_revision_id: old_revision_id,
+              new_revision_id: new_revision_id,
+              class: class_short
+          }
+        end
+
+        ground_truth
       end
 
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
@@ -188,21 +243,8 @@ module Wikipedia
         @annotated_revisions ||= annotated_revisions
       end
 
-      # Change attributes including -1 values to '?' (missing)
-      def self.invalid_to_missing(dataset)
-        filter = Weka::Filters::Unsupervised::Attribute::NumericCleaner.new
-
-        filter.data(dataset)
-        filter.min_threshold = 0.0
-        filter.min_default = java.lang.Double.parse_double('NaN')
-
-        filter.use
-      end
-
       # Removes all instances with missing attributes
       def self.remove_missing(dataset)
-        dataset = invalid_to_missing(dataset)
-
         dataset.each_column do |attribute|
           dataset.delete_with_missing(attribute)
         end
@@ -288,11 +330,12 @@ module Wikipedia
 
       private_class_method :annotated_revision?,
                            :annotated_revisions,
-                           :invalid_to_missing,
                            :remove_missing,
                            :create_edit_from,
                            :load_corpus_file_index,
-                           :print_progress
+                           :print_progress,
+                           :merge_feature_arffs,
+                           :add_ground_truth_class_to
     end
   end
 end

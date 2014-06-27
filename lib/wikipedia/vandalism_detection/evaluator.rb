@@ -313,7 +313,7 @@ module Wikipedia
       def create_testcorpus_classification_file!(file_path, ground_truth_data)
         raise(ArgumentError, "Ground truth data hash is not allowed to be nil!") if ground_truth_data.nil?
 
-        dataset = TestDataset.instances
+        dataset = TestDataset.build!
 
         dir_name = File.dirname(file_path)
         FileUtils.mkdir_p(dir_name) unless Dir.exists?(dir_name)
@@ -325,14 +325,10 @@ module Wikipedia
         file.puts header
 
         dataset.to_a2d.each do |instance|
-          features = instance[0...-2]
-
-          old_revision_id = instance[-2].to_i
-          new_revision_id = instance[-1].to_i
-
-          key = :"#{old_revision_id}-#{new_revision_id}"
-          next unless ground_truth_data.has_key?(key)
-          ground_truth_class_name = ground_truth_data[key][:class]
+          features = instance[0...-3]
+          old_revision_id = instance[-3].to_i
+          new_revision_id = instance[-2].to_i
+          ground_truth_class_name = instance[-1]
 
           confidence = @classifier.classify(features)
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
@@ -367,7 +363,7 @@ module Wikipedia
 
         ground_truth_file_path = @config.test_corpus_ground_truth_file
         training_dataset = TrainingDataset.instances
-        test_dataset = TestDataset.instances
+        test_dataset = TestDataset.build!
 
         analysis = {}
 
@@ -405,7 +401,7 @@ module Wikipedia
         puts "train classifier..."
         classifier = Classifier.new
 
-        test_dataset = TestDataset.instances
+        test_dataset = TestDataset.build!
 
         puts "computing classification..."
         classification = classification_data(classifier, test_dataset)
@@ -443,10 +439,10 @@ module Wikipedia
         classification = {}
 
         test_dataset.to_a2d.each do |instance|
-          features = instance[0...-2]
+          features = instance[0...-3]
 
-          old_revision_id = instance[-2].to_i
-          new_revision_id = instance[-1].to_i
+          old_revision_id = instance[-3].to_i
+          new_revision_id = instance[-2].to_i
 
           params = classifier.classify(features, return_all_params: true)
           class_short_name = Instances::CLASSES_SHORT[params[:class_index]]

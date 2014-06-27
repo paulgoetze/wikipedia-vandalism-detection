@@ -39,7 +39,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
   describe "#initialize" do
 
-    it "raises an ArgumentError if classifier attr is not of Wikipedia::VandalismDetection::Classfier" do
+    it "raises an ArgumentError if classifier attr is not a Wikipedia::VandalismDetection::Classfier" do
       expect { Wikipedia::VandalismDetection::Evaluator.new("") }.to raise_error ArgumentError
     end
 

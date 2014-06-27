@@ -127,4 +127,28 @@ describe Wikipedia::VandalismDetection::Instances do
       @new_revision_id_attribute.numeric?.should be_true
     end
   end
+
+  describe "#empty_for_test_class" do
+
+    before do
+      @dataset = Wikipedia::VandalismDetection::Instances.empty_for_test_class
+      @class = @dataset.enumerate_attributes.to_a.first
+    end
+
+    it "returns a weka dataset" do
+      @dataset.class.should == Java::WekaCore::Instances::Base
+    end
+
+    it "returns an empty dataset" do
+      @dataset.n_rows.should == 0
+    end
+
+    it "has one given feature as attributes" do
+      @class.name.should == 'class'
+    end
+
+    it "has feature attributes of type 'nominal'" do
+      @class.nominal?.should be_true
+    end
+  end
 end
