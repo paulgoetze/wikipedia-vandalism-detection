@@ -19,18 +19,76 @@ module Wikipedia
     # This class provides methods for getting and creating a training ARFF file from a configured training corpus.
     class TrainingDataset
 
-      # Returns the unbalanced dataset as given by the training arff file
-      def self.instances
-        config = Wikipedia::VandalismDetection.configuration
-        dataset = build!
+      # Returns an instance dataset from the configured gold annotation file using the
+      # configured features from feature_calculator parameter.
+      def self.build
+        @config = Wikipedia::VandalismDetection.configuration
 
-        dataset.class_index = config.features.count
+        print "\ncreating training dataset..."
+
+        annotations_file = @config.training_corpus_annotations_file
+        raise AnnotationsFileNotConfiguredError unless annotations_file
+
+        annotations = CSV.parse(File.read(annotations_file), headers: true)
+        annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
+
+        output_directory = File.join(@config.output_base_directory, 'training')
+        FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
+        FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
+
+        # create feature file hash with io objects
+        feature_files = @config.features.inject({}) do |hash, feature_name|
+          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
+          arff_file = File.join(output_directory, file_name)
+
+          unless File.exists?(arff_file)
+            dataset = Instances.empty_for_feature(feature_name)
+            dataset.to_ARFF(arff_file)
+            hash[feature_name] = File.open(arff_file, 'a')
+          end
+
+          hash
+        end
+
+        feature_calculator = FeatureCalculator.new
+
+        unless feature_files.empty?
+          processed_edits = 0
+
+          annotation_data.each do |row|
+            edit_id = row[:edit_id]
+            vandalism = row[:class]
+            edit = create_edit_from(edit_id)
+
+            feature_files.each do |feature_name, file|
+              value = feature_calculator.calculate_feature_for(edit, feature_name)
+              file.puts [value, vandalism].join(',')
+            end
+
+            processed_edits += 1
+            print_progress(processed_edits, @edits_csv.count, "computing training features")
+          end
+
+          # close all io objects
+          feature_files.each do |feature_name, file|
+            file.close
+            puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+          end
+        end
+
+        dataset = merge_feature_arffs(@config.features, output_directory)
+        dataset.class_index = @config.features.count
+
         dataset
+      end
+
+      class << self
+        alias_method :instances, :build
       end
 
       # Returns the balanced training dataset (same number of vandalism & regular instances)
       def self.balanced_instances
-        dataset = instances
+        dataset = self.build
         filter = Weka::Filters::Supervised::Instance::SpreadSubsample.new
 
         #uniform distribution (remove majority instances)
@@ -55,7 +113,7 @@ module Wikipedia
         options = config.oversampling_options if options.empty?
 
         smote = Weka::Filters::Supervised::Instance::SMOTE.new
-        dataset = instances
+        dataset = self.build
 
         percentage = options[:percentage]
         smote_options = "-P #{percentage.to_i}" if percentage
@@ -84,78 +142,6 @@ module Wikipedia
         else
           smote_dataset
         end
-      end
-
-      # Builds the dataset as ARFF file which can be used by a classifier.
-      # As training data it uses the configured data corpus from /config/config.yml.
-      def self.build!
-        @config = Wikipedia::VandalismDetection.configuration
-        feature_calculator = FeatureCalculator.new
-        create_dataset!(feature_calculator)
-      end
-
-      # Creates and returns an instance dataset from the configured gold annotation file using the
-      # configured features from feature_calculator parameter.
-      def self.create_dataset!(feature_calculator)
-        print "\ncreating training dataset..."
-
-        annotations_file = @config.training_corpus_annotations_file
-        raise AnnotationsFileNotConfiguredError unless annotations_file
-
-        annotations = CSV.parse(File.read(annotations_file), headers: true)
-        annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
-
-        output_directory = File.join(@config.output_base_directory, 'training')
-        FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
-        FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
-
-        # create feature file hash with io objects
-        feature_files = @config.features.inject({}) do |hash, feature_name|
-          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
-          arff_file = File.join(output_directory, file_name)
-
-          unless File.exists?(arff_file)
-            dataset = Instances.empty_for_feature(feature_name)
-            dataset.to_ARFF(arff_file)
-            hash[feature_name] = File.open(arff_file, 'a')
-          end
-
-          hash
-        end
-
-        unless feature_files.empty?
-          processed_edits = 0
-
-          annotation_data.each do |row|
-            edit_id = row[:edit_id]
-            vandalism = row[:class]
-            edit = create_edit_from(edit_id)
-
-            feature_files.each do |feature_name, file|
-              value = feature_calculator.calculate_feature_for(edit, feature_name)
-              file.puts [value, vandalism].join(',')
-            end
-
-            processed_edits += 1
-            print_progress(processed_edits, @edits_csv.count, "computing training features")
-          end
-
-          # close all io objects
-          feature_files.each do |feature_name, file|
-            file.close
-            puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
-          end
-        end
-
-        dataset = merge_feature_arffs(@config.features, output_directory)
-        #merged_dataset = merge_feature_arffs(@config.features, output_directory)
-        #dataset = remove_missing(merged_dataset)
-
-        output_file = @config.training_output_arff_file
-        dataset.to_ARFF(output_file)
-        puts "'#{File.basename(output_file)}' saved to #{File.dirname(output_file)}"
-
-        dataset
       end
 
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
@@ -191,28 +177,6 @@ module Wikipedia
         print "Index file saved to #{file}.\n" if written > 0
 
         file_index
-      end
-
-      # Change attributes including -1 values to '?' (missing)
-      def self.invalid_to_missing(dataset)
-        filter = Weka::Filters::Unsupervised::Attribute::NumericCleaner.new
-
-        filter.data(dataset)
-        filter.min_threshold = 0.0
-        filter.min_default = java.lang.Double.parse_double('NaN')
-
-        filter.use
-      end
-
-      # Removes all instances with missing attributes
-      def self.remove_missing(dataset)
-        dataset = invalid_to_missing(dataset)
-
-        dataset.each_column do |attribute|
-          dataset.delete_with_missing(attribute)
-        end
-
-        dataset
       end
 
       # Loads arff files of given features and merge them into one arff file.
@@ -322,9 +286,7 @@ module Wikipedia
                            :merge_feature_arffs,
                            :print_progress,
                            :find_edits_data_for,
-                           :load_corpus_file_index,
-                           :invalid_to_missing,
-                           :remove_missing
+                           :load_corpus_file_index
     end
   end
 end
