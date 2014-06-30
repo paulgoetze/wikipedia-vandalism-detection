@@ -54,8 +54,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       old_revision = build(:old_revision)
       new_revision = build(:new_revision)
 
-      edit_redirect_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_redirect, new_revision, nil)
-      edit_redirect_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_redirect, nil)
+      edit_redirect_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_redirect, new_revision)
+      edit_redirect_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_redirect)
 
       @calculator.calculate_features_for(edit_redirect_1).count.should == config.features.count
       @calculator.calculate_features_for(edit_redirect_2).count.should == config.features.count
@@ -75,8 +75,8 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
       old_revision = build(:old_revision)
       new_revision = build(:new_revision)
 
-      edit_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_unparsable, new_revision, nil)
-      edit_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_unparsable, nil)
+      edit_1 =  Wikipedia::VandalismDetection::Edit.new(old_revision_unparsable, new_revision)
+      edit_2 =  Wikipedia::VandalismDetection::Edit.new(old_revision, new_revision_unparsable)
 
       @calculator.calculate_features_for(edit_1).should include Wikipedia::VandalismDetection::Features::MISSING_VALUE
       @calculator.calculate_features_for(edit_2).should include Wikipedia::VandalismDetection::Features::MISSING_VALUE

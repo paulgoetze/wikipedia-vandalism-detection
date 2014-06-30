@@ -5,17 +5,19 @@ module Wikipedia
   module VandalismDetection
     class Edit
 
-      attr_reader :old_revision, :new_revision, :page_id
+      attr_reader :old_revision, :new_revision
+      attr_accessor :page_id, :page_title
 
-      def initialize(old_revision, new_revision, page_id)
+      def initialize(old_revision, new_revision, attributes = {})
         message = "old revision: #{old_revision.id} | parent: #{old_revision.parent_id},
                   new revision: #{new_revision.id} | parent: #{new_revision.parent_id}"
 
-        raise ArgumentError, "Revisions are not sequent: #{message}." if !sequent?(old_revision, new_revision)
+        raise ArgumentError, "Revisions are not sequent: #{message}." unless sequent?(old_revision, new_revision)
 
         @old_revision = old_revision
         @new_revision = new_revision
-        @page_id = page_id
+        @page_id = attributes[:page_id]
+        @page_title = attributes[:page_title]
       end
 
       def serialize(*attributes)

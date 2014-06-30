@@ -256,6 +256,7 @@ module Wikipedia
         comment = edit_data['editcomment']
         new_timestamp = edit_data['edittime']
         page_id = edit_data['articleid']
+        page_title = edit_data['articletitle']
 
         old_revision_file = @file_index["#{old_revision_id}.txt"]
         new_revision_file = @file_index["#{new_revision_id}.txt"]
@@ -280,7 +281,7 @@ module Wikipedia
         new_revision.contributor = editor
         new_revision.timestamp = new_timestamp
 
-        Edit.new(old_revision, new_revision, page_id)
+        Edit.new(old_revision, new_revision, page_id: page_id, page_title: page_title)
       end
 
       # Gets or creates the corpus index file, which holds a hash of revision files name and their path

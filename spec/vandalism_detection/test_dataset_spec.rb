@@ -194,6 +194,16 @@ describe Wikipedia::VandalismDetection::TestDataset do
       edit.should be_a Wikipedia::VandalismDetection::Edit
     end
 
+    it "returns an edit whose page_title is not nil" do
+      edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
+      edit.page_title.should_not be_nil
+    end
+
+    it "returns an edit whose page_id is not nil" do
+      edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
+      edit.page_id.should_not be_nil
+    end
+
     it "returns nil for a not annotated edit with given revision ids" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('328774088', '328774188')
       edit.should be_nil
