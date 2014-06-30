@@ -9,12 +9,14 @@ module Wikipedia
       # This feature calculates the average editor's reputation on the current article.
       class UserReputation < Base
 
-        # Attention! This is pretty time consuming (up to 2 sec) due to the url request.
+        # Attention! This can be pretty time consuming (up to 2 sec) due to the url request.
         def calculate(edit)
           super
 
           revision = edit.new_revision
-          text = Wikipedia::wikitrust_request({ pageid: edit.page_id, revid: revision.id })
+          page_id = edit.page_id || Wikipedia::api_request({ titles: edit.page_title }).xpath("//page/@pageid").first
+
+          text = Wikipedia::wikitrust_request({ pageid: page_id, revid: revision.id })
           contributions = text.scan(/(\{\{#t:\d+,\d+,#{revision.contributor}\}\})/)
           # {{#t:trust,revision_id,UserName}}
 
