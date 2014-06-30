@@ -328,7 +328,7 @@ module Wikipedia
           features = instance[0...-3]
           old_revision_id = instance[-3].to_i
           new_revision_id = instance[-2].to_i
-          ground_truth_class_name = instance[-1]
+          ground_truth_class_name = Instances::CLASSES_SHORT[Instances::CLASSES.key(instance[-1])]
 
           confidence = @classifier.classify(features)
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)

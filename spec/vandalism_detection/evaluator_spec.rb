@@ -294,6 +294,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
       lines.shift # remove header
       lines.count.should == samples_count
     end
+
+    it "has the short class names as class value" do
+      @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
+      content = File.open(@test_classification_file, 'r')
+
+      lines = content.lines.to_a
+      lines.shift # remove header
+      short_classes = Wikipedia::VandalismDetection::Instances::CLASSES_SHORT
+      vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
+      regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+
+      lines.each do |line|
+        class_name = line.split[2]
+        is_short_class_name = short_classes[vandalism_index] == class_name || short_classes[regular_index] == class_name
+        is_short_class_name.should be_true
+      end
+    end
   end
 
   describe "#evaluate_testcorpus_classification" do
