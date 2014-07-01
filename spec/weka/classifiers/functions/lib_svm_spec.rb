@@ -7,6 +7,7 @@ describe Weka::Classifiers::Functions::LibSVM do
   before do
     @config = test_config
     @config.instance_variable_set :@classifier_type, 'Functions::LibSVM'
+    @config.instance_variable_set :@classifier_options, '-S 2 -N 0.001 -M 100.0 -C 1.0 -E 0.001 -P 0.1 -Z'
     @config.instance_variable_set :@cross_validation_fold, '2'
 
     use_configuration(@config)

@@ -110,6 +110,24 @@ describe Wikipedia::VandalismDetection::TestDataset do
         dataset.enumerate_attributes.to_a[-1].name.should == 'class'
       end
     end
+
+    it "normalizes the numeric features if LibSVM is used as classifier" do
+      config = test_config
+      config.instance_variable_set :@classifier_type, 'Functions::LibSVM'
+      use_configuration(config)
+
+      dataset = Wikipedia::VandalismDetection::TestDataset.build
+      puts dataset
+
+      dataset.to_a2d.each do |instance|
+        puts instance.to_s
+        numerics = instance[0...-3] # feature values
+        edit_ids = instance[-3..-2] # revision ids
+
+        numerics.each { |value| value.should be_between(0.0, 1.0) }
+        edit_ids.each { |value| value.should be > 1 }
+      end
+    end
   end
 
   describe "#instances" do

@@ -76,7 +76,9 @@ module Wikipedia
           end
         end
 
-        merge_feature_arffs(@config.features, output_directory)
+        dataset = merge_feature_arffs(@config.features, output_directory)
+        dataset = normalize(dataset) if @config.classifier_type.match('Functions::LibSVM')
+        dataset
       end
 
       class << self
@@ -250,6 +252,23 @@ module Wikipedia
         end
 
         dataset
+      end
+
+      # Returns the normalized dataset (important for lib svm one class classification)
+      def self.normalize(dataset)
+        remove_filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+        remove_filter.data(dataset)
+        remove_filter.filter_options("-V -R 1-#{@config.features.count}")
+        numerics_dataset = remove_filter.use
+
+        remove_filter.filter_options("-R 1-#{@config.features.count}")
+        non_numerics_dataset = remove_filter.use
+
+        normalize_filter = Weka::Filters::Unsupervised::Attribute::Normalize.new
+        normalize_filter.data(numerics_dataset)
+        normalized_dataset = normalize_filter.use
+
+        normalized_dataset.merge_with non_numerics_dataset
       end
 
       # Returns the Edit with the given revision ids.

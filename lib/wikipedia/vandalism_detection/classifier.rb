@@ -129,8 +129,13 @@ module Wikipedia
           end
         end
 
+        if @config.use_occ?
+          dataset.rename_attribute_value(dataset.class_index, one_class_index, Instances::OUTLIER)
+        elsif @config.classifier_type.match('Functions::LibSVM')
+          dataset = remove_regular_instances(dataset)
+        end
+
         @dataset = dataset
-        dataset.rename_attribute_value(dataset.class_index, one_class_index, Instances::OUTLIER) if @config.use_occ?
 
         begin
           classifier = classifier_class.new do
@@ -151,6 +156,28 @@ module Wikipedia
         else
           Instances::VANDALISM_CLASS_INDEX
         end
+      end
+
+      # Returns the given dataset cleaned up the regular instances
+      def remove_regular_instances(dataset)
+        features = @config.features
+
+        vandalism_dataset = Core::Type::Instances::Base.new do
+          features.each { |name| numeric :"#{name.gsub(' ', '_')}" }
+          nominal :class, [Instances::VANDALISM]
+        end
+
+        dataset.to_a2d.each_with_index do |attributes, index|
+          class_value = Instances::CLASSES[dataset.instance(index).value(dataset.class_index).to_i]
+          vandalism_dataset.add_instance([*attributes, class_value]) if  class_value == Instances::VANDALISM
+        end
+
+        filter = Weka::Filters::Unsupervised::Attribute::Normalize.new
+        filter.data(vandalism_dataset)
+        vandalism_dataset = filter.use
+        vandalism_dataset.class_index = features.count
+
+        vandalism_dataset
       end
     end
   end

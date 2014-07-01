@@ -330,7 +330,11 @@ module Wikipedia
           new_revision_id = instance[-2].to_i
           ground_truth_class_name = Instances::CLASSES_SHORT[Instances::CLASSES.key(instance[-1])]
 
-          confidence = @classifier.classify(features)
+          classification = @classifier.classify(features, return_all_params: true)
+          puts classification.to_s
+          class_value = (classification[:class_index] == Instances::VANDALISM_CLASS_INDEX + 1) ? 1.0 : 0.0
+          confidence = classification[:confidence] || class_value
+
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
           confidence_value =  must_be_inverted ? (1.0 - confidence) : confidence
 
