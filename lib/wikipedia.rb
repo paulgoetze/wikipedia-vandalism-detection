@@ -24,12 +24,12 @@ module Wikipedia
       Timeout::timeout(timeout) do
         content = URI.parse(uri).read
       end
-    rescue Timeout::Error
+    rescue => e
       if times > 0
         times -= 1
         retry
       else
-        raise Timeout::Error,  "#{times} times retrying request failed."
+        raise "#{times} times retrying request failed.\n#{e.message}"
       end
     end
 
