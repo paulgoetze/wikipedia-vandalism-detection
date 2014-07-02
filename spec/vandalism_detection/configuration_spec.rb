@@ -365,7 +365,8 @@ describe Wikipedia::VandalismDetection do
           "user reputation",
           "vulgarism frequency",
           "vulgarism impact",
-          "weekday"
+          "weekday",
+          "words increment"
       ]
 
       Wikipedia::VandalismDetection.configuration['features'].should == features

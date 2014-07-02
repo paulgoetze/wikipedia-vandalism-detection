@@ -213,7 +213,8 @@ module Wikipedia
               "user reputation",
               "vulgarism frequency",
               "vulgarism impact",
-              "weekday"
+              "weekday",
+              "words increment"
           ],
           "corpora" => {
             "base_directory" => nil,
