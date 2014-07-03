@@ -129,13 +129,6 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
     end
 
-    [:recalls, :precisions,:fp_rates, :tp_rates].each do |attribute|
-      it "returns a Hash including #{attribute} of length #{@sample_count}" do
-        #start and end value could be added => + 2
-        @curve_data[attribute].count.should be_between(@sample_count, @sample_count + 2)
-      end
-    end
-
     describe "#predictive_values" do
 
       before do
@@ -165,14 +158,14 @@ describe Wikipedia::VandalismDetection::Evaluator do
     describe "#sort_curve_values" do
 
       before do
-        @x = [0.7, 0.4, 0.8, 0.4]
-        @y = [0.6, 0.8, 0.2, 0.6]
+        @x = [0.7, 0.4, 0.8, 0.4, 0.7]
+        @y = [0.6, 0.8, 0.2, 0.6, 0.6]
 
         @x_sorted = [0.4, 0.4, 0.7, 0.8]
         @y_sorted = [0.8, 0.6, 0.6, 0.2]
       end
 
-      it "returns the sorted input values" do
+      it "returns the unique sorted input values" do
         hash = { x: @x_sorted, y: @y_sorted }
         sorted = @evaluator.sort_curve_values(@x, @y)
 
@@ -187,9 +180,41 @@ describe Wikipedia::VandalismDetection::Evaluator do
         sorted.should == hash
       end
 
+      it "adds x start value if only one value given" do
+        start_values = { x: -1.0 }
+        hash = { x: @x_sorted.unshift(start_values[:x]), y: @y_sorted.unshift(@y_sorted.first) }
+        sorted = @evaluator.sort_curve_values(@x, @y, start_values)
+
+        sorted.should == hash
+      end
+
+      it "adds y start value if only one value given" do
+        start_values = { y: -2.0 }
+        hash = { x: @x_sorted.unshift(@x_sorted.first), y: @y_sorted.unshift(start_values[:y]) }
+        sorted = @evaluator.sort_curve_values(@x, @y, start_values)
+
+        sorted.should == hash
+      end
+
       it "adds end values if given" do
         end_values = { x: -1.0, y: -2.0 }
-        hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(end_values[:y])}
+        hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(end_values[:y]) }
+        sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
+
+        sorted.should == hash
+      end
+
+      it "adds y end values if only one value is given" do
+        end_values = {y: -2.0 }
+        hash = { x: @x_sorted.push(@x_sorted.last), y: @y_sorted.push(end_values[:y]) }
+        sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
+
+        sorted.should == hash
+      end
+
+      it "adds x end values if only one value is given" do
+        end_values = {x: -1.0 }
+        hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(@y_sorted.last) }
         sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
 
         sorted.should == hash

@@ -29,7 +29,7 @@ module Wikipedia
       DEFAULT_SAMPLE_COUNT = 200.freeze
 
       def initialize(classifier)
-        raise(ArgumentError, "Classifier param has to be a Wikipedia::VandalismDetection::Classifier instance") unless
+        raise(ArgumentError, 'Classifier param has to be a Wikipedia::VandalismDetection::Classifier instance') unless
             classifier.is_a?(Wikipedia::VandalismDetection::Classifier)
 
         @config = Wikipedia::VandalismDetection.configuration
@@ -141,7 +141,8 @@ module Wikipedia
 
       # Returns the performance curve points (recall, precision, fp-rate) and computed area under curves.
       def test_performance_curves(ground_truth, classification, sample_count)
-        thresholds = (0.0..1.0).step(1.0 / (sample_count - 1)).to_a
+        thresholds = (0.0...1.0).step(1.0 / (sample_count.to_f)).to_a
+        thresholds.shift #remove first value to not use the [0,1] value in curve
 
         precisions = []
         recalls = []
@@ -151,18 +152,14 @@ module Wikipedia
           values = predictive_values(ground_truth, classification, threshold)
           performance_params = performance_parameters(values[:tp], values[:fp], values[:tn], values[:fn])
 
-          if performance_params[:precision] == 0.0 && performance_params[:recall] == 0.0
-            precisions.push 1.0
-          else
-            precisions.push performance_params[:precision]
-          end
-            recalls.push performance_params[:recall]
-            fp_rates.push performance_params[:fp_rate]
+          precisions.push performance_params[:precision]
+          recalls.push performance_params[:recall]
+          fp_rates.push performance_params[:fp_rate]
         end
 
         tp_rates = recalls
-        pr_sorted = sort_curve_values(recalls, precisions, { x: 0.0, y: 1.0 }, { x: 1.0, y: 0.0 })
-        roc_sorted = sort_curve_values(fp_rates, tp_rates, { x: 0.0, y: 0.0 }, { x: 1.0, y: 1.0 })
+        pr_sorted = sort_curve_values(recalls, precisions, { x: 0.0 }, { x: 1.0 })
+        roc_sorted = sort_curve_values(fp_rates, tp_rates, { y: 0.0 }, { x: 1.0 })
 
         recalls = pr_sorted[:x]
         precisions = pr_sorted[:y]
@@ -242,7 +239,7 @@ module Wikipedia
       # Returns the calculated area under curve for given point values
       # x and y values has to be float arrays of the same length.
       def area_under_curve(x_values, y_values)
-        raise ArgumentError, "x and y values must have the same length!" unless x_values.count == y_values.count
+        raise ArgumentError, 'x and y values must have the same length!' unless x_values.count == y_values.count
 
         sum = 0.0
         last_index = x_values.size - 1
@@ -271,25 +268,25 @@ module Wikipedia
       #  #=>Hash { x: [0.0, *x, 1.0], y: [0.0, *y, 1.0] }
       def sort_curve_values(x_values, y_values, start_values = nil, end_values = nil)
         merge_sorted = (x_values.each_with_index.map { |x, index| [x, y_values[index]] })
-        merge_sorted = merge_sorted.sort_by{ |values| [values[0], - values[1]] }
+        merge_sorted = merge_sorted.sort_by{ |values| [values[0], - values[1]] }.uniq
 
         x = merge_sorted.transpose[0]
         y = merge_sorted.transpose[1]
 
-        start_values_set = start_values && start_values.has_key?(:x) && start_values.has_key?(:y)
-        end_values_set = end_values && end_values.has_key?(:x) && end_values.has_key?(:y)
+        start_values_set = start_values && (start_values.has_key?(:x) || start_values.has_key?(:y))
+        end_values_set = end_values && (end_values.has_key?(:x) || end_values.has_key?(:y))
 
         if start_values_set
-          unless (x.first == start_values[:x] && y.first == start_values[:y])
-            x.unshift start_values[:x]
-            y.unshift start_values[:y]
+          unless x.first == start_values[:x] && y.first == start_values[:y]
+            x.unshift(start_values[:x] || x.first)
+            y.unshift(start_values[:y] || y.first)
           end
         end
 
         if end_values_set
-          unless (x.last == end_values[:x] && y.last == end_values[:y])
-            x.push end_values[:x]
-            y.push end_values[:y]
+          unless x.last == end_values[:x] && y.last == end_values[:y]
+            x.push(end_values[:x] || x.last)
+            y.push(end_values[:y] || y.last)
           end
         end
 
@@ -320,7 +317,7 @@ module Wikipedia
         file = File.open(file_path, 'w')
 
         feature_names = dataset.enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
-        header = ["OLDREVID", "NEWREVID", "C", "CONF", *feature_names].join(" ")
+        header = ['OLDREVID', 'NEWREVID', 'C', 'CONF', *feature_names].join(' ')
 
         file.puts header
 
@@ -331,14 +328,21 @@ module Wikipedia
           ground_truth_class_name = Instances::CLASSES_SHORT[Instances::CLASSES.key(instance[-1])]
 
           classification = @classifier.classify(features, return_all_params: true)
-          puts classification.to_s
-          class_value = (classification[:class_index] == Instances::VANDALISM_CLASS_INDEX + 1) ? 1.0 : 0.0
+          class_value = Features::MISSING_VALUE
+
+          if classification[:class_index] == Instances::VANDALISM_CLASS_INDEX
+            class_value = 1.0
+          elsif classification[:class_index] == Instances::REGULAR_CLASS_INDEX
+            class_value = 0.0
+          end
+
           confidence = classification[:confidence] || class_value
 
           must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
           confidence_value =  must_be_inverted ? (1.0 - confidence) : confidence
+          features = features.join(' ').gsub(Float::NAN.to_s, Features::MISSING_VALUE).split
 
-          file.puts [old_revision_id, new_revision_id, ground_truth_class_name, confidence_value, *features].join(" ")
+          file.puts [old_revision_id, new_revision_id, ground_truth_class_name, confidence_value, *features].join(' ')
         end
 
         file.close
@@ -375,7 +379,7 @@ module Wikipedia
           puts "analyzing feature... '#{feature_name}'"
 
           dataset = filter_single_attribute(training_dataset, index)
-          print " | train classifier with feature data..."
+          print ' | train classifier with feature data...'
           classifier = Classifier.new(dataset)
           print "done \n"
 
@@ -402,12 +406,12 @@ module Wikipedia
 
         ground_truth_file_path = @config.test_corpus_ground_truth_file
 
-        puts "train classifier..."
+        puts 'train classifier...'
         classifier = Classifier.new
 
         test_dataset = TestDataset.build!
 
-        puts "computing classification..."
+        puts 'computing classification...'
         classification = classification_data(classifier, test_dataset)
         ground_truth = ground_truth_hash(ground_truth_file_path)
 
