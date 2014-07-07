@@ -144,11 +144,13 @@ module Wikipedia
           ground_truth = ground_truth_hash(ground_truth_file_path)
 
           dataset.to_a2d.each do |instance|
-            key = :"#{instance[-2].to_i}-#{instance[-1].to_i}"
+            old_revision_id = instance[-2].to_i
+            new_revision_id = instance[-1].to_i
+            key = :"#{old_revision_id}-#{new_revision_id}"
 
             if ground_truth.has_key?(key)
               class_value = Instances::CLASSES[Instances::CLASSES_SHORT.key(ground_truth[key][:class])]
-              class_dataset.add_instance([class_value])
+              class_value ? class_dataset.add_instance([class_value]) : class_dataset.add(Core::Type::DenseInstance.new(1))
             else
               class_dataset.add(Core::Type::DenseInstance.new(1)) # missing
             end
@@ -220,11 +222,11 @@ module Wikipedia
         file_index
       end
 
-      # Returns whether the
-      def self.annotated_revision?(revision_file)
+      # Returns whether the given revision is annotated in the configured gold annotation file.
+      def self.annotated_revision?(revision_file_or_id)
         @annotated_revisions ||= annotated_revisions
 
-        revision_id = revision_file.gsub('.txt', '')
+        revision_id = revision_file_or_id.to_s.gsub('.txt', '')
         @annotated_revisions[revision_id.to_sym]
       end
 
