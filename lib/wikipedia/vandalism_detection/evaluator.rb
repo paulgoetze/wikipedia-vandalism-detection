@@ -158,7 +158,7 @@ module Wikipedia
         end
 
         tp_rates = recalls
-        pr_sorted = sort_curve_values(recalls, precisions, { x: 0.0 }, { x: 1.0 })
+        pr_sorted = sort_curve_values(recalls, precisions, { x: 0.0 }, { y: 0.0 })
         roc_sorted = sort_curve_values(fp_rates, tp_rates, { y: 0.0 }, { x: 1.0 })
 
         recalls = pr_sorted[:x]
