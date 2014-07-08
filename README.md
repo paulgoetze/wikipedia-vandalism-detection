@@ -96,8 +96,8 @@ C) the classifier type and its options and the number of cross validation splits
 
 **Create training and test ARFF file from configured corpus:**
 
-    Wikipedia::VandalismDetection::TrainingDataset.build!
-    Wikipedia::VandalismDetection::TestDataset.build!
+    training_dataset = Wikipedia::VandalismDetection::TrainingDataset.build
+    test_dataset = Wikipedia::VandalismDetection::TestDataset.build
 
 While creating the training and test datasets, for each a corpus file index is created into the configured `index_file`
 directory.
@@ -175,9 +175,9 @@ Get each features predictive value for analysis:
     evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
     
     analysis_data = evaluator.feature_analysis #default sample_count = 100
-    analysis_data = evaluator.feature_analysis(sample_count: 200)
+    analysis_data = evaluator.feature_analysis(sample_count: 1000)
     
-This returns a hash comrpising all feature names as configured as keys and the threshold hashes as values.
+This returns a hash comprising all feature names as configured as keys and the threshold hashes as values.
 
     {
       feature_name_1:
