@@ -329,11 +329,13 @@ describe Wikipedia::VandalismDetection::Evaluator do
       short_classes = Wikipedia::VandalismDetection::Instances::CLASSES_SHORT
       vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
       regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+      missing_index = Wikipedia::VandalismDetection::Instances::NOT_KNOWN_INDEX
+
+      names = [short_classes[regular_index], short_classes[vandalism_index], short_classes[missing_index]]
 
       lines.each do |line|
         class_name = line.split[2]
-        is_short_class_name = short_classes[vandalism_index] == class_name || short_classes[regular_index] == class_name
-        is_short_class_name.should be_true
+        names.include?(class_name).should be_true
       end
     end
   end

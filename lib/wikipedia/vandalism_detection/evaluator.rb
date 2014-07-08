@@ -330,10 +330,22 @@ module Wikipedia
           classification = @classifier.classify(features, return_all_params: true)
           class_value = Features::MISSING_VALUE
 
-          if classification[:class_index] == Instances::VANDALISM_CLASS_INDEX
-            class_value = 1.0
-          elsif classification[:class_index] == Instances::REGULAR_CLASS_INDEX
-            class_value = 0.0
+          if @config.classifier_type.match(/Functions::LibSVM/) && @config.classifier_options.match(/-s 2/i)
+            # LibSVM with one class has only one class during training
+            # Vandalism will get class index 0 while classifying
+            # Regular will get missing (or Instances::NOT_KNOWN_INDEX in Wikipedia::VandalismDetection::Classifier)
+
+            if classification[:class_index] == 0
+              class_value = 1.0
+            elsif classification[:class_index] == Instances::NOT_KNOWN_INDEX
+              class_value = 0.0
+            end
+          else
+            if classification[:class_index] == Instances::VANDALISM_CLASS_INDEX
+              class_value = 1.0
+            elsif classification[:class_index] == Instances::REGULAR_CLASS_INDEX
+              class_value = 0.0
+            end
           end
 
           confidence = classification[:confidence] || class_value
