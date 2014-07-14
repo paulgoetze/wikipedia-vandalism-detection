@@ -4,7 +4,7 @@ module Wikipedia
   module VandalismDetection
     module Features
 
-      # This feature computes the character diversisty of the edit's new revision inserted text.
+      # This feature computes the character diversity of the edit's new revision inserted text.
       # I.e. how many unique characters are amongst all inserted?
       #
       # Random typing leads to less unique characters relative to full length =>
