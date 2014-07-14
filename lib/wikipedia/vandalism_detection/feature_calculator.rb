@@ -9,8 +9,8 @@ module Wikipedia
   module VandalismDetection
 
     # This class provides methods for calculating a feature set of an edit.
-    # The features that shall be used can be defined in the conf/config.yml file
-    # under the features: root attribute like this:
+    # The features that shall be used can be defined in the config/config.yml file
+    # under the 'features:' root attribute like this:
     #
     # features:
     #   - anonymity
@@ -34,7 +34,6 @@ module Wikipedia
 
         features = @feature_classes.map do |feature|
           begin
-            print "\r | #{feature.class.name.demodulize}        \t\t\t"
             feature.calculate(edit)
           rescue WikitextExtractionError => e
             $stderr.print %Q{
@@ -48,7 +47,7 @@ module Wikipedia
         features
       end
 
-      # Returns the calculated Numeric feature value for given edti and feature with given name
+      # Returns the calculated Numeric feature value for given edit and feature with given name
       def calculate_feature_for(edit, feature_name)
         raise ArgumentError, "First parameter has to be an Edit." unless edit.is_a? Edit
         raise ArgumentError, "Second parameter has to be a feature name String (e.g. 'anonymity')." unless \
