@@ -23,6 +23,14 @@ FactoryGirl.define do
     f.comment Wikipedia::VandalismDetection::Text.new
   end
 
+  factory :even_newer_revision, class: Wikipedia::VandalismDetection::Revision do |f|
+    f.id '3'
+    f.parent_id '2'
+    f.timestamp '2014-11-28T18:00:00Z'
+    f.text Wikipedia::VandalismDetection::Text.new('text 3')
+    f.comment Wikipedia::VandalismDetection::Text.new
+  end
+
   factory :anonymous_revision, class: Wikipedia::VandalismDetection::Revision do |f|
     f.id '2'
     f.parent_id '1'

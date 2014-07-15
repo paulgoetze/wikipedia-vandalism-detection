@@ -1,12 +1,13 @@
 require 'wikipedia/vandalism_detection/diff'
 require 'wikipedia/vandalism_detection/text'
+require 'wikipedia/vandalism_detection/page'
 
 module Wikipedia
   module VandalismDetection
     class Edit
 
       attr_reader :old_revision, :new_revision
-      attr_accessor :page_id, :page_title
+      attr_accessor :page
 
       def initialize(old_revision, new_revision, attributes = {})
         message = "old revision: #{old_revision.id} | parent: #{old_revision.parent_id},
@@ -16,8 +17,7 @@ module Wikipedia
 
         @old_revision = old_revision
         @new_revision = new_revision
-        @page_id = attributes[:page_id]
-        @page_title = attributes[:page_title]
+        @page = attributes[:page] || Page.new
       end
 
       def serialize(*attributes)

@@ -245,7 +245,11 @@ module Wikipedia
         new_revision.contributor = editor
         new_revision.timestamp = new_timestamp
 
-        Edit.new(old_revision, new_revision, page_id: page_id, page_title: page_title)
+        page = Page.new
+        page.id = page_id
+        page.title = page_title
+
+        Edit.new(old_revision, new_revision, page: page)
       end
 
       # Gets or creates the corpus index file, which holds a hash of revision files name and their path

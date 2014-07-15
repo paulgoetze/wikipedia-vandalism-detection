@@ -16,8 +16,31 @@ module Wikipedia
           super
 
           revision = edit.new_revision
-          xml = Wikipedia::api_request({ list: 'usercontribs', ucuser: revision.contributor, ucprop: 'ids|timestamp' })
-          page_item =  xml.xpath("//item[@revid='#{revision.id}']").first
+          page = edit.page
+
+          if page && page.id
+            edits_count_from_page(edit)
+          else
+            edits_count_from_api_request(revision)
+          end
+        end
+
+        protected
+
+        def edits_count_from_page(edit)
+          edit_revision = edit.new_revision
+
+          previous_count = edit.page.edits.reduce(0) do |count, page_edit|
+            page_revision = page_edit.new_revision
+            count += 1 if page_revision.contributor == edit_revision.contributor &&
+                time_diff_in_sec(page_revision.timestamp, edit_revision.timestamp) < 0
+            count
+          end
+        end
+
+        def edits_count_from_api_request(revision)
+          xml = Wikipedia::api_request({list: 'usercontribs', ucuser: revision.contributor, ucprop: 'ids|timestamp'})
+          page_item = xml.xpath("//item[@revid='#{revision.id}']").first
 
           if page_item
             page_id = page_item.xpath("@pageid").text
@@ -32,8 +55,6 @@ module Wikipedia
             0
           end
         end
-
-        protected
 
         def time_diff_in_sec(time1, time2)
           ((DateTime.parse(time1) - DateTime.parse(time2)) * 24 * 60 * 60).to_i

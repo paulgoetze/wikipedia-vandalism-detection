@@ -56,29 +56,16 @@ describe Wikipedia::VandalismDetection::Page do
       @page.edits.count.should == 2
     end
 
-    it "computes edits of which each holds the pages id" do
-      page_id = '1234'
-      @page.id = page_id
+    it "computes edits of which each holds the parent page as reference" do
+      @page.id = '1234'
+      @page.title = 'Article'
 
       @page.add_revision build(:empty_revision, id: '1')
       @page.add_revision build(:empty_revision, id: '3', parent_id: "2")
       @page.add_revision build(:empty_revision, id: '2', parent_id: "1")
 
       @page.edits.each do |edit|
-        edit.page_id.should == page_id
-      end
-    end
-
-    it "computes edits of which each holds the pages title" do
-      page_title = 'Title'
-      @page.title = page_title
-
-      @page.add_revision build(:empty_revision, id: '1')
-      @page.add_revision build(:empty_revision, id: '3', parent_id: "2")
-      @page.add_revision build(:empty_revision, id: '2', parent_id: "1")
-
-      @page.edits.each do |edit|
-        edit.page_title.should == page_title
+        edit.page.should == @page
       end
     end
   end

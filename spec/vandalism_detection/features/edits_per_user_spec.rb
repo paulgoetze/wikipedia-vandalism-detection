@@ -10,15 +10,40 @@ describe Wikipedia::VandalismDetection::Features::EditsPerUser do
 
   describe "#calculate" do
 
-    it "returns the number of previously submitted edit from the same IP or ID" do
-      #http://en.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&ucuser=<name or ip>&ucprop=ids
-      old_revision = build(:old_revision, id: '527136737')
-      new_revision = build(:new_revision, id: '527137015', parent_id: '527136737',
-                           contributor: '142.11.81.219', timestamp: '2012-12-09T05:30:07Z' )
+    describe "online" do
+      it "returns the number of previously submitted edit from the same IP or ID" do
+        #http://en.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&ucuser=<name or ip>&ucprop=ids
+        old_revision = build(:old_revision, id: '527136737')
+        new_revision = build(:new_revision, id: '527137015', parent_id: '527136737',
+                             contributor: '142.11.81.219', timestamp: '2012-12-09T05:30:07Z' )
 
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 1
+        @feature.calculate(edit).should == 1
+      end
+    end
+
+    describe "offline" do
+      before do
+        page = build(:page)
+        page.id = '1234'
+        page.title = 'Page Title'
+
+        # contributor: see factories/page.rb !
+        old_revision = build(:new_revision, contributor: 'User')
+        new_revision = build(:even_newer_revision, contributor: 'User')
+
+        @edit = build(:edit, old_revision: old_revision, new_revision: new_revision, page: page)
+      end
+
+      it "does not use an API call if the edit has a page reference" do
+        expect(Wikipedia).to_not receive :api_request
+        @feature.calculate(@edit)
+      end
+
+      it "returns the number of previously submitted edit from the same IP or ID" do
+        @feature.calculate(@edit).should == 1
+      end
     end
   end
 end

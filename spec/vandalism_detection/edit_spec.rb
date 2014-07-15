@@ -18,49 +18,36 @@ describe Wikipedia::VandalismDetection::Edit do
     @edit.new_revision.should == @new_revision
   end
 
-  it "can be build with a page_id" do
+  it "can be build with its parent page referenced" do
+    page = build(:page, id: '1234', title: 'Page Title')
+    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
+    edit.page.should == page
+  end
+
+  it "can be build with a page to get the id" do
     page_id = '1234'
-    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page_id: page_id)
-    edit.page_id.should == page_id
+    page = Wikipedia::VandalismDetection::Page.new
+    page.id = page_id
+
+    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
+    edit.page.id.should == page_id
   end
 
-  it "can be build with a page_title" do
+  it "can be build with a page to get the title" do
+    page = Wikipedia::VandalismDetection::Page.new
     page_title = 'Article'
-    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page_title: page_title)
-    edit.page_title.should == page_title
-  end
+    page.title = page_title
 
-  it "can be build with an page_id and page_title" do
-    page_id = '1234'
-    page_title = 'Article'
-    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision,
-                                                   page_id: page_id, page_title: page_title)
-
-    edit.page_id.should == page_id
-    edit.page_title.should == page_title
-  end
-
-  describe "#page_id" do
-    it "is an attr writer for edit" do
-      expect { @edit.page_id = '1234' }.not_to raise_error
-    end
-
-    it "is an attr reader for edit" do
-      expect { @edit.page_id }.not_to raise_error
-    end
-  end
-
-  describe "#page_title" do
-    it "is an attr writer for edit" do
-      expect { @edit.page_title = 'Title' }.not_to raise_error
-    end
-
-    it "is an attr reader for edit" do
-      expect { @edit.page_title }.not_to raise_error
-    end
+    edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
+    edit.page.title.should == page_title
   end
 
   describe "exception handling" do
+    it "does not raise an error if page parameters are called" do
+      edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision)
+      expect { edit.page.id }.not_to raise_error
+    end
+
     it "raises no error if revisions are not sequent" do
       expect { Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision) }.not_to raise_error
     end

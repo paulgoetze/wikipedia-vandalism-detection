@@ -14,7 +14,7 @@ module Wikipedia
           super
 
           revision = edit.new_revision
-          page_id = edit.page_id || Wikipedia::api_request({ titles: edit.page_title }).xpath("//page/@pageid").first
+          page_id = edit.page.id || Wikipedia::api_request({ titles: edit.page.title }).xpath("//page/@pageid").first
 
           text = Wikipedia::wikitrust_request({ pageid: page_id, revid: revision.id })
           contributions = text.scan(/(\{\{#t:\d+,\d+,#{revision.contributor}\}\})/)

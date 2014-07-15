@@ -41,9 +41,10 @@ module Wikipedia
 
         revisions.each do |id, new_revision|
           old_revision = revisions[new_revision.parent_id]
-          @edits.push Edit.new(old_revision, new_revision, page_id: @id, page_title: @title) unless old_revision.nil?
+          @edits.push Edit.new(old_revision, new_revision) unless old_revision.nil?
         end
 
+        @edits.each { |edit| edit.instance_variable_set(:@page, self) }
         @edits
       end
     end
