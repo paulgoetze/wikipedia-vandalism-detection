@@ -87,10 +87,32 @@ B) the features used by the feature calculator
 C) the classifier type and its options and the number of cross validation splits for the classifier evaluation
 
     classifier:
-      type: Trees::RandomForest     # Weka classifier class
-      options: -I 10 -K 0.5         # for further classifier options see Weka-dev documentation
-      cross-validation-fold: 5      # default is 10
-      uniform-training-data: true   # default is false, every other text than 'false' will lead to true
+      type: Trees::RandomForest         # Weka classifier class
+      options: -I 10 -K 0.5             # same as for Weka, for further classifier options see Weka-dev documentation
+      cross-validation-fold: 5          # default is 10
+      training-data-options: balanced   # default is unbalanced
+      
+`training-data-options` is used to resample the training dataset: 
+
+* `unbalanced` is the default value and uses the original dataset 
+* `balanced` uses random undersampling of the majority class
+* `oversampled` uses SMOTE oversampling (with percentage `-p`) and random undersampling (with minority/majority class balance `-u`) 
+  
+Examples:
+
+    # 200% SMOTE oversampling with 300% random undersampling
+    training-data-options: oversampled -p 200 -u true 300 
+    
+    # default 100% SMOTE oversampling with 300% random undersampling
+    training-data-options: oversampled -u true 300 
+    
+    # 200% SMOTE oversampling with default full (100% minority/majority class balance) random undersampling
+    training-data-options: oversampled -p 200 
+    
+    # default 100% SMOTE oversampling without undersampling
+    training-data-options: oversampled -u false
+    
+Instead of the `true` option you can also use `t`, `y` and `yes` as well as their upper case pendants.
 
 ### Examples
 

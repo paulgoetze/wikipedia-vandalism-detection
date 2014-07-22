@@ -71,14 +71,23 @@ module Wikipedia
         if oversampled_training_data?
           params = @training_data_options.gsub(TRAINING_DATA_OVERSAMPLED, '').split('-')
 
-          percent_default = 100
-          undersampled_default = true
+          percent_default = 100.0
+          undersampling_default = 100.0
 
           percent_option = params.select { |param| param.match /(p\s|percentage\s)\d+/i }[0]
           undersampling_option = params.select { |param| param.match /(u\s|undersampling\s)/i }[0]
 
           percent = percent_option.nil? ? percent_default : percent_option.split.last.to_f
-          undersampling = undersampling_option.nil? ? undersampled_default : !undersampling_option.match(/(true|t|yes|y|1)$/i).nil?
+          undersampling = undersampling_default
+
+          if undersampling_option
+            if !undersampling_option.match(/(true|t|yes|y)/i).nil?
+              undersampling_percentage = undersampling_option.split.last
+              undersampling = undersampling_percentage.nil? ? undersampling_default : undersampling_percentage.to_f
+            else
+              undersampling = 0.0
+            end
+          end
 
           { percentage: percent, undersampling: undersampling }
         else

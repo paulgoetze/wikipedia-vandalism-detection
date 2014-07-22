@@ -110,11 +110,12 @@ module Wikipedia
       # Doc: http://weka.sourceforge.net/doc.packages/SMOTE/weka/filters/supervised/instance/SMOTE.html
       def self.oversampled_instances(options = {})
         config = Wikipedia::VandalismDetection.configuration
-        options = config.oversampling_options if options.empty?
+        default_options = config.oversampling_options
+        options[:percentage] = default_options[:percentage] unless options[:percentage]
+        options[:undersampling] = default_options[:undersampling] unless options[:undersampling]
 
         smote = Weka::Filters::Supervised::Instance::SMOTE.new
         dataset = self.build
-
         percentage = options[:percentage]
         smote_options = "-P #{percentage.to_i}" if percentage
 
@@ -123,19 +124,16 @@ module Wikipedia
           filter_options smote_options if smote_options
         end
 
-        undersampling = options[:undersampling]
-        use_undersampling = undersampling.nil? ? true : undersampling
-
+        undersampling = options[:undersampling] / 100.0
         smote_dataset = smote.use
 
-        if use_undersampling
+        if undersampling > 0.0
           subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
-
 
           # balance (remove majority instances)
           subsample.set do
             data smote_dataset
-            filter_options '-M 1'
+            filter_options "-M #{undersampling}"
           end
 
           subsample.use

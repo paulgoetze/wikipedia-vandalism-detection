@@ -209,14 +209,14 @@ describe Wikipedia::VandalismDetection do
 
       describe "Returning of configured options" do
         before do
-          @percentage = 300
-          @undersampling = false
+          @percentage = 300.0
+          @undersampling = 200.0
           @hash = { percentage: @percentage, undersampling: @undersampling }
         end
 
         it "returns the configured options with downcase params" do
           config = test_config
-          options = "oversampled -p #{@percentage} -u #{@undersampling}"
+          options = "oversampled -p #{@percentage} -u true #{@undersampling}"
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
@@ -225,7 +225,7 @@ describe Wikipedia::VandalismDetection do
 
         it "returns the configured options with upcase params" do
           config = test_config
-          options = "oversampled -P #{@percentage} -U #{@undersampling}"
+          options = "oversampled -P #{@percentage} -U true #{@undersampling}"
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
@@ -234,7 +234,7 @@ describe Wikipedia::VandalismDetection do
 
         it "returns the configured options with full params" do
           config = test_config
-          options = "oversampled -Percentage #{@percentage} -Undersampling #{@undersampling}"
+          options = "oversampled -Percentage #{@percentage} -Undersampling true #{@undersampling}"
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
@@ -244,11 +244,11 @@ describe Wikipedia::VandalismDetection do
 
       it "returns a default value for percent if not set" do
         percentage = 100 # default value
-        undersampling = false
+        undersampling = 200
         hash = { percentage: percentage, undersampling: undersampling }
 
         config = test_config
-        config.instance_variable_set(:@training_data_options, "oversampled -u #{undersampling}")
+        config.instance_variable_set(:@training_data_options, "oversampled -u true #{undersampling}")
         use_configuration(config)
 
         expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
@@ -256,11 +256,23 @@ describe Wikipedia::VandalismDetection do
 
       it "returns a default true for undersampling if not set" do
         percentage = 200
-        undersampling = true # default value
+        undersampling = 100 # default value
         hash = { percentage: percentage, undersampling: undersampling }
 
         config = test_config
         config.instance_variable_set(:@training_data_options, "oversampled -p #{percentage}")
+        use_configuration(config)
+
+        expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
+      end
+
+      it "returns a percentange value for undersampling if set in -u option" do
+        percentage = 200
+        undersampling = 0.001
+        hash = { percentage: percentage, undersampling: undersampling }
+
+        config = test_config
+        config.instance_variable_set(:@training_data_options, "oversampled -p #{percentage} -u true #{undersampling}")
         use_configuration(config)
 
         expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
