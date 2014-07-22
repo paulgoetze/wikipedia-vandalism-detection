@@ -16,6 +16,7 @@ module Wikipedia
       def initialize
         @revisions = {}
         @edits = []
+        @revision_added = false
       end
 
       def add_revision(revision)
