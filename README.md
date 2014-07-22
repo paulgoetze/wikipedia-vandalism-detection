@@ -197,8 +197,12 @@ This returns a hash comprising all feature names as configured as keys and the t
 
 **Creating new Features:**
 
-You can define your own new Feature classes and use them by configuration in the config.yml.
- 
+You can define your own new Feature classes and use them by configuration in the config.yml. 
+
+Make sure to define the Feature class inside of the `Wikipedia::VandalismDetection::Features` module 
+and to implement the `calculate` method 
+(also refer to the `Wikipedia::VandalismDetection::Features::Base` class definition).
+
     module Wikipedia
       module VandalismDetection
         module Features
@@ -216,9 +220,7 @@ You can define your own new Feature classes and use them by configuration in the
       end
     end
     
-Make sure to define the Feature class inside of the `Wikipedia::VandalismDetection::Features` module 
-and to implement the `claculate` method 
-(also refer to the `Wikipedia::VandalismDetection::Features::Base` class definition).
+
 
 While creating new Feature classes you should be aware of the following naming convention: 
 The feature's name in the config.yml is the *downcased name with spaces or dashes* of the feature class name
@@ -229,7 +231,7 @@ E.g.:
       - my new 
       - my-new
       
-both search for Feature classes with the name `MyNew`.
+both search for a Feature class with the name `MyNew`.
 
 
 ## Contributing
