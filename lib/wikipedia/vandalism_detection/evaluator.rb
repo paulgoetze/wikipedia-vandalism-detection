@@ -350,7 +350,7 @@ module Wikipedia
 
           confidence = classification[:confidence] || class_value
 
-          must_be_inverted = @config.use_occ? && !(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
+          must_be_inverted = @config.use_occ? && !!(@classifier.classifier_instance.options =~ /#{Instances::VANDALISM}/)
           confidence_value =  must_be_inverted ? (1.0 - confidence) : confidence
           features = features.join(' ').gsub(Float::NAN.to_s, Features::MISSING_VALUE).split
 
