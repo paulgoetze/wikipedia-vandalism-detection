@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::CommentMarkupFrequency do
       new_revision = build(:new_revision, comment: comment)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 3.0 / 7.0
+      expect(@feature.calculate(edit)).to eq 3.0 / 7.0
     end
 
     it "returns 0.0 on emtpy text comment" do
@@ -28,7 +28,7 @@ describe Wikipedia::VandalismDetection::Features::CommentMarkupFrequency do
       new_revision = build(:new_revision, comment: comment)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end

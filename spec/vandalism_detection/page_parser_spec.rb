@@ -12,13 +12,15 @@ describe Wikipedia::VandalismDetection::PageParser do
       it "returns a Wikipedia::Page object" do
         xml = load_file('vandalism_on_wikipedia.xml')
         @page = @parser.parse xml
-        @page.should be_a Wikipedia::VandalismDetection::Page
+
+        expect(@page).to be_a Wikipedia::VandalismDetection::Page
       end
 
       it "returns an empty Wikipedia::Page if the only revision is a redirect" do
         xml = load_file('redirect_page.xml')
         @page = @parser.parse xml
-        @page.revisions.should be_empty
+
+        expect(@page.revisions).to be_empty
       end
     end
   end
@@ -39,34 +41,34 @@ describe Wikipedia::VandalismDetection::PageParser do
     end
 
     it "can read a single page dump text input" do
-      @page.should_not be_nil
+      expect(@page).to_not be_nil
     end
 
     it 'has a title' do
-      @page.title.should == 'Vandalism on Wikipedia'
+      expect(@page.title).to eq 'Vandalism on Wikipedia'
     end
 
     it 'has an id' do
-      @page.id.should == '29753790'
+      expect(@page.id).to eq '29753790'
     end
 
 
     describe "page's revisions" do
       it 'has the right number of revisions' do
-        @page.revisions.count.should == 5
+        expect(@page.revisions.count).to eq 5
       end
 
       it "discards revisions with #REDIRECT content" do
         xml = load_file('page_with_redirects.xml')
         page = @parser.parse xml
-        page.revisions.count.should == 2
+        expect(page.revisions.count).to eq 2
       end
 
       it "has revisions each with the right id" do
         page_revisions = @page.revisions
 
         page_revisions.each do |key, value|
-          value.id.should == @revisions[key].id
+          expect(value.id).to eq @revisions[key].id
         end
       end
 
@@ -74,7 +76,7 @@ describe Wikipedia::VandalismDetection::PageParser do
         page_revisions = @page.revisions
 
         page_revisions.each do |key, value|
-          value.parent_id.should == @revisions[key].parent_id
+          expect(value.parent_id).to eq @revisions[key].parent_id
         end
       end
 
@@ -92,7 +94,7 @@ describe Wikipedia::VandalismDetection::PageParser do
                       revision_4.id => revision_4, revision_5.id => revision_5}
 
         page.revisions.each do |key, value|
-          value.text.should == revisions[key].text
+          expect(value.text).to eq revisions[key].text
         end
       end
 
@@ -110,7 +112,7 @@ describe Wikipedia::VandalismDetection::PageParser do
                      revision_4.id => revision_4, revision_5.id => revision_5}
 
         page.revisions.each do |key, value|
-          value.comment.should == revisions[key].comment
+          expect(value.comment).to eq revisions[key].comment
         end
       end
 
@@ -131,19 +133,19 @@ describe Wikipedia::VandalismDetection::PageParser do
 
         it "has revisions each with the right contributor id" do
           @page.revisions.each do |key, value|
-            value.contributor_id.should == @revisions[key].contributor_id
+            expect(value.contributor_id).to eq @revisions[key].contributor_id
           end
         end
 
         it "has revisions each with the right contributor ip" do
           @page.revisions.each do |key, value|
-            value.contributor_ip.should == @revisions[key].contributor_ip
+            expect(value.contributor_ip).to eq @revisions[key].contributor_ip
           end
         end
 
         it "has revisions each with the right contributor username" do
           @page.revisions.each do |key, value|
-            value.contributor_username.should == @revisions[key].contributor_username
+            expect(value.contributor_username).to eq @revisions[key].contributor_username
           end
         end
       end
@@ -162,7 +164,7 @@ describe Wikipedia::VandalismDetection::PageParser do
                      revision_4.id => revision_4, revision_5.id => revision_5}
 
         page.revisions.each do |key, value|
-          value.timestamp.should == revisions[key].timestamp
+          expect(value.timestamp).to eq revisions[key].timestamp
         end
       end
 

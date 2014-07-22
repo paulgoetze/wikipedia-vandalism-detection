@@ -38,7 +38,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     it "returns a weka instances" do
       dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-      dataset.class.should == Java::WekaCore::Instances
+      expect(dataset.class).to be Java::WekaCore::Instances
     end
 
     describe "exceptions" do
@@ -69,9 +69,9 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
         file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
 
-        File.exist?(file).should be_false
+        expect(File.exist?(file)).to be false
         Wikipedia::VandalismDetection::TrainingDataset.build
-        File.exist?(file).should be_true
+        expect(File.exist?(file)).to be true
       end
     end
 
@@ -91,7 +91,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       Wikipedia::VandalismDetection::TrainingDataset.build
 
       # anonymity should not be overwritten
-      Core::Parser.parse_ARFF(anonymity_file).to_a2d.first.should == data
+      expect(Core::Parser.parse_ARFF(anonymity_file).to_a2d.first).to eq data
     end
 
     describe "internal algorithm" do
@@ -104,12 +104,12 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
         annotations_num = File.open(@annotations_file, 'r').lines.count - 1
         additional_header_lines = 5
 
-        dataset.to_s.lines.count.should == additional_header_lines + annotations_num + @features_num
+        expect(dataset.to_s.lines.count).to eq additional_header_lines + annotations_num + @features_num
       end
 
       it "builds the right number of data columns" do
         dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-        dataset.n_col.should == @config.features.count + 1
+        expect(dataset.n_col).to eq @config.features.count + 1
       end
     end
   end
@@ -119,7 +119,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       build = Wikipedia::VandalismDetection::TrainingDataset.build
       instances = Wikipedia::VandalismDetection::TrainingDataset.instances
 
-      build.should.to_s == instances.to_s
+      expect(build.to_s).to eq instances.to_s
     end
   end
 
@@ -134,12 +134,12 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     it "returns a weka dataset" do
-      @dataset.class.should == Java::WekaCore::Instances
+      expect(@dataset.class).to eq Java::WekaCore::Instances
     end
 
     it "returns a dataset built from the configured corpus" do
       # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
-      @dataset.n_rows.should == 4
+      expect(@dataset.n_rows).to eq 4
     end
 
     [:VANDALISM, :REGULAR].each do |class_const|
@@ -149,7 +149,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
           (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
         end
 
-        class_count.should == 2
+        expect(class_count).to eq 2
       end
     end
   end
@@ -165,12 +165,12 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
 
       it "returns a weka dataset" do
-        @dataset.class.should == Java::WekaCore::Instances
+        expect(@dataset.class).to be Java::WekaCore::Instances
       end
 
       it "returns a dataset of size 8 built from the configured corpus" do
         # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-        @dataset.n_rows.should == 8
+        expect(@dataset.n_rows).to eq 8
       end
 
       [:VANDALISM, :REGULAR].each do |class_const|
@@ -180,7 +180,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
             (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
           end
 
-          class_count.should == 4
+          expect(class_count).to eq 4
         end
       end
 
@@ -188,7 +188,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
         # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
         dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances(percentage: 200)
         puts dataset
-        dataset.n_rows.should == 8
+
+        expect(dataset.n_rows).to eq 8
       end
     end
 
@@ -202,13 +203,13 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       end
 
       it "returns a weka dataset" do
-        @dataset.class.should == Java::WekaCore::Instances
+        expect(@dataset.class).to be Java::WekaCore::Instances
       end
 
       it "returns a dataset of size 12 built from the configured corpus" do
         # 2 + 300 % = 8 vandalism, 4 regular, see resources/corpora/training/annotations.csv
         puts @dataset
-        @dataset.n_rows.should == 12
+        expect(@dataset.n_rows).to eq 12
       end
     end
   end
@@ -216,7 +217,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
   describe "#create_corpus_index_file!" do
 
     it "responds to #create_corpus_file_index!" do
-      Wikipedia::VandalismDetection::TrainingDataset.should respond_to(:create_corpus_file_index!)
+      expect(Wikipedia::VandalismDetection::TrainingDataset).to respond_to :create_corpus_file_index!
     end
 
     describe "exceptions" do
@@ -232,9 +233,9 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     it "creates a corpus_index.yml file in the build directory" do
-      File.exist?(@index_file).should be_false
+      expect(File.exist?(@index_file)).to be false
       Wikipedia::VandalismDetection::TrainingDataset.create_corpus_file_index!
-      File.exist?(@index_file).should be_true
+      expect(File.exist?(@index_file)).to be true
     end
   end
 end

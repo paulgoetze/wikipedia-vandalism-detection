@@ -16,11 +16,11 @@ describe Wikipedia::VandalismDetection::Features::FrequencyBase do
 
     it "returns the frequency in percentage of given word counts" do
       text = "I am, i like you."
-      @feature.frequency(text , @terms).should == 3.0/5.0
+      expect(@feature.frequency(text , @terms)).to eq 3.0/5.0
     end
 
     it "returns 0.0 if total word count is zero" do
-      @feature.frequency("", @terms).should == 0.0
+      expect(@feature.frequency("", @terms)).to eq 0.0
     end
   end
 end

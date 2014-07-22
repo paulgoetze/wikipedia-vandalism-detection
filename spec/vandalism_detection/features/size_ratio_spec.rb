@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::SizeRatio do
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 9.0 / (9.0 + 3.0)
+      expect(@feature.calculate(edit)).to eq 9.0 / (9.0 + 3.0)
     end
 
     it "returns 1.0 on emtpy new text revisions" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::SizeRatio do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 1.0
+      expect(@feature.calculate(edit)).to eq 1.0
     end
 
     it "returns 0.0 on emtpy old text revisions" do
@@ -40,7 +40,7 @@ describe Wikipedia::VandalismDetection::Features::SizeRatio do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
 
     it "returns 0.5 on emtpy both text revisions" do
@@ -51,7 +51,7 @@ describe Wikipedia::VandalismDetection::Features::SizeRatio do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.5
+      expect(@feature.calculate(edit)).to eq 0.5
     end
   end
 end

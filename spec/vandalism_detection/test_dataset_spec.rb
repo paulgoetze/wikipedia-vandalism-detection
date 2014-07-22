@@ -48,7 +48,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
     it "returns a weka instances" do
       dataset = Wikipedia::VandalismDetection::TestDataset.build
-      dataset.class.should == Java::WekaCore::Instances
+      expect(dataset.class).to be Java::WekaCore::Instances
     end
 
     Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
@@ -59,9 +59,9 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
         file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
 
-        File.exist?(file).should be_false
+        expect(File.exist?(file)).to be false
         Wikipedia::VandalismDetection::TestDataset.build
-        File.exist?(file).should be_true
+        expect(File.exist?(file)).to be true
       end
     end
 
@@ -81,7 +81,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
       Wikipedia::VandalismDetection::TestDataset.build
 
       # anonymity should not be overwritten
-      Core::Parser.parse_ARFF(anonymity_file).to_a2d.first.should == data
+      expect(Core::Parser.parse_ARFF(anonymity_file).to_a2d.first).to eq data
     end
 
     describe "internal algorithm" do
@@ -94,7 +94,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
         lines_count = additional_header_lines + edits_count + @features.count + revision_id_lines + class_line
         dataset = Wikipedia::VandalismDetection::TestDataset.build
 
-        dataset.to_s.lines.count.should == lines_count
+        expect(dataset.to_s.lines.count).to eq lines_count
       end
 
       it "builds the right number of data columns" do
@@ -102,12 +102,12 @@ describe Wikipedia::VandalismDetection::TestDataset do
         class_value = 1
         dataset = Wikipedia::VandalismDetection::TestDataset.build
 
-        dataset.n_col.should == @features.count + class_value + old_and_new_edit_attr_count
+        expect(dataset.n_col).to eq @features.count + class_value + old_and_new_edit_attr_count
       end
 
       it "builds a class attribute" do
         dataset = Wikipedia::VandalismDetection::TestDataset.build
-        dataset.enumerate_attributes.to_a[-1].name.should == 'class'
+        expect(dataset.enumerate_attributes.to_a[-1].name).to eq 'class'
       end
     end
 
@@ -124,8 +124,8 @@ describe Wikipedia::VandalismDetection::TestDataset do
         numerics = instance[0...-3] # feature values
         edit_ids = instance[-3..-2] # revision ids
 
-        numerics.each { |value| value.should be_between(0.0, 1.0) }
-        edit_ids.each { |value| value.should be > 1 }
+        numerics.each { |value| expect(value).to be_between(0.0, 1.0) }
+        edit_ids.each { |value| expect(value).to be > 1 }
       end
     end
   end
@@ -135,13 +135,13 @@ describe Wikipedia::VandalismDetection::TestDataset do
       build = Wikipedia::VandalismDetection::TestDataset.build
       instances = Wikipedia::VandalismDetection::TestDataset.instances
 
-      build.should.to_s == instances.to_s
+      expect(build.to_s).to eq instances.to_s
     end
   end
 
   describe "#create_corpus_index_file!" do
     it "responds to #create_corpus_file_index!" do
-      Wikipedia::VandalismDetection::TestDataset.should respond_to(:create_corpus_file_index!)
+      expect(Wikipedia::VandalismDetection::TestDataset).to respond_to :create_corpus_file_index!
     end
 
     describe "exceptions" do
@@ -156,21 +156,21 @@ describe Wikipedia::VandalismDetection::TestDataset do
     end
 
     it "creates a corpus_index.yml file in the build directory" do
-      File.exist?(@index_file).should be_false
+      expect(File.exist?(@index_file)).to be false
       Wikipedia::VandalismDetection::TestDataset.create_corpus_file_index!
-      File.exist?(@index_file).should be_true
+      expect(File.exist?(@index_file)).to be true
     end
   end
 
   describe "#build!" do
     it "should respond to #build!" do
-      Wikipedia::VandalismDetection::TestDataset.should respond_to(:build!)
+      expect(Wikipedia::VandalismDetection::TestDataset).to respond_to :build!
     end
 
     it "creates an .arff file in the directory defined in config.yml" do
-      File.exist?(@arff_file).should be_false
+      expect(File.exist?(@arff_file)).to be false
       Wikipedia::VandalismDetection::TestDataset.build!
-      File.exist?(@arff_file).should be_true
+      expect(File.exist?(@arff_file)).to be true
     end
 
     it "overwrites existing test arff file" do
@@ -179,7 +179,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
       # test config uses 3 features + 2 edit id columns + 1 class value = 6
       Wikipedia::VandalismDetection::TestDataset.build!
       first_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
-      first_parsed_dataset.n_col.should == 6
+      expect(first_parsed_dataset.n_col).to eq 6
 
       config = test_config
       config.instance_variable_set(:@features, ['anonymity'])
@@ -188,7 +188,8 @@ describe Wikipedia::VandalismDetection::TestDataset do
       # uses only 1 feature + 2 edit id columns + 1 class vlaue = 4
       Wikipedia::VandalismDetection::TestDataset.build!
       second_parsed_dataset = Core::Parser.parse_ARFF(@arff_file)
-      second_parsed_dataset.n_col.should == 4
+
+      expect(second_parsed_dataset.n_col).to eq 4
     end
   end
 
@@ -204,27 +205,27 @@ describe Wikipedia::VandalismDetection::TestDataset do
 
     it "returns nil if Edit could not be found" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('1', '2')
-      edit.should be_nil
+      expect(edit).to be_nil
     end
 
     it "returns an Edit" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
-      edit.should be_a Wikipedia::VandalismDetection::Edit
+      expect(edit).to be_a Wikipedia::VandalismDetection::Edit
     end
 
     it "returns an edit whose parent page title is not nil" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
-      edit.page.title.should_not be_nil
+      expect(edit.page.title).to_not be_nil
     end
 
     it "returns an edit whose parent page id is not nil" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('307084144', '326873205')
-      edit.page.id.should_not be_nil
+      expect(edit.page.id).to_not be_nil
     end
 
     it "returns nil for a not annotated edit with given revision ids" do
       edit = Wikipedia::VandalismDetection::TestDataset.edit('328774088', '328774188')
-      edit.should be_nil
+      expect(edit).to be_nil
     end
   end
 end

@@ -14,14 +14,14 @@ describe Wikipedia::VandalismDetection::Features::CommentLength do
       comment = Wikipedia::VandalismDetection::Text.new "1 34567 9"
       edit = build :edit, new_revision: build(:new_revision, comment: comment)
 
-      @feature.calculate(edit).should == 9
+      expect(@feature.calculate(edit)).to eq 9
     end
 
     it "returns 0 on emtpy clean text" do
       text = Wikipedia::VandalismDetection::Text.new "{{speedy deletion}}"
       edit = build :edit, new_revision: build(:new_revision, text: text)
 
-      @feature.calculate(edit).should == 0
+      expect(@feature.calculate(edit)).to eq 0
     end
   end
 end

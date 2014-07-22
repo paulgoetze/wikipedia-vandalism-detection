@@ -5,11 +5,11 @@ describe Wikipedia::VandalismDetection::Revision do
   describe "constants" do
 
     it "has a START_TAG constant" do
-      Wikipedia::VandalismDetection::Revision::START_TAG.should == '<revision>'
+      expect(Wikipedia::VandalismDetection::Revision::START_TAG).to eq '<revision>'
     end
 
     it "has an END_TAG constant" do
-      Wikipedia::VandalismDetection::Revision::END_TAG.should == '</revision>'
+      expect(Wikipedia::VandalismDetection::Revision::END_TAG).to eq '</revision>'
     end
   end
 
@@ -25,7 +25,7 @@ describe Wikipedia::VandalismDetection::Revision do
 
     it "returns true in case of an anonymous user" do
       @anonymous_revision = build :anonymous_revision
-      @anonymous_revision.anonymous_contributor?.should be_true
+      expect(@anonymous_revision.anonymous_contributor?).to be true
     end
   end
 
@@ -35,15 +35,17 @@ describe Wikipedia::VandalismDetection::Revision do
     it "sets the @contributor_id if contributor is no IPv4" do
       id = "12345"
       @revision.contributor = id
-      @revision.instance_variable_get(:@contributor_id).should == id
-      @revision.instance_variable_get(:@contributor_ip).should be_nil
+
+      expect(@revision.instance_variable_get(:@contributor_id)).to eq id
+      expect(@revision.instance_variable_get(:@contributor_ip)).to be_nil
     end
 
     it "sets the @contributor_ip if contributor is an IPv4" do
       ip = "127.0.0.1"
       @revision.contributor = ip
-      @revision.instance_variable_get(:@contributor_ip).should == ip
-      @revision.instance_variable_get(:@contributor_id).should be_nil
+
+      expect(@revision.instance_variable_get(:@contributor_ip)).to eq ip
+      expect(@revision.instance_variable_get(:@contributor_id)).to be_nil
     end
   end
 
@@ -53,25 +55,27 @@ describe Wikipedia::VandalismDetection::Revision do
     it "returns the contributor_id if set" do
       id = "12345"
       @revision.contributor = id
-      @revision.contributor.should == @revision.instance_variable_get(:@contributor_id)
+
+      expect(@revision.contributor).to eq @revision.instance_variable_get(:@contributor_id)
     end
 
     it "returns the contributor_ip if set" do
       ip = "127.0.0.1"
       @revision.contributor = ip
-      @revision.contributor.should == @revision.instance_variable_get(:@contributor_ip)
+
+      expect(@revision.contributor).to eq @revision.instance_variable_get(:@contributor_ip)
     end
   end
 
   it "has the revision attributes" do
     @instance_variables.each do |name|
-      @revision.should respond_to name
+      expect(@revision).to respond_to name
     end
   end
 
   it "defaults its attributes to nil" do
     @nil_instance_variables.each do |name|
-      @revision.send(name).should be_nil
+      expect(@revision.send(name)).to be_nil
     end
   end
 
@@ -82,30 +86,30 @@ describe Wikipedia::VandalismDetection::Revision do
   end
 
   it "has an empty default text" do
-    @revision.text.should == ''
+    expect(@revision.text).to be_empty
   end
 
   it "has a text of type Wikipedia::Text" do
-    @revision.text.should be_a Wikipedia::VandalismDetection::Text
+    expect(@revision.text).to be_a Wikipedia::VandalismDetection::Text
   end
 
   it "has an empty default comment" do
-    @revision.comment.should == ''
+    expect(@revision.comment).to be_empty
   end
 
   it "has a comment of type Wikipedia::Text" do
-    @revision.comment.should be_a Wikipedia::VandalismDetection::Text
+    expect(@revision.comment).to be_a Wikipedia::VandalismDetection::Text
   end
 
   it { should respond_to :redirect? }
 
   it "is marked as redirect if #REDIRECT appears in its text" do
     @revision.text = "#REDIRECT [[Redirect Page Name]]\n"
-    @revision.redirect?.should be_true
+    expect(@revision.redirect?).to be true
   end
 
   it "is not marked as redirect if #REDIRECT does not appear in its text" do
     @revision.text = "''text''"
-    @revision.redirect?.should be_false
+    expect(@revision.redirect?).to be false
   end
 end

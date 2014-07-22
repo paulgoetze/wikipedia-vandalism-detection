@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::SizeIncrement do
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 3.0 - 9.0
+      expect(@feature.calculate(edit)).to eq 3.0 - 9.0
     end
 
     it "returns a positive increment on more removed texts" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::SizeIncrement do
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 9.0 - 3.0
+      expect(@feature.calculate(edit)).to eq 9.0 - 3.0
     end
   end
 end

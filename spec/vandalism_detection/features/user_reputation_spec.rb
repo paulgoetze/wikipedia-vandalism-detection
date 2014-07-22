@@ -20,7 +20,7 @@ describe Wikipedia::VandalismDetection::Features::UserReputation do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision, page: page)
 
-      @feature.calculate(edit).should == 10.0
+      expect(@feature.calculate(edit)).to eq 10.0
     end
 
     it "fetches the page id from the wikipedia API by page title if not available in edit" do
@@ -33,7 +33,7 @@ describe Wikipedia::VandalismDetection::Features::UserReputation do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision, page: page)
 
-      @feature.calculate(edit).should == 10.0
+      expect(@feature.calculate(edit)).to eq 10.0
     end
 
     it "returns 0.0 WikiTrust if no contributions are available for given user" do
@@ -46,7 +46,7 @@ describe Wikipedia::VandalismDetection::Features::UserReputation do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision, page: page)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end

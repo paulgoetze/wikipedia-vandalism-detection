@@ -19,7 +19,7 @@ describe Wikipedia::VandalismDetection::Features::ReplacementSimilarity do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0.8133333333333332
+      expect(@feature.calculate(edit)).to eq 0.8133333333333332
     end
 
     it "returns 0 on empty old revisions text" do
@@ -28,7 +28,7 @@ describe Wikipedia::VandalismDetection::Features::ReplacementSimilarity do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0
+      expect(@feature.calculate(edit)).to eq 0
     end
 
 
@@ -38,7 +38,7 @@ describe Wikipedia::VandalismDetection::Features::ReplacementSimilarity do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0
+      expect(@feature.calculate(edit)).to eq 0
     end
   end
 end

@@ -25,7 +25,7 @@ describe Wikipedia::VandalismDetection::Features::Compressibility do
       Wikipedia::VandalismDetection::Text.any_instance.stub(bytesize: bytesize)
       ratio = bytesize / (bytesize + bytesize)
 
-      @feature.calculate(edit).should == ratio
+      expect(@feature.calculate(edit)).to eq ratio
     end
 
     it "returns 0.5 on emtpy inserted text" do
@@ -36,7 +36,7 @@ describe Wikipedia::VandalismDetection::Features::Compressibility do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.5
+      expect(@feature.calculate(edit)).to eq 0.5
     end
   end
 end

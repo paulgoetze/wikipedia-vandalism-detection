@@ -19,7 +19,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedBadFrequency do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 4.0 / 9.0
+      expect(@feature.calculate(edit)).to eq 4.0 / 9.0
     end
 
     it "returns 0.0 on emtpy removed clean text" do
@@ -30,7 +30,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedBadFrequency do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end

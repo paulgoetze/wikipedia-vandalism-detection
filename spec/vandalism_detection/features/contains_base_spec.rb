@@ -12,22 +12,22 @@ describe Wikipedia::VandalismDetection::Features::ContainsBase do
 
     it "returns 1 if a given text contains the given terms array" do
       text = "Content including text"
-      @base.contains(text, ['content', 'anything']).should == 1
+      expect(@base.contains(text, ['content', 'anything'])).to eq 1
     end
 
     it "returns 1 if a given text contains the given string" do
       text = "Content including text"
-      @base.contains(text, 'content').should == 1
+      expect(@base.contains(text, 'content')).to eq 1
     end
 
     it "returns 0 if a given text does not contain the given string" do
       text = "not containing anything con tent"
-      @base.contains(text, 'content').should == 0
+      expect(@base.contains(text, 'content')).to eq 0
     end
 
     it "returns 0 if a given text does not contain any of the given terms" do
       text = "not containing anything con tent"
-      @base.contains(text, ['content', 'text']).should == 0
+      expect(@base.contains(text, ['content', 'text'])).to eq 0
     end
   end
 end

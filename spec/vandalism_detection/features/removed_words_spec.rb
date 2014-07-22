@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedWords do
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 6
+      expect(@feature.calculate(edit)).to eq 6
     end
 
     it "returns 0 if no removed text" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedWords do
       new_revision = build(:new_revision, text: new_revision_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0
+      expect(@feature.calculate(edit)).to eq 0
     end
   end
 end

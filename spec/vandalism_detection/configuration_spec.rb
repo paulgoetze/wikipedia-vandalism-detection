@@ -27,20 +27,20 @@ describe Wikipedia::VandalismDetection do
       :test_output_arff_file
     ].each do |attribute|
       it "responds to ##{attribute}" do
-        @configuration.should respond_to attribute
+        expect(@configuration).to respond_to attribute
       end
     end
 
     it "returns a hash for #data (the full config hash) " do
-      @configuration.data.should be_a Hash
+      expect(@configuration.data).to be_a Hash
     end
 
     it "returns a feature array for #feature" do
-      @configuration.features.should be_a Array
+      expect(@configuration.features).to be_an Array
     end
 
     it "returns a numeric for #cross-validation-fold" do
-      @configuration.cross_validation_fold.should be_a Numeric
+      expect(@configuration.cross_validation_fold).to be_a Numeric
     end
 
     describe "#test_output_classification_file" do
@@ -50,7 +50,8 @@ describe Wikipedia::VandalismDetection do
         dataset_options = @configuration.training_data_options
         file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['test']['classification_file']
 
-        file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+        path = File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+        expect(file_path).to eq path
       end
     end
 
@@ -62,7 +63,8 @@ describe Wikipedia::VandalismDetection do
           dataset_options = @configuration.training_data_options
           file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['training']['arff_file']
 
-          file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+          path = File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+          expect(file_path).to eq path
         end
       end
 
@@ -73,7 +75,8 @@ describe Wikipedia::VandalismDetection do
           dataset_options = @configuration.training_data_options
           file_name = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['output']['test']['arff_file']
 
-          file_path.should == File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+          path = File.join(@configuration.output_base_directory, classifier_name, dataset_options, file_name)
+          expect(file_path).to eq path
         end
       end
     end
@@ -84,12 +87,12 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@classifier_type, Weka::Classifiers::Meta::OneClassClassifier.type)
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.use_occ?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.use_occ?).to be true
       end
 
       it "returns false if used classifier is not a one class classifier (occ)" do
         use_test_configuration
-        Wikipedia::VandalismDetection.configuration.use_occ?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.use_occ?).to be false
       end
     end
 
@@ -100,7 +103,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'balanced')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.balanced_training_data?).to be true
       end
 
       it "returns false if it is not set in config" do
@@ -108,7 +111,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, nil)
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.balanced_training_data?).to be false
       end
 
       it "returns false if it is set to other value than 'balanced'" do
@@ -116,7 +119,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'other')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.balanced_training_data?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.balanced_training_data?).to be false
       end
     end
 
@@ -127,7 +130,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'unbalanced')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.unbalanced_training_data?).to be true
       end
 
       it "returns true if it is not set in config" do
@@ -135,7 +138,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, nil)
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.unbalanced_training_data?).to be true
       end
 
       it "returns true if it is set to other value than 'unbalanced' or 'oversampled'" do
@@ -143,7 +146,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'other value')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.unbalanced_training_data?).to be true
       end
 
       it "returns false if it is set to other value than 'unbalanced'" do
@@ -151,7 +154,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'balanced')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.unbalanced_training_data?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.unbalanced_training_data?).to be false
       end
     end
 
@@ -162,7 +165,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'oversampled')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_true
+        expect(Wikipedia::VandalismDetection.configuration.oversampled_training_data?).to be true
       end
 
       it "returns false if it is not set in config" do
@@ -170,7 +173,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, nil)
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.oversampled_training_data?).to be false
       end
 
       it "returns false if it is set to other value than 'balanced'" do
@@ -178,13 +181,13 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'other')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampled_training_data?.should be_false
+        expect(Wikipedia::VandalismDetection.configuration.oversampled_training_data?).to be false
       end
     end
 
     describe "#oversampled_options" do
       it "returns a hash" do
-        @configuration.oversampling_options.should be_a Hash
+        expect(@configuration.oversampling_options).to be_a Hash
       end
 
       it "returns a hash with the :percent and :undersampling keys" do
@@ -193,7 +196,7 @@ describe Wikipedia::VandalismDetection do
         use_configuration(config)
 
         hash = { percentage: 0, undersampling: true }
-        Wikipedia::VandalismDetection.configuration.oversampling_options.keys.should == hash.keys
+        expect(Wikipedia::VandalismDetection.configuration.oversampling_options.keys).to eq hash.keys
       end
 
       it "returns an empty hash if training data is not oversampled" do
@@ -201,7 +204,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, 'other')
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampling_options.should == {}
+        expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to be {}
       end
 
       describe "Returning of configured options" do
@@ -217,7 +220,7 @@ describe Wikipedia::VandalismDetection do
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
-          Wikipedia::VandalismDetection.configuration.oversampling_options.should == @hash
+          expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq @hash
         end
 
         it "returns the configured options with upcase params" do
@@ -226,7 +229,7 @@ describe Wikipedia::VandalismDetection do
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
-          Wikipedia::VandalismDetection.configuration.oversampling_options.should == @hash
+          expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq @hash
         end
 
         it "returns the configured options with full params" do
@@ -235,7 +238,7 @@ describe Wikipedia::VandalismDetection do
           config.instance_variable_set(:@training_data_options, options)
           use_configuration(config)
 
-          Wikipedia::VandalismDetection.configuration.oversampling_options.should == @hash
+          expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq @hash
         end
       end
 
@@ -248,7 +251,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, "oversampled -u #{undersampling}")
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampling_options.should == hash
+        expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
       end
 
       it "returns a default true for undersampling if not set" do
@@ -260,7 +263,7 @@ describe Wikipedia::VandalismDetection do
         config.instance_variable_set(:@training_data_options, "oversampled -p #{percentage}")
         use_configuration(config)
 
-        Wikipedia::VandalismDetection.configuration.oversampling_options.should == hash
+        expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
       end
     end
 
@@ -279,7 +282,7 @@ describe Wikipedia::VandalismDetection do
       :output_base_directory
     ].each do |attribute|
       it "returns a string when calling ##{attribute}" do
-        @configuration.send(attribute).should be_a String
+        expect(@configuration.send(attribute)).to be_a String
       end
     end
   end
@@ -292,11 +295,11 @@ describe Wikipedia::VandalismDetection do
       default_config = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS
       custom_config = YAML.load_file(File.expand_path('../../resources/config/config.yml', __FILE__))
 
-      Wikipedia::VandalismDetection.configuration.data.should == default_config.deep_merge(custom_config)
+      expect(Wikipedia::VandalismDetection.configuration.data).to eq default_config.deep_merge(custom_config)
     end
 
     it "returns a Wikipedia::VandalismDetection::Configuration" do
-      Wikipedia::VandalismDetection.configuration.should be_a Wikipedia::VandalismDetection::Configuration
+      expect(Wikipedia::VandalismDetection.configuration).to be_a Wikipedia::VandalismDetection::Configuration
     end
 
     it "has all features as default configuration" do
@@ -369,7 +372,7 @@ describe Wikipedia::VandalismDetection do
           "words increment"
       ]
 
-      Wikipedia::VandalismDetection.configuration['features'].should == features
+      expect(Wikipedia::VandalismDetection.configuration['features']).to eq features
     end
 
     describe "#configuration#corpora" do
@@ -379,28 +382,28 @@ describe Wikipedia::VandalismDetection do
       end
 
       it "has a corpora config" do
-        Wikipedia::VandalismDetection.configuration['corpora'].should be_a Hash
+        expect(Wikipedia::VandalismDetection.configuration['corpora']).to be_a Hash
       end
 
       [:training, :test].each do |attribute|
         it "has a #{attribute}-corpus config" do
-          Wikipedia::VandalismDetection.configuration['corpora'][attribute.to_s].should be_a Hash
+          expect(Wikipedia::VandalismDetection.configuration['corpora'][attribute.to_s]).to be_a Hash
         end
       end
 
       it "has a default nil corpora-base_directory config" do
-        Wikipedia::VandalismDetection.configuration['corpora']['base_directory'].should be_nil
+        expect(Wikipedia::VandalismDetection.configuration['corpora']['base_directory']).to be nil
       end
 
       [:base_directory, :revisions_directory, :edits_file, :annotations_file].each do |attribute|
         it "has an default nil '#{attribute}' config for the training-corpus" do
-          Wikipedia::VandalismDetection.configuration['corpora']['training'][attribute.to_s].should be_nil
+          expect(Wikipedia::VandalismDetection.configuration['corpora']['training'][attribute.to_s]).to be nil
         end
       end
 
       [:base_directory, :revisions_directory, :edits_file].each do |attribute|
         it "has an default nil '#{attribute}' config for the test-corpus" do
-          Wikipedia::VandalismDetection.configuration['corpora']['test'][attribute.to_s].should be_nil
+          expect(Wikipedia::VandalismDetection.configuration['corpora']['test'][attribute.to_s]).to be nil
         end
       end
     end
@@ -412,33 +415,33 @@ describe Wikipedia::VandalismDetection do
       end
 
       it "has an output-config" do
-        Wikipedia::VandalismDetection.configuration['output'].should be_a Hash
+        expect(Wikipedia::VandalismDetection.configuration['output']).to be_a Hash
       end
 
       describe "output sub configs" do
 
         before do
           @output_config = Wikipedia::VandalismDetection.configuration['output']
-          @output_config.should be_a Hash
+          expect(@output_config).to be_a Hash
         end
 
         it "has a default 'base_directory' output-config" do
-          @output_config['base_directory'].should_not be_nil
+          expect(@output_config['base_directory']).to_not be nil
         end
 
         [:arff_file, :index_file].each do |attribute|
           it "has a default '#{attribute}' config for the training-output" do
             output_training_config = @output_config['training']
-            output_training_config.should_not be_nil
-            output_training_config[attribute.to_s].should_not be_nil
+            expect(output_training_config).to_not be nil
+            expect(output_training_config[attribute.to_s]).to_not be nil
           end
         end
 
         [:arff_file, :index_file].each do |attribute|
           it "has a default '#{attribute}' config for the test-output" do
             output_test_config = @output_config['training']
-            output_test_config.should_not be_nil
-            output_test_config[attribute.to_s].should_not be_nil
+            expect(output_test_config).to_not be nil
+            expect(output_test_config[attribute.to_s]).to_not be nil
           end
         end
 
@@ -456,21 +459,21 @@ describe Wikipedia::VandalismDetection do
       end
 
       it "return a classifier Hash" do
-        Wikipedia::VandalismDetection.configuration['classifier'].should be_a Hash
+        expect(Wikipedia::VandalismDetection.configuration['classifier']).to be_a Hash
       end
 
       [:type, :options].each do |attribute|
         it "has a default nil '#{attribute}' config for classification" do
-          Wikipedia::VandalismDetection.configuration['classifier'][attribute.to_s].should be_nil
+          expect(Wikipedia::VandalismDetection.configuration['classifier'][attribute.to_s]).to be_nil
         end
       end
 
       it "has a default 10 'cross-validation-fold' config for classifier evaluation" do
-        Wikipedia::VandalismDetection.configuration['classifier']['cross-validation-fold'].should == 10
+        expect(Wikipedia::VandalismDetection.configuration['classifier']['cross-validation-fold']).to eq 10
       end
 
       it "has a default 'training-data-options' config of unbalanced for classifier training" do
-        Wikipedia::VandalismDetection.configuration['classifier']['training-data-options'].should == 'unbalanced'
+        expect(Wikipedia::VandalismDetection.configuration['classifier']['training-data-options']).to eq 'unbalanced'
       end
     end
   end

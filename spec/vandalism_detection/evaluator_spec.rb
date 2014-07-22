@@ -120,12 +120,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns a Hash" do
-      @curve_data.should be_a Hash
+      expect(@curve_data).to be_a Hash
     end
 
     [:recalls, :precisions,:fp_rates, :tp_rates, :pr_auc, :roc_auc].each do |attribute|
       it "returns a Hash including #{attribute}" do
-        @curve_data.should have_key(attribute)
+        expect(@curve_data).to have_key(attribute)
       end
     end
 
@@ -137,7 +137,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "returns a Hash" do
-        @predictive_values.should be_a Hash
+        expect(@predictive_values).to be_a Hash
       end
 
       [
@@ -150,7 +150,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       ].each do |values|
         it "returns the right values for threshold #{values[:threshold]}" do
           predictive_values = @evaluator.predictive_values(@ground_truth, @classification, values[:threshold])
-          predictive_values.should == values[:result]
+          expect(predictive_values).to eq values[:result]
         end
       end
     end
@@ -169,7 +169,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted, y: @y_sorted }
         sorted = @evaluator.sort_curve_values(@x, @y)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds start values if given" do
@@ -177,7 +177,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.unshift(start_values[:x]), y: @y_sorted.unshift(start_values[:y])}
         sorted = @evaluator.sort_curve_values(@x, @y, start_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds x start value if only one value given" do
@@ -185,7 +185,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.unshift(start_values[:x]), y: @y_sorted.unshift(@y_sorted.first) }
         sorted = @evaluator.sort_curve_values(@x, @y, start_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds y start value if only one value given" do
@@ -193,7 +193,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.unshift(@x_sorted.first), y: @y_sorted.unshift(start_values[:y]) }
         sorted = @evaluator.sort_curve_values(@x, @y, start_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds end values if given" do
@@ -201,7 +201,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(end_values[:y]) }
         sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds y end values if only one value is given" do
@@ -209,7 +209,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.push(@x_sorted.last), y: @y_sorted.push(end_values[:y]) }
         sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
 
       it "adds x end values if only one value is given" do
@@ -217,7 +217,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
         hash = { x: @x_sorted.push(end_values[:x]), y: @y_sorted.push(@y_sorted.last) }
         sorted = @evaluator.sort_curve_values(@x, @y, nil, end_values)
 
-        sorted.should == hash
+        expect(sorted).to eq hash
       end
     end
 
@@ -229,21 +229,21 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "returns a numeric value for pr_auc" do
-        @pr_auc.should be_a Numeric
+        expect(@pr_auc).to be_a Numeric
       end
 
       it "returns a numeric value between 0.0 & 1.0 for pr_auc" do
         is_between_zero_and_one = (@pr_auc >= 0.0 && @pr_auc <= 1.0)
-        is_between_zero_and_one.should be_true
+        expect(is_between_zero_and_one).to be true
       end
 
       it "returns a numeric value for roc_auc" do
-        @roc_auc.should be_a Numeric
+        expect(@roc_auc).to be_a Numeric
       end
 
       it "returns a numeric value between 0.0 & 1.0 for roc_auc" do
         is_between_zero_and_one = @roc_auc >= 0.0 && @roc_auc <= 1.0
-        is_between_zero_and_one.should be_true
+        expect(is_between_zero_and_one).to be true
       end
 
       [
@@ -254,7 +254,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
           y = data[:y]
           auc = data[:auc]
 
-          @evaluator.area_under_curve(x, y).should == auc
+          expect(@evaluator.area_under_curve(x, y)).to eq auc
         end
       end
 
@@ -293,9 +293,9 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "creates a classification file in the base output directory" do
-      File.exists?(@test_classification_file).should be_false
+      expect(File.exists?(@test_classification_file)).to be false
       @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
-      File.exists?(@test_classification_file).should be_true
+      expect(File.exists?(@test_classification_file)).to be true
     end
 
     it "creates a file with an appropriate header" do
@@ -306,7 +306,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       proposed_header = ['OLDREVID', 'NEWREVID', 'C', 'CONF', *features]
       header = content.lines.first.split(' ')
 
-      header.should == proposed_header
+      expect(header).to eq proposed_header
     end
 
     it "creates a file with an appropriate number of lines" do
@@ -317,7 +317,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
       lines = content.lines.to_a
       lines.shift # remove header
-      lines.count.should == samples_count
+      expect(lines.count).to eq samples_count
     end
 
     it "has the short class names as class value" do
@@ -335,7 +335,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
       lines.each do |line|
         class_name = line.split[2]
-        names.include?(class_name).should be_true
+        expect(names).to include class_name
       end
     end
   end
@@ -371,7 +371,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it "returns a performance values Hash" do
       performance_values = @evaluator.evaluate_testcorpus_classification(sample_count: @sample_count)
-      performance_values.should be_a Hash
+      expect(performance_values).to be_a Hash
     end
 
     [ :fp_rates,
@@ -385,14 +385,14 @@ describe Wikipedia::VandalismDetection::Evaluator do
     ].each do |attr|
       it "returns a performance values Hash with property'#{attr}'" do
         performance_values = @evaluator.evaluate_testcorpus_classification(sample_count: @sample_count)
-        performance_values[attr].should_not be_nil
+        expect(performance_values[attr]).to_not be_nil
       end
     end
 
     it "runs the classification file creation" do
-      File.exists?(@test_classification_file).should be_false
+      expect(File.exists?(@test_classification_file)).to be false
       @evaluator.evaluate_testcorpus_classification
-      File.exists?(@test_classification_file).should be_true
+      expect(File.exists?(@test_classification_file)).to be true
     end
 
     it "overwrites the old classification file" do
@@ -416,7 +416,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       evaluator.evaluate_testcorpus_classification
       content_new = File.read(@test_classification_file)
 
-      content_old.should_not == content_new
+      expect(content_old).to_not eq content_new
     end
   end
 
@@ -424,7 +424,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it "returns an evaluation object" do
       evaluation = @evaluator.cross_validate
-      evaluation.class.should == Java::WekaClassifiers::Evaluation
+      expect(evaluation.class).to eq Java::WekaClassifiers::Evaluation
     end
 
     it "can cross validates the classifier" do
@@ -445,27 +445,27 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "returns a Hash" do
-        @data.should be_a Hash
+        expect(@data).to be_a Hash
       end
 
       it "includes precision curve data" do
-        @data[:precision].should be_a Array
+        expect(@data[:precision]).to be_an Array
       end
 
       it "includes recall curve data" do
-        @data[:recall].should be_a Array
+        expect(@data[:recall]).to be_an Array
       end
 
       it "includes area_under_prc data" do
-        @data[:area_under_prc].should be_a Numeric
+        expect(@data[:area_under_prc]).to be_a Numeric
       end
 
       it "has non-empty :precision Array contents" do
-        @data[:precision].should_not be_empty
+        expect(@data[:precision]).to_not be_empty
       end
 
       it "has non-empty :recall Array contents" do
-        @data[:recall].should_not be_empty
+        expect(@data[:recall]).to_not be_empty
       end
     end
 
@@ -476,27 +476,27 @@ describe Wikipedia::VandalismDetection::Evaluator do
       end
 
       it "returns a Hash" do
-        @data.should be_a Hash
+        expect(@data).to be_a Hash
       end
 
       it "includes precision curve data" do
-        @data[:precision].should be_a Array
+        expect(@data[:precision]).to be_a Array
       end
 
       it "includes recall curve data" do
-        @data[:recall].should be_a Array
+        expect(@data[:recall]).to be_a Array
       end
 
       it "includes area_under_prc data" do
-        @data[:area_under_prc].should be_a Numeric
+        expect(@data[:area_under_prc]).to be_a Numeric
       end
 
       it "has non-empty :precision Array contents" do
-        @data[:precision].should_not be_empty
+        expect(@data[:precision]).to_not be_empty
       end
 
       it "has non-empty :recall Array contents" do
-        @data[:recall].should_not be_empty
+        expect(@data[:recall]).to_not be_empty
       end
     end
   end
@@ -505,12 +505,12 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it "returns a hash" do
       analysis = @evaluator.feature_analysis(sample_count: 100)
-      analysis.should be_a Hash
+      expect(analysis).to be_a Hash
     end
 
     it "returns a hash with feature count size" do
       analysis = @evaluator.feature_analysis(sample_count: 100)
-      analysis.count.should == @config.features.count
+      expect(analysis.count).to eq @config.features.count
     end
 
     it "returns a hash with sample count number of data hashes" do
@@ -518,7 +518,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       analysis = @evaluator.feature_analysis(sample_count: sample_count)
 
       analysis.each do |key, threshold_hash|
-        threshold_hash.count.should == sample_count
+        expect(threshold_hash.count).to eq sample_count
       end
     end
 
@@ -526,10 +526,10 @@ describe Wikipedia::VandalismDetection::Evaluator do
       analysis = @evaluator.feature_analysis
       threshold_hash = analysis[@config.features.first][0.0]
 
-      threshold_hash.should have_key(:fp)
-      threshold_hash.should have_key(:fn)
-      threshold_hash.should have_key(:tp)
-      threshold_hash.should have_key(:tn)
+      expect(threshold_hash).to have_key(:fp)
+      expect(threshold_hash).to have_key(:fn)
+      expect(threshold_hash).to have_key(:tp)
+      expect(threshold_hash).to have_key(:tn)
     end
   end
 
@@ -537,23 +537,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it "returns a hash" do
       analysis = @evaluator.full_analysis(sample_count: 100)
-      analysis.should be_a Hash
+      expect(analysis).to be_a Hash
     end
 
     it "returns a hash with smaple count number of threshold hashes" do
       sample_count = 5
       analysis = @evaluator.full_analysis(sample_count: sample_count)
-      analysis.count.should == sample_count
+      expect(analysis.count).to eq sample_count
     end
 
     it "returns the four predictive values in each features threshold hash" do
       analysis = @evaluator.full_analysis
       threshold_hash = analysis[0.0]
 
-      threshold_hash.should have_key(:fp)
-      threshold_hash.should have_key(:fn)
-      threshold_hash.should have_key(:tp)
-      threshold_hash.should have_key(:tn)
+      expect(threshold_hash).to have_key(:fp)
+      expect(threshold_hash).to have_key(:fn)
+      expect(threshold_hash).to have_key(:tp)
+      expect(threshold_hash).to have_key(:tn)
     end
   end
 
@@ -565,23 +565,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns true if the given confidence is higher than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.8, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.8, @threshold)).to be true
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, 0.5, @threshold)).to be false
     end
 
     it "returns false for the same confidence and threshold if ground truth is 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, @threshold, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_positive?(@vandalism, @threshold, @threshold)).to be false
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.8, @threshold).should be_false
+      expect( Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.8, @threshold)).to be false
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_positive?(@regular, 0.5, @threshold)).to be false
     end
   end
 
@@ -593,23 +593,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns true if the given confidence is lower than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.5, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.5, @threshold)).to be true
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.8, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, 0.8, @threshold)).to be false
     end
 
     it "returns false for the same confidence and threshold if ground truth is 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, @threshold, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_negative?(@regular, @threshold, @threshold)).to be false
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.5, @threshold)).to be false
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.8, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.true_negative?(@vandalism, 0.8, @threshold)).to be false
     end
   end
 
@@ -621,23 +621,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns true if the given confidence is higher than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.8, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.8, @threshold)).to be true
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, 0.5, @threshold)).to be false
     end
 
     it "returns true for the same confidence and threshold if ground truth is 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, @threshold, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.false_positive?(@regular, @threshold, @threshold)).to be true
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.8, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.8, @threshold)).to be false
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_positive?(@vandalism, 0.5, @threshold)).to be false
     end
   end
 
@@ -649,23 +649,23 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "returns true if the given confidence is lower than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.5, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.5, @threshold)).to be true
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.8, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, 0.8, @threshold)).to be false
     end
 
     it "returns true for the same confidence and threshold if ground truth is 'V'" do
-      Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, @threshold, @threshold).should be_true
+      expect(Wikipedia::VandalismDetection::Evaluator.false_negative?(@vandalism, @threshold, @threshold)).to be true
     end
 
     it "returns false if the given confidence is lower than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.5, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.5, @threshold)).to be false
     end
 
     it "returns false if the given confidence is higher than a threshold regarding the ground truth 'R'" do
-      Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.8, @threshold).should be_false
+      expect(Wikipedia::VandalismDetection::Evaluator.false_negative?(@regular, 0.8, @threshold)).to be false
     end
   end
 end

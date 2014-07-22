@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::TimeInterval do
       new_revision = build(:new_revision, timestamp: new_revision_time)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 1.5
+      expect(@feature.calculate(edit)).to eq 1.5
     end
 
     it "requests the time from Wikipedia API if old revisions timestamp is not given" do
@@ -31,7 +31,7 @@ describe Wikipedia::VandalismDetection::Features::TimeInterval do
       new_revision = build(:new_revision, id: '327607921', parent_id: '327585467', timestamp: new_revision_time)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0.5
+      expect(@feature.calculate(edit)).to eq 0.5
     end
 
     it "returns missing if old reivision is not available anymore" do
@@ -44,7 +44,7 @@ describe Wikipedia::VandalismDetection::Features::TimeInterval do
       new_revision = build(:new_revision, id: '326980599', parent_id: '325218985', timestamp: new_revision_time)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
   end
 end

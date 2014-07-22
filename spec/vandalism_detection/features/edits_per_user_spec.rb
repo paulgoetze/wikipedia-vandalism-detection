@@ -19,7 +19,7 @@ describe Wikipedia::VandalismDetection::Features::EditsPerUser do
 
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-        @feature.calculate(edit).should == 1
+        expect(@feature.calculate(edit)).to eq 1
       end
     end
 
@@ -42,7 +42,7 @@ describe Wikipedia::VandalismDetection::Features::EditsPerUser do
       end
 
       it "returns the number of previously submitted edit from the same IP or ID" do
-        @feature.calculate(@edit).should == 1
+        expect(@feature.calculate(@edit)).to eq 1
       end
     end
   end

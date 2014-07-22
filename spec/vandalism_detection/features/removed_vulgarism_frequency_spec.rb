@@ -19,7 +19,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedVulgarismFrequency do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 3.0 / 10.0
+      expect(@feature.calculate(edit)).to eq 3.0 / 10.0
     end
 
     it "returns 0.0 on emtpy removed clean text revisions" do
@@ -30,7 +30,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedVulgarismFrequency do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end

@@ -16,7 +16,7 @@ describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
         new_revision = build(:new_revision)
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-        @feature.calculate(edit).should == 1
+        expect(@feature.calculate(edit)).to eq 1
       end
 
       it "returns 0.0 in case of an anonymous previous editor" do
@@ -24,7 +24,7 @@ describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
         new_revision = build(:new_revision)
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-        @feature.calculate(edit).should == 0
+        expect(@feature.calculate(edit)).to eq 0
       end
     end
 
@@ -32,17 +32,17 @@ describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
       it "requests the user from Wikipedia API and returns 1 in case of a registered previous editor" do
         old_revision = build(:old_revision, id: '324557983', contributor: nil)
         new_revision = build(:new_revision, id: '329962649', parent_id: '324557983', contributor: 'Tomaxer')
-
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-        @feature.calculate(edit).should == 1
+
+        expect(@feature.calculate(edit)).to eq 1
       end
 
       it "requests the user from Wikipedia API and returns 0 in case of an anonymous previous editor" do # also same editor!
         old_revision = build(:old_revision, id: '328774110', contributor: nil)
         new_revision = build(:new_revision, id: '328774035', parent_id: '328774110')
-
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-        @feature.calculate(edit).should == 0
+
+        expect(@feature.calculate(edit)).to eq 0
       end
 
       it "returns missing if old reivision is not available anymore" do
@@ -54,7 +54,7 @@ describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
         new_revision = build(:new_revision, id: '326980599', parent_id: '325218985')
         edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-        @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
+        expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
       end
     end
   end

@@ -21,7 +21,7 @@ describe Wikipedia::VandalismDetection::Features::EmoticonsImpact do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 3.0 / (3.0 + 4.0)
+      expect(@feature.calculate(edit)).to eq 3.0 / (3.0 + 4.0)
     end
 
     it "returns 0.5 on both no terms in text revisions" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::EmoticonsImpact do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.5
+      expect(@feature.calculate(edit)).to eq 0.5
     end
 
     it "returns 0.0 on emtpy text of old revision" do
@@ -37,7 +37,7 @@ describe Wikipedia::VandalismDetection::Features::EmoticonsImpact do
       new_revision = build(:new_revision, text: ":)")
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
 
     it "returns 1.0 on emtpy text of new revision" do
@@ -45,7 +45,7 @@ describe Wikipedia::VandalismDetection::Features::EmoticonsImpact do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 1.0
+      expect(@feature.calculate(edit)).to eq 1.0
     end
   end
 end

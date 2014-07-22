@@ -17,22 +17,24 @@ describe Wikipedia::VandalismDetection::Diff do
 
     it "can return the added words as array" do
       inserted_words = @diff.inserted_words
-      inserted_words.should be_an Array
-      inserted_words.count.should == 3
+
+      expect(inserted_words).to be_an Array
+      expect(inserted_words.count).to eq 3
     end
 
     it "can return the removed words as array" do
       removed_words = @diff.removed_words
-      removed_words.should be_an Array
-      removed_words.count.should == 2
+
+      expect(removed_words).to be_an Array
+      expect(removed_words.count).to eq 2
     end
 
     it "returns the right inserted words" do
-      @diff.inserted_words.should == ['hello', 'Mr.', 'Skywalker']
+      expect(@diff.inserted_words).to eq ['hello', 'Mr.', 'Skywalker']
     end
 
     it "returns the right removed words" do
-      @diff.removed_words.should == ['hello', 'Luke']
+      expect(@diff.removed_words).to eq ['hello', 'Luke']
     end
   end
 end

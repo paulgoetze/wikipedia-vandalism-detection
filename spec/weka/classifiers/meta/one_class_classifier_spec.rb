@@ -70,7 +70,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
 
   describe "#type" do
     it "returns the classifier's type name" do
-      Weka::Classifiers::Meta::OneClassClassifier.type.should == 'Meta::OneClassClassifier'
+      expect(Weka::Classifiers::Meta::OneClassClassifier.type).to eq 'Meta::OneClassClassifier'
     end
   end
 end

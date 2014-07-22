@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 1.6609633564650683
+      expect(@feature.calculate(edit)).to eq 1.6609633564650683
     end
 
     it "returns missing value if no alphanumeric characters are removed" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
 
     it "returns missing value if no text inserted" do
@@ -40,7 +40,7 @@ describe Wikipedia::VandalismDetection::Features::RemovedCharacterDistribution d
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
     end
   end
 end

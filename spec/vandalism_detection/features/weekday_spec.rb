@@ -16,7 +16,7 @@ describe Wikipedia::VandalismDetection::Features::Weekday do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 2 # Thuesday
+      expect(@feature.calculate(edit)).to eq 2 # Thuesday
     end
   end
 end

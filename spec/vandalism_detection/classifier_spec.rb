@@ -27,7 +27,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     classifier_name =  @config.classifier_type
     class_type = "Weka::Classifiers::#{classifier_name}::Base".constantize
 
-    @classifier.classifier_instance.should be_a class_type
+    expect(@classifier.classifier_instance).to be_a class_type
   end
 
   it "loads the configured classifier with given dataset" do
@@ -37,8 +37,9 @@ describe Wikipedia::VandalismDetection::Classifier do
     dataset.add_instance([1.0, Wikipedia::VandalismDetection::Instances::REGULAR])
 
     classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
-    classifier.classifier_instance.should be_a class_type
-    classifier.dataset .should == dataset
+
+    expect(classifier.classifier_instance).to be_a class_type
+    expect(classifier.dataset).to be dataset
   end
 
   it "raises an error if no classifier is configured" do
@@ -76,7 +77,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     classifier = Wikipedia::VandalismDetection::Classifier.new
 
     # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
-    classifier.dataset.n_rows.should == 4
+    expect(classifier.dataset.n_rows).to eq 4
   end
 
   it "load the classifier and learns it regarding the full configured (unbalanced) training set" do
@@ -101,9 +102,9 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 2 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-    dataset.n_rows.should == 6
-    regular_count.should == 4
-    vandalism_count.should == 2
+    expect(dataset.n_rows).to eq 6
+    expect(regular_count).to eq 4
+    expect(vandalism_count).to eq 2
   end
 
   it "loads the classifier and learns it regarding an oversampled training set if set in config" do
@@ -128,9 +129,9 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 4 vandalism, 4 regular, due to SMOTE oversampling
-    dataset.n_rows.should == 8
-    regular_count.should == 4
-    vandalism_count.should == 4
+    expect(dataset.n_rows).to eq 8
+    expect(regular_count).to eq 4
+    expect(vandalism_count).to eq 4
   end
 
   it "loads the classifier and learns it regarding a customized oversampled training set if set in config" do
@@ -154,9 +155,9 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 2 + 200 % = 6 vandalism, 4 regular, due to SMOTE oversampling without undersampling
-    dataset.n_rows.should == 10
-    regular_count.should == 4
-    vandalism_count.should == 6
+    expect(dataset.n_rows).to eq 10
+    expect(regular_count).to eq 4
+    expect(vandalism_count).to eq 6
   end
 
   describe "attribute readers" do
@@ -168,7 +169,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     it "returns an Evaluator instance from attribute #evaluator" do
-      @classifier.evaluator.should be_a Wikipedia::VandalismDetection::Evaluator
+      expect(@classifier.evaluator).to be_a Wikipedia::VandalismDetection::Evaluator
     end
   end
 
@@ -195,51 +196,51 @@ describe Wikipedia::VandalismDetection::Classifier do
       confidence_from_edit = @classifier.classify @edit
       confidence_from_features = @classifier.classify @features
 
-      confidence_from_edit.should == confidence_from_features
+      expect(confidence_from_edit).to eq confidence_from_features
     end
 
     it "returns a Numeric value which represents the confidence of vandalism class" do
       confidence = @classifier.classify @features
-      confidence.should be_a Numeric
+      expect(confidence).to be_a Numeric
     end
 
     it "returns an array that holds the confidence at first that is between 0.0 and 1.0" do
       confidence = @classifier.classify @features
       confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
-      confidence_between_0_and_1.should be_true
+      expect(confidence_between_0_and_1).to be true
     end
 
     it "returns -1.0 if features cannot be computed from the edit" do
       Wikipedia::VandalismDetection::FeatureCalculator.any_instance.stub(calculate_features_for: [])
       confidence = @classifier.classify @edit
 
-      confidence.should == -1.0
+      expect(confidence).to eq -1.0
     end
 
     describe "with option ':return_all_params = true'" do
 
       it "returns a hash" do
         parameters = @classifier.classify @features, return_all_params: true
-        parameters.should be_a Hash
+        expect(parameters).to be_a Hash
       end
 
       [:confidence, :class_index].each do |key|
         it "returns a hash with key :#{key}" do
           parameters = @classifier.classify @features, return_all_params: true
-          parameters.keys.should include key
+          expect(parameters.keys).to include key
         end
       end
 
       it "returns a class_index value of 0 or 1" do
         class_index = @classifier.classify(@features, return_all_params: true)[:class_index]
         is_one_or_zero = class_index == 0 || class_index == 1
-        is_one_or_zero.should be_true
+        expect(is_one_or_zero).to be true
       end
 
       it "returns an confidence value that is between 0.0 and 1.0" do
         confidence = (@classifier.classify @features, return_all_params: true)[:confidence]
         confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
-        confidence_between_0_and_1.should be_true
+        expect(confidence_between_0_and_1).to be true
       end
     end
 
@@ -302,14 +303,14 @@ describe Wikipedia::VandalismDetection::Classifier do
 
     it "returns a evaluation object" do
       evaluation = @classifier.cross_validate
-      evaluation.class.should == Java::WekaClassifiers::Evaluation
+      expect(evaluation.class).to be Java::WekaClassifiers::Evaluation
     end
 
     it "returns an Array of Evaluation objects (when equally distributed option used)" do
       evaluations = @classifier.cross_validate(equally_distributed: true)
 
       evaluations.each do |evaluation|
-        evaluation.class.should == Java::WekaClassifiers::Evaluation
+        expect(evaluation.class).to be Java::WekaClassifiers::Evaluation
       end
     end
   end

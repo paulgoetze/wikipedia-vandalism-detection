@@ -18,7 +18,7 @@ describe Wikipedia::VandalismDetection::Features::CharacterDiversity do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 14 ** (1.0 / 9)
+      expect(@feature.calculate(edit)).to eq 14 ** (1.0 / 9)
     end
 
     it "returns 0.0 if no text inserted" do
@@ -29,7 +29,7 @@ describe Wikipedia::VandalismDetection::Features::CharacterDiversity do
       new_revision = build(:new_revision, text: new_text)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end

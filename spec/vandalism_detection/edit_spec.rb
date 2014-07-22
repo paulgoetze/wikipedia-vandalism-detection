@@ -11,17 +11,17 @@ describe Wikipedia::VandalismDetection::Edit do
   end
 
   it "has an old revision" do
-    @edit.old_revision.should == @old_revision
+    expect(@edit.old_revision).to eq @old_revision
   end
 
   it "has a new revision" do
-    @edit.new_revision.should == @new_revision
+    expect(@edit.new_revision).to eq @new_revision
   end
 
   it "can be build with its parent page referenced" do
     page = build(:page, id: '1234', title: 'Page Title')
     edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
-    edit.page.should == page
+    expect(edit.page).to eq page
   end
 
   it "can be build with a page to get the id" do
@@ -30,7 +30,7 @@ describe Wikipedia::VandalismDetection::Edit do
     page.id = page_id
 
     edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
-    edit.page.id.should == page_id
+    expect(edit.page.id).to eq page_id
   end
 
   it "can be build with a page to get the title" do
@@ -39,7 +39,7 @@ describe Wikipedia::VandalismDetection::Edit do
     page.title = page_title
 
     edit = Wikipedia::VandalismDetection::Edit.new(@old_revision, @new_revision, page: page)
-    edit.page.title.should == page_title
+    expect(edit.page.title).to eq page_title
   end
 
   describe "exception handling" do
@@ -59,7 +59,7 @@ describe Wikipedia::VandalismDetection::Edit do
 
   describe "#serialize" do
     it "serializes the given parameters into a string" do
-      @edit.serialize(:id, :text).should == "1:text 1\t2:text 2"
+      expect(@edit.serialize(:id, :text)).to eq "1:text 1\t2:text 2"
     end
   end
 
@@ -69,7 +69,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "inserted words")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.inserted_words.should == ['inserted', 'words']
+      expect(edit.inserted_words).to eq ['inserted', 'words']
     end
 
     it "returns the uncleaned text inserted words as array" do
@@ -77,7 +77,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "[[inserted words]]")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.inserted_words.should == ['[[inserted', 'words]]']
+      expect(edit.inserted_words).to eq ['[[inserted', 'words]]']
     end
   end
 
@@ -87,7 +87,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "inserted words")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.inserted_text.should == Wikipedia::VandalismDetection::Text.new('inserted words')
+      expect(edit.inserted_text).to eq Wikipedia::VandalismDetection::Text.new('inserted words')
     end
 
     it "returns the uncleaned text inserted text as Wikipedia::VadalismDetection::Text" do
@@ -95,7 +95,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "[[inserted words]]")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.inserted_text.should == Wikipedia::VandalismDetection::Text.new('[[inserted words]]')
+      expect(edit.inserted_text).to eq Wikipedia::VandalismDetection::Text.new('[[inserted words]]')
     end
   end
 
@@ -105,7 +105,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.removed_words.should == ['removed', 'words']
+      expect(edit.removed_words).to eq ['removed', 'words']
     end
 
     it "returns the uncleaned text rremoved words as array" do
@@ -113,7 +113,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.removed_words.should == ['[[removed', 'words]]']
+      expect(edit.removed_words).to eq ['[[removed', 'words]]']
     end
   end
 
@@ -123,7 +123,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.removed_text.should == Wikipedia::VandalismDetection::Text.new('removed words')
+      expect(edit.removed_text).to eq Wikipedia::VandalismDetection::Text.new('removed words')
     end
 
     it "returns the uncleaned text removed text as Wikipedia::VadalismDetection::Text" do
@@ -131,7 +131,7 @@ describe Wikipedia::VandalismDetection::Edit do
       new_revision = build(:new_revision, text: "")
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      edit.removed_text.should == Wikipedia::VandalismDetection::Text.new('[[removed words]]')
+      expect(edit.removed_text).to eq Wikipedia::VandalismDetection::Text.new('[[removed words]]')
     end
   end
 end

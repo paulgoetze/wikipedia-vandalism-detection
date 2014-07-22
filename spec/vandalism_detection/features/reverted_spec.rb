@@ -15,14 +15,14 @@ describe Wikipedia::VandalismDetection::Features::Reverted do
         comment = Wikipedia::VandalismDetection::Text.new "#{term} edited"
         edit = build :edit, new_revision: build(:new_revision, comment: comment)
 
-        @feature.calculate(edit).should == 1
+        expect(@feature.calculate(edit)).to eq 1
       end
     end
 
     it "returns 0 on emtpy comment" do
       edit = build :edit, new_revision: build(:new_revision, comment: "")
 
-      @feature.calculate(edit).should == 0
+      expect(@feature.calculate(edit)).to eq 0
     end
   end
 end

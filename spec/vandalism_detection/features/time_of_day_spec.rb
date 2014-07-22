@@ -16,7 +16,7 @@ describe Wikipedia::VandalismDetection::Features::TimeOfDay do
 
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 5.6
+      expect(@feature.calculate(edit)).to eq 5.6
     end
   end
 end

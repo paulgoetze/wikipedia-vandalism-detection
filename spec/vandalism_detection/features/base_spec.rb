@@ -25,11 +25,11 @@ describe Wikipedia::VandalismDetection::Features::Base do
 
     it "returns the number of terms in the given text found with the given term array" do
       terms = [:i, :you]
-      @feature.count(terms, in: @text).should == 4
+      expect(@feature.count(terms, in: @text)).to eq 4
     end
 
     it "returns the number of terms in the given text found with the given single term" do
-      @feature.count("You", in: @text).should == 2
+      expect(@feature.count("You", in: @text)).to eq 2
     end
   end
 

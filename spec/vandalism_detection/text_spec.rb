@@ -23,7 +23,7 @@ describe Wikipedia::VandalismDetection::Text do
       wiki_text = Wikipedia::VandalismDetection::Text.new load_file('sample_revision.txt')
       clean_text = load_file('sample_revision_clean_text.txt')
 
-      wiki_text.clean.should == clean_text
+      expect(wiki_text.clean).to eq clean_text
     end
   end
 end

@@ -16,7 +16,7 @@ describe Wikipedia::VandalismDetection::Features::Blanking do
       new_revision = build(:new_revision, text: @blank_text)
       edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
 
-      @feature.calculate(edit).should == 1.0
+      expect(@feature.calculate(edit)).to eq 1.0
     end
 
     it "returns 0.0 in case of not full blanking (size >= BLANKING_THRESHOLD) new revision" do
@@ -24,7 +24,7 @@ describe Wikipedia::VandalismDetection::Features::Blanking do
       new_revision = build(:new_revision, text: "#{@blank_text}a")
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
 
     it "returns 0.0 if old revision is <= new revision" do
@@ -32,7 +32,7 @@ describe Wikipedia::VandalismDetection::Features::Blanking do
       new_revision = build(:new_revision, text: @blank_text.next!)
       edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
 
-      @feature.calculate(edit).should == 0.0
+      expect(@feature.calculate(edit)).to eq 0.0
     end
   end
 end
