@@ -17,8 +17,6 @@ module Wikipedia
     #   - character sequence
     #   - ...
     # etc.
-    #
-    # @author Paul Götze <paul.christoph.goetze@gmail.com>
     class FeatureCalculator
 
       def initialize
