@@ -32,6 +32,7 @@ module Wikipedia
           revision.timestamp = element.xpath('timestamp').inner_text
           revision.comment = Text.new(element.xpath('comment').inner_text)
           revision.text = Text.new(element.xpath('text').inner_text)
+          revision.sha1 = element.xpath('sha1').inner_text
 
           parent_id_node = element.xpath('parentid')
           contributor_id_node = element.xpath('contributor/id')

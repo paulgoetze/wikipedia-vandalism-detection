@@ -91,4 +91,23 @@ describe Wikipedia::VandalismDetection::Page do
       expect(@page.instance_variable_get(:@revision_added)).to be false
     end
   end
+
+  describe "#reverted_edits" do
+
+    it {should respond_to :reverted_edits }
+
+    it "returns reverted revisions by comparing the sha1 values" do
+      revision_1 = build(:empty_revision, id: 1, sha1: 'hash1')
+      revision_2 = build(:empty_revision, id: 2, parent_id: 1, sha1: 'hash2')
+      revision_3 = build(:empty_revision, id: 3, parent_id: 2, sha1: 'hash1')
+      revision_4 = build(:empty_revision, id: 4, parent_id: 3, sha1: 'hash2')
+
+      @page.add_revision(revision_3)
+      @page.add_revision(revision_1)
+      @page.add_revision(revision_2)
+      @page.add_revision(revision_4)
+
+      expect(@page.reverted_edits.map { |edit| edit.new_revision.id }).to eq [2, 3]
+    end
+  end
 end

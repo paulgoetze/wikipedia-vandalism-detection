@@ -168,6 +168,24 @@ describe Wikipedia::VandalismDetection::PageParser do
         end
       end
 
+      it "has revisions each with the right sha1 hash" do
+        xml = load_file('vandalism_on_wikipedia_simplified.xml')
+        page = @parser.parse xml
+
+        revision_1 = build :empty_revision, id: '1', sha1: 'hash1'
+        revision_2 = build :empty_revision, id: '2', sha1: 'hash2'
+        revision_3 = build :empty_revision, id: '3', sha1: 'hash3'
+        revision_4 = build :empty_revision, id: '4', sha1: 'hash4'
+        revision_5 = build :empty_revision, id: '5', sha1: 'hash5'
+
+        revisions = {revision_1.id => revision_1, revision_2.id => revision_2, revision_3.id => revision_3,
+                     revision_4.id => revision_4, revision_5.id => revision_5}
+
+        page.revisions.each do |key, value|
+          expect(value.sha1).to eq revisions[key].sha1
+        end
+      end
+
     end
   end
 end

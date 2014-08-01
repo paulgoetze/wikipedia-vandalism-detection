@@ -58,7 +58,7 @@
         1
 
       </text>
-      <sha1>eju7ojn2omej7atr11ll7k64hzhpkaq</sha1>
+      <sha1>hash1</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>
     </revision>
@@ -72,7 +72,7 @@
       </contributor>
       <comment>comment 2</comment>
       <text xml:space="preserve" bytes="1914">text 2</text>
-      <sha1>rwmi3pu1ormoc1mqgs7mej6r63u9uxk</sha1>
+      <sha1>hash2</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>
     </revision>
@@ -85,7 +85,7 @@
         <id>11</id>
       </contributor>
       <text xml:space="preserve" bytes="3177">text 3</text>
-      <sha1>hya1xftsfkq6wml6uigb6j480p4x2nt</sha1>
+      <sha1>hash3</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>
     </revision>
@@ -98,7 +98,7 @@
         <id>12</id>
       </contributor>
       <text xml:space="preserve" bytes="3261">text 4</text>
-      <sha1>ebb1e4tgy49mqdwtyk0rafzdcokp4lh</sha1>
+      <sha1>hash4</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>
     </revision>
@@ -111,7 +111,7 @@
       </contributor>
       <comment>comment 3</comment>
       <text xml:space="preserve" bytes="3541">text 5</text>
-      <sha1>t8s84rnkje13fkdkw0exui4hrs3fx8x</sha1>
+      <sha1>hash5</sha1>
       <model>wikitext</model>
       <format>text/x-wiki</format>
     </revision>

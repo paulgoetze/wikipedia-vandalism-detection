@@ -15,8 +15,8 @@ describe Wikipedia::VandalismDetection::Revision do
 
   before do
     @revision = Wikipedia::VandalismDetection::Revision.new
-    @instance_variables = [:id, :parent_id, :timestamp, :comment, :text, :contributor_id, :contributor_ip]
-    @nil_instance_variables = [:id, :parent_id, :timestamp, :contributor_id, :contributor_ip, :contributor_username]
+    @instance_variables = [:id, :parent_id, :timestamp, :comment, :text, :contributor_id, :contributor_ip, :sha1]
+    @nil_instance_variables = [:id, :parent_id, :timestamp, :contributor_id, :contributor_ip, :contributor_username, :sha1]
     @read_only_attributes = [:contributor_id, :contributor_ip]
   end
 

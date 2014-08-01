@@ -34,6 +34,35 @@ module Wikipedia
         end
       end
 
+      # Returns the reverted edits by comparing the text's sha1 hashes of multiple revisions.
+      # If the next but one revision has the same sha1 hash as a base revision, the in-between revision is reverted.
+      # Then the edit has the base revision as old revision and the reverted as new revision.
+      def reverted_edits
+        if @revision_added
+          @reverted_edits = @revisions.map do |current_id, current_revision|
+            mid_revision_select = @revisions.select { |_, value| value.parent_id == current_id }.first
+
+            next unless mid_revision_select
+
+            mid_revision = mid_revision_select[1]
+            target_revision_select = @revisions.select { |_, value| value.parent_id == mid_revision.id }.first
+
+            next unless target_revision_select
+
+            target_revision = target_revision_select[1]
+
+            base_sha1 = current_revision.sha1
+            target_sha1 = target_revision.sha1
+
+            if base_sha1 == target_sha1
+              Edit.new(current_revision, mid_revision)
+            end
+          end
+        end
+
+        @reverted_edits.compact!
+      end
+
       private
 
       def create_edits_from(revisions)

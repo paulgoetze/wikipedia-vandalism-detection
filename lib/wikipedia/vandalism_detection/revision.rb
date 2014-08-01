@@ -13,7 +13,8 @@ module Wikipedia
                     :timestamp,
                     :comment,
                     :text,
-                    :contributor_username
+                    :contributor_username,
+                    :sha1
 
       attr_reader :contributor_id,
                   :contributor_ip
