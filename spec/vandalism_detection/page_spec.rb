@@ -45,7 +45,7 @@ describe Wikipedia::VandalismDetection::Page do
     it "resets the @revision_added flag to false" do
       @page.add_revision build(:empty_revision, id: '1')
       @page.edits
-      expect(@page.instance_variable_get(:@revision_added)).to be false
+      expect(@page.instance_variable_get(:@update_edits)).to be false
     end
 
     it "computes edits from the page's revisions" do
@@ -79,16 +79,22 @@ describe Wikipedia::VandalismDetection::Page do
       expect { @page.add_revision(revision) }.to change(@page.revisions, :count).by(1)
     end
 
-    it "sets the @revision_added flag to true after adding a revision" do
+    it "sets the @update_edits flag to true after adding a revision" do
       revision = build :empty_revision
       @page.add_revision(revision)
-      expect(@page.instance_variable_get(:@revision_added)).to be true
+      expect(@page.instance_variable_get(:@update_edits)).to be true
+    end
+
+    it "sets the @update_reverted_edits flag to true after adding a revision" do
+      revision = build :empty_revision
+      @page.add_revision(revision)
+      expect(@page.instance_variable_get(:@update_reverted_edits)).to be true
     end
 
     it "only adds revisions which are no redirects" do
       revision = build :empty_revision, text: "#REDIRECT [[Redirect page name]]"
       expect { @page.add_revision(revision) }.not_to change(@page.revisions, :count)
-      expect(@page.instance_variable_get(:@revision_added)).to be false
+      expect(@page.instance_variable_get(:@update_edits)).to be false
     end
   end
 
@@ -96,18 +102,40 @@ describe Wikipedia::VandalismDetection::Page do
 
     it {should respond_to :reverted_edits }
 
-    it "returns reverted revisions by comparing the sha1 values" do
-      revision_1 = build(:empty_revision, id: 1, sha1: 'hash1')
+    it "returns reverted edits by comparing the sha1 values" do
+      # principle:
+      # in edit wars the in-between of the first revert triple which has another hash before
+      # can be seen as vandalism (here revision with id 2)
+
+      revision_1 = build(:empty_revision, id: 1, parent_id: nil,  sha1: 'hash0')
+      revision_2 = build(:empty_revision, id: 2, parent_id: 1, sha1: 'hash1')
+      revision_3 = build(:empty_revision, id: 3, parent_id: 2, sha1: 'hash2')
+      revision_4 = build(:empty_revision, id: 4, parent_id: 3, sha1: 'hash1')
+      revision_5 = build(:empty_revision, id: 5, parent_id: 4, sha1: 'hash2')
+      revision_6 = build(:empty_revision, id: 6, parent_id: 5, sha1: 'hash3')
+
+      @page.add_revision(revision_3)
+      @page.add_revision(revision_6)
+      @page.add_revision(revision_1)
+      @page.add_revision(revision_5)
+      @page.add_revision(revision_4)
+      @page.add_revision(revision_2)
+
+      expect(@page.reverted_edits.map { |edit| edit.new_revision.id }).to eq [3]
+    end
+
+    it "returns reverted edit if no previous revision is available" do
+      revision_1 = build(:empty_revision, id: 1, parent_id: nil,  sha1: 'hash1')
       revision_2 = build(:empty_revision, id: 2, parent_id: 1, sha1: 'hash2')
       revision_3 = build(:empty_revision, id: 3, parent_id: 2, sha1: 'hash1')
       revision_4 = build(:empty_revision, id: 4, parent_id: 3, sha1: 'hash2')
 
       @page.add_revision(revision_3)
       @page.add_revision(revision_1)
-      @page.add_revision(revision_2)
       @page.add_revision(revision_4)
+      @page.add_revision(revision_2)
 
-      expect(@page.reverted_edits.map { |edit| edit.new_revision.id }).to eq [2, 3]
+      expect(@page.reverted_edits.map { |edit| edit.new_revision.id }).to eq [2]
     end
   end
 end

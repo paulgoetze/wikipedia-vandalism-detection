@@ -16,66 +16,75 @@ module Wikipedia
       def initialize
         @revisions = {}
         @edits = []
-        @revision_added = false
+        @update_edits = false
+        @update_reverted_edits = false
       end
 
       def add_revision(revision)
+        #TODO remove redirect? condition
         unless revision.redirect?
           @revisions[revision.id] = revision
-          @revision_added = true
+
+          @update_edits = true
+          @update_reverted_edits = true
         end
       end
 
       def edits
-        if @revision_added
-         create_edits_from @revisions
-        else
-         @edits
-        end
+        @edits = create_edits_from @revisions if @update_edits
+        @edits
       end
 
-      # Returns the reverted edits by comparing the text's sha1 hashes of multiple revisions.
-      # If the next but one revision has the same sha1 hash as a base revision, the in-between revision is reverted.
-      # Then the edit has the base revision as old revision and the reverted as new revision.
       def reverted_edits
-        if @revision_added
-          @reverted_edits = @revisions.map do |current_id, current_revision|
-            mid_revision_select = @revisions.select { |_, value| value.parent_id == current_id }.first
-
-            next unless mid_revision_select
-
-            mid_revision = mid_revision_select[1]
-            target_revision_select = @revisions.select { |_, value| value.parent_id == mid_revision.id }.first
-
-            next unless target_revision_select
-
-            target_revision = target_revision_select[1]
-
-            base_sha1 = current_revision.sha1
-            target_sha1 = target_revision.sha1
-
-            if base_sha1 == target_sha1
-              Edit.new(current_revision, mid_revision)
-            end
-          end
-        end
-
-        @reverted_edits.compact!
+        @reverted_edits = create_reverted_edits_from @revisions if @update_reverted_edits
+        @reverted_edits
       end
 
       private
 
       def create_edits_from(revisions)
-        @revision_added = false
-        @edits = []
+        @update_edits = false
+        edits = []
 
-        revisions.each do |id, new_revision|
+        revisions.each do |_, new_revision|
           old_revision = revisions[new_revision.parent_id]
-          @edits.push Edit.new(old_revision, new_revision) unless old_revision.nil?
+          edits << Edit.new(old_revision, new_revision) unless old_revision.nil?
         end
 
-        @edits.each { |edit| edit.instance_variable_set(:@page, self) }
-        @edits
+        edits.each { |edit| edit.instance_variable_set(:@page, self) }
+        edits
+      end
+
+      # Returns the reverted edits by comparing the text's sha1 hashes of multiple revisions.
+      # If the next but one revision has the same sha1 hash as a base revision and the base revision has another
+      # hash than the one before, the in-between revision is reverted.
+      # The resulting edit holds the base revision as old revision and the reverted as new revision.
+      def create_reverted_edits_from(revisions)
+        @update_reverted_edits = false
+        edits = []
+
+        revisions.each do |current_id, first_revision|
+          second_revision_select = revisions.select { |_, value| value.parent_id == current_id }.first
+          next unless second_revision_select
+
+          second_revision = second_revision_select[1]
+
+          third_revision_select = revisions.select { |_, value| value.parent_id == second_revision.id }.first
+          next unless third_revision_select
+
+          first_sha1 = first_revision.sha1
+          second_sha1 = second_revision.sha1
+          third_sha1 = third_revision_select[1].sha1
+
+          previous_revision_select = revisions.select { |_, value| value.id == first_revision.parent_id }.first
+          previous_sha1 = previous_revision_select ? previous_revision_select[1].sha1 : nil
+
+          if (first_sha1 == third_sha1) && (second_sha1 != previous_sha1)
+            edits << Edit.new(first_revision, second_revision)
+          end
+        end
+
+        edits
       end
     end
   end
