@@ -21,13 +21,10 @@ module Wikipedia
       end
 
       def add_revision(revision)
-        #TODO remove redirect? condition
-        unless revision.redirect?
-          @revisions[revision.id] = revision
+        @revisions[revision.id] = revision
 
-          @update_edits = true
-          @update_reverted_edits = true
-        end
+        @update_edits = true
+        @update_reverted_edits = true
       end
 
       def edits

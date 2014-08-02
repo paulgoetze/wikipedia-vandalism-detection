@@ -90,12 +90,6 @@ describe Wikipedia::VandalismDetection::Page do
       @page.add_revision(revision)
       expect(@page.instance_variable_get(:@update_reverted_edits)).to be true
     end
-
-    it "only adds revisions which are no redirects" do
-      revision = build :empty_revision, text: "#REDIRECT [[Redirect page name]]"
-      expect { @page.add_revision(revision) }.not_to change(@page.revisions, :count)
-      expect(@page.instance_variable_get(:@update_edits)).to be false
-    end
   end
 
   describe "#reverted_edits" do
