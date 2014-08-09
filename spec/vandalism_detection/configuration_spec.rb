@@ -24,7 +24,8 @@ describe Wikipedia::VandalismDetection do
       :test_output_classification_file,
       :oversampling_options,
       :training_output_arff_file,
-      :test_output_arff_file
+      :test_output_arff_file,
+      :replace_training_data_missing_values?
     ].each do |attribute|
       it "responds to ##{attribute}" do
         expect(@configuration).to respond_to attribute
@@ -276,6 +277,29 @@ describe Wikipedia::VandalismDetection do
         use_configuration(config)
 
         expect(Wikipedia::VandalismDetection.configuration.oversampling_options).to eq hash
+      end
+    end
+
+    describe "#replace_missing_values?" do
+
+      ['no', 'No', 'false', 'nope', '', nil].each do |option|
+        it "returns false if not set" do
+          config = test_config
+          config.instance_variable_set(:@replace_missing_values, option)
+          use_configuration(config)
+
+          expect(Wikipedia::VandalismDetection.configuration.replace_training_data_missing_values?).to be false
+        end
+      end
+
+      ['yes', 't', 'T', 'YES', 'True', 'true'].each do |option|
+        it "returns true if set" do
+          config = test_config
+          config.instance_variable_set(:@replace_missing_values, option)
+          use_configuration(config)
+
+          expect(Wikipedia::VandalismDetection.configuration.replace_training_data_missing_values?).to be true
+        end
       end
     end
 

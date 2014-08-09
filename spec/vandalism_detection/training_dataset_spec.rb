@@ -62,6 +62,8 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
+      next if name == "user reputation"
+
       it "creates an arff file for the feature '#{name}'" do
         config = test_config
         config.instance_variable_set :@features, [name]
@@ -110,6 +112,29 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       it "builds the right number of data columns" do
         dataset = Wikipedia::VandalismDetection::TrainingDataset.build
         expect(dataset.n_col).to eq @config.features.count + 1
+      end
+    end
+
+    describe "replacing missing values" do
+
+      it "replaces missing values if configured" do
+        config = test_config
+        config.instance_variable_set :@replace_missing_values, 'true'
+        use_configuration(config)
+
+        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
+
+        expect(dataset.to_s).to match /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
+      end
+
+      it "does not replace missing values if not configured" do
+        config = test_config
+        config.instance_variable_set :@replace_missing_values, 'Nope'
+        use_configuration(config)
+
+        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
+
+        expect(dataset.to_s).not_to match /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
       end
     end
   end

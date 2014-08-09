@@ -33,6 +33,9 @@ module Wikipedia
         @classifier_options = @data['classifier']['options']
         @cross_validation_fold = @data['classifier']['cross-validation-fold']
         @training_data_options = @data['classifier']['training-data-options']
+        @replace_missing_values = @data['classifier']['replace-missing-values'].to_s
+
+        puts "replace missing values: " + @replace_missing_values
 
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
@@ -43,6 +46,10 @@ module Wikipedia
       # Returns whether the classifier uses one class classification
       def use_occ?
         @classifier_type == Weka::Classifiers::Meta::OneClassClassifier.type
+      end
+
+      def replace_training_data_missing_values?
+        !!(@replace_missing_values =~ /(true|t|yes|y)/i)
       end
 
       # Returns a boolean value whether a balanced data set is used for classifier training.
@@ -256,7 +263,8 @@ module Wikipedia
               "type"    => nil,
               "options" => nil,
               "cross-validation-fold" => 10,
-              "training-data-options" => 'unbalanced'
+              "training-data-options" => 'unbalanced',
+              "replace-missing-values" => nil
           }
       }
 

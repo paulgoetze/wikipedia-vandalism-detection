@@ -78,6 +78,7 @@ module Wikipedia
 
         dataset = merge_feature_arffs(@config.features, output_directory)
         dataset.class_index = @config.features.count
+        dataset = replace_missing_values(dataset) if @config.replace_training_data_missing_values?
 
         dataset
       end
@@ -140,6 +141,13 @@ module Wikipedia
         else
           smote_dataset
         end
+      end
+
+      def self.replace_missing_values(dataset)
+        puts "replacing missing values..."
+        filter = Weka::Filters::Unsupervised::Attribute::ReplaceMissingValues.new
+        filter.set { data dataset }
+        filter.use
       end
 
       # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
@@ -288,7 +296,8 @@ module Wikipedia
                            :merge_feature_arffs,
                            :print_progress,
                            :find_edits_data_for,
-                           :load_corpus_file_index
+                           :load_corpus_file_index,
+                           :replace_missing_values
     end
   end
 end
