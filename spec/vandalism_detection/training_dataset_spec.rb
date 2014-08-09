@@ -62,8 +62,6 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
 
     Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
-      next if name == "user reputation"
-
       it "creates an arff file for the feature '#{name}'" do
         config = test_config
         config.instance_variable_set :@features, [name]
