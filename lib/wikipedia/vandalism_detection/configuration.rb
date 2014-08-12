@@ -35,8 +35,6 @@ module Wikipedia
         @training_data_options = @data['classifier']['training-data-options']
         @replace_missing_values = @data['classifier']['replace-missing-values'].to_s
 
-        puts "replace missing values: " + @replace_missing_values
-
         @features = @data['features']
         @output_base_directory = File.expand_path(@data['output']['base_directory'], __FILE__)
         @training_arff_file_name = @data['output']['training']['arff_file']
