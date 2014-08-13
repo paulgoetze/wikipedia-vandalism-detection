@@ -9,18 +9,17 @@ describe Wikipedia::VandalismDetection::PageParser do
   describe "parser structure" do
 
     describe "#parse" do
-      it "returns a Wikipedia::Page object" do
+      before do
         xml = load_file('vandalism_on_wikipedia.xml')
-        @page = @parser.parse xml
+        @page = @parser.parse(xml)
+      end
 
+      it "returns a Wikipedia::Page object" do
         expect(@page).to be_a Wikipedia::VandalismDetection::Page
       end
 
-      it "returns an empty Wikipedia::Page if the only revision is a redirect" do
-        xml = load_file('redirect_page.xml')
-        @page = @parser.parse xml
-
-        expect(@page.revisions).to be_empty
+      it "returns a Wikipedia::Page with the right number of revisions" do
+        expect(@page.revisions.count).to eq 5
       end
     end
   end
@@ -56,12 +55,6 @@ describe Wikipedia::VandalismDetection::PageParser do
     describe "page's revisions" do
       it 'has the right number of revisions' do
         expect(@page.revisions.count).to eq 5
-      end
-
-      it "discards revisions with #REDIRECT content" do
-        xml = load_file('page_with_redirects.xml')
-        page = @parser.parse xml
-        expect(page.revisions.count).to eq 2
       end
 
       it "has revisions each with the right id" do
