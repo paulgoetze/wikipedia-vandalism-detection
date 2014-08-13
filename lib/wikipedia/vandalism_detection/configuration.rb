@@ -1,4 +1,5 @@
 require 'weka/classifiers/meta/one_class_classifier'
+require 'singleton'
 
 module Wikipedia
   module VandalismDetection
@@ -6,10 +7,11 @@ module Wikipedia
     require 'yaml'
 
     def self.configuration
-      @configuration ||= Configuration.new
+      Configuration.instance
     end
 
     class Configuration
+      include Singleton
 
       TRAINING_DATA_BALANCED = 'balanced'
       TRAINING_DATA_UNBALANCED = 'unbalanced'
@@ -273,23 +275,44 @@ module Wikipedia
       # Looks in two places for a custom config file:
       # in <app_root>/config/ and in <app_root>/lib/config
       def config_file
-        root_file = File.join(source, "config/config.yml")
-        lib_file = File.join(source, "lib/config/config.yml")
+        config_file_path = "config/config.yml"
+        root_file = File.join(source, config_file_path)
+        lib_file = File.join(source, "lib/#{config_file_path}")
+        first_parent_file = find_first_parent_path_for(File.expand_path(File.dirname(__FILE__)), config_file_path)
 
-        File.exist?(root_file) ? root_file : lib_file
+        File.exist?(root_file) ? root_file : (File.exist?(lib_file) ? lib_file : first_parent_file)
       end
 
       def load_config_file(file)
-
-        if File.exists? file
+        if File.exists?(file) && file =~ /config\.yml/
           YAML.load_file(file)
         else
           warn %Q{
 
-            Configuration file not found in #{source}/config or #{source}/lib/config directory.
+            Configuration file not found in
+            #{source}/config,
+            #{source}/lib/config directory
+            or any other parent path.
+
             To customize the system, create a config.yml file.
 
           }
+        end
+      end
+
+      private
+
+      def find_first_parent_path_for(start_path, file)
+        file_path = File.join(start_path, file)
+
+        if File.exists?(file_path)
+          file_path
+        else
+          if File.dirname(start_path) != start_path
+            find_first_parent_path_for(File.dirname(start_path), file)
+          else
+            start_path
+          end
         end
       end
 

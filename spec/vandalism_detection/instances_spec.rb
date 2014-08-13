@@ -10,6 +10,8 @@ describe Wikipedia::VandalismDetection::Instances do
   describe "#empty" do
 
     before do
+      use_test_configuration
+
       @dataset = Wikipedia::VandalismDetection::Instances.empty
       @attributes = @dataset.enumerate_attributes
       @class_attribute = @dataset.class_attribute
@@ -25,7 +27,7 @@ describe Wikipedia::VandalismDetection::Instances do
 
     it "has all configured features and class as attributes" do
       attribute_names = @attributes.map{ |attr| "#{attr.name.gsub('_', ' ')}" }
-      features = Wikipedia::VandalismDetection.configuration.features
+      features = test_config.features
 
       expect(attribute_names).to eq features
     end

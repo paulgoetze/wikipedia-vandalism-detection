@@ -7,7 +7,7 @@ describe Wikipedia::VandalismDetection do
 
     before do
       Wikipedia::VandalismDetection::DefaultConfiguration.any_instance.stub(source: source_dir)
-      @configuration = Wikipedia::VandalismDetection::Configuration.new
+      @configuration = Wikipedia::VandalismDetection::Configuration.instance
 
       use_test_configuration
     end

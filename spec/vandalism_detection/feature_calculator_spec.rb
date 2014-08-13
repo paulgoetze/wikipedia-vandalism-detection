@@ -3,7 +3,7 @@ require 'spec_helper'
 describe  Wikipedia::VandalismDetection::FeatureCalculator do
 
   it "raises NoFeaturesConfiguredError when no features are configured" do
-    configuration = Wikipedia::VandalismDetection::Configuration.new
+    configuration = Wikipedia::VandalismDetection::Configuration.send(:new)
     configuration.instance_variable_set :@features, nil
 
     use_configuration(configuration)
@@ -13,6 +13,7 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
   end
 
   before do
+    use_test_configuration
     @calculator = Wikipedia::VandalismDetection::FeatureCalculator.new
   end
 
@@ -62,7 +63,7 @@ describe  Wikipedia::VandalismDetection::FeatureCalculator do
     end
 
     it "returns an array holding -1 for not extractable texts in either revision" do
-      configuration = Wikipedia::VandalismDetection::Configuration.new
+      configuration = Wikipedia::VandalismDetection::Configuration.instance
       configuration.instance_variable_set :@features, ['all wordlists impact']
 
       use_configuration(configuration)
