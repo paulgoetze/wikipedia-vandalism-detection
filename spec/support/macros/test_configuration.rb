@@ -31,7 +31,7 @@ module TestConfiguration
 
   def test_config
     Wikipedia::VandalismDetection::DefaultConfiguration.any_instance.stub(source: source_dir)
-    Wikipedia::VandalismDetection::Configuration.new
+    Wikipedia::VandalismDetection::Configuration.send(:new)
   end
 
   def paths
