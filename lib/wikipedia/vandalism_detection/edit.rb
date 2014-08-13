@@ -25,22 +25,19 @@ module Wikipedia
         new_revision_parts = []
 
         attributes.each do |attr|
-          variable_name = "@#{attr.to_s}"
-
-          if @old_revision.instance_variable_defined?(variable_name)
-            old_revision_parts.push @old_revision.instance_variable_get(variable_name)
+          if @old_revision.respond_to?(attr)
+            old_revision_parts.push @old_revision.method(attr).call
           end
         end
 
         attributes.each do |attr|
-          variable_name = "@#{attr.to_s}"
-          if @new_revision.instance_variable_defined?(variable_name)
-            new_revision_parts.push @new_revision.instance_variable_get(variable_name)
+          if @new_revision.respond_to?(attr)
+            new_revision_parts.push @new_revision.method(attr).call
           end
         end
 
-        old_revision_string = old_revision_parts.join ':'
-        new_revision_string = new_revision_parts.join ':'
+        old_revision_string = old_revision_parts.join(',')
+        new_revision_string = new_revision_parts.join(',')
 
         "#{old_revision_string}\t#{new_revision_string}"
       end

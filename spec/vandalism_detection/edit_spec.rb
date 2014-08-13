@@ -59,7 +59,7 @@ describe Wikipedia::VandalismDetection::Edit do
 
   describe "#serialize" do
     it "serializes the given parameters into a string" do
-      expect(@edit.serialize(:id, :text)).to eq "1:text 1\t2:text 2"
+      expect(@edit.serialize(:id, :text)).to eq "1,text 1\t2,text 2"
     end
   end
 
