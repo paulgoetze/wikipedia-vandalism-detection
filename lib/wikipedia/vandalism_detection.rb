@@ -8,6 +8,7 @@ require 'wikipedia/vandalism_detection/revision'
 require 'wikipedia/vandalism_detection/edit'
 require 'wikipedia/vandalism_detection/page'
 require 'wikipedia/vandalism_detection/page_parser'
+require 'wikipedia/vandalism_detection/revision_parser'
 
 require 'wikipedia/vandalism_detection/word_lists'
 require 'wikipedia/vandalism_detection/diff'

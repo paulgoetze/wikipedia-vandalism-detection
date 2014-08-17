@@ -1,0 +1,13 @@
+   <revision>
+      <id>id1</id>
+     <parentid>parentid1</parentid>
+      <timestamp>time1</timestamp>
+      <contributor>
+        <ip>ip1</ip>
+      </contributor>
+      <comment>comment 1</comment>
+      <text xml:space="preserve" bytes="1880">text 1</text>
+      <sha1>hash1</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+   </revision>
