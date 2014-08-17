@@ -49,12 +49,12 @@ module Wikipedia
         # remove invalid utf-8 byte sequences
         text.encode!('UTF-16', 'UTF-8', invalid: :replace, replace: '')
         text.encode!('UTF-8', 'UTF-16')
-        @text = Zlib::Deflate.deflate(text, Zlib::BEST_COMPRESSION)
+        @text = Zlib::Deflate.deflate(text)
       end
 
       # Decompresses text when called
       def text
-        Text.new(Zlib::Inflate.inflate(@text))
+        Text.new(Zlib::Inflate.inflate(@text).force_encoding('utf-8'))
       end
 
       private
