@@ -9,7 +9,7 @@ module Wikipedia
       # Parses an xml string and returns a Wikipedia::VandalismDetection::Page.
       def parse(xml)
         @page = Page.new
-        document = Nokogiri::XML xml, nil, 'UTF-8'
+        document = Nokogiri::XML(xml, nil, 'UTF-8')
 
         @page.title = document.xpath('//page/title').inner_text
         @page.id = document.xpath('//page/id').inner_text
