@@ -17,14 +17,20 @@ module Wikipedia
   end
 
   # Retries to call the request in the case of Timeout errors
-  def self.request_with_retry(uri, timeout = 10)
+  def self.request_with_retry(uri, times = 1, timeout = 5)
     content = ""
 
     begin
-      content = Timeout::timeout(timeout) { URI.parse(uri).read }
+      Timeout::timeout(timeout) do
+        content = URI.parse(uri).read
+      end
     rescue => e
-      puts " #{e.message} - retrying..."
-      retry
+      if times > 0
+        times -= 1
+        retry
+      else
+        raise "#{times} times retrying request failed.\n#{e.message}"
+      end
     end
 
     content
@@ -32,13 +38,13 @@ module Wikipedia
 
   def api_request(params = {})
     uri = URI::encode(api_base_uri + param_string(params))
-    content = request_with_retry(uri)
+    content = request_with_retry(uri, 3)
     Nokogiri::XML(content)
   end
 
   def wikitrust_request(params = {})
     uri = URI::encode(wikitrust_base_uri + param_string(params))
-    request_with_retry(uri)
+    request_with_retry(uri, 3)
   end
 
   module_function :api_request, :wikitrust_request
