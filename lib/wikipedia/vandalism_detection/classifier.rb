@@ -53,6 +53,8 @@ module Wikipedia
         feature_values = param_is_edit ? @feature_calculator.calculate_features_for(edit_or_features) : edit_or_features
         return -1.0 if feature_values.empty?
 
+        feature_values = feature_values.map { |i| i == Features::MISSING_VALUE ? nil : i }
+
         dataset = Instances.empty
         dataset.set_class_index(feature_values.count)
         dataset.add_instance([*feature_values, Instances::VANDALISM])
