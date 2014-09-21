@@ -20,15 +20,6 @@ the [PAN 2011 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research
 
 ## Installation
 
-To use the Weka machine learning library [ruby-band](https://github.com/paulgoetze/ruby-band/tree/weka-dev)
-gem is used. Make shure to use the weka-dev branch of the gem from
-[github.com/paulgoetze/ruby-band/tree/weka-dev](https://github.com/paulgoetze/ruby-band/tree/weka-dev)
-since the current ruby-band version available by usual gem installation still depends on Weka v1.6.10.
-
-    $ git clone https://github.com/paulgoetze/ruby-band.git -b weka-dev
-    $ cd ruby-band
-    $ bundle-exec rake install
-
 Add this line to your application's Gemfile:
 
     gem 'wikipedia-vandalism_detection'
@@ -53,46 +44,52 @@ You can configure:
 
 A) the training and test corpora directories and essential input and output files
 
-    corpora:
-      base_directory: /home/user/corpora
-    
-      training:
-        base_directory: training
-        annotations_file: annotations.csv
-        edits_file: edits.csv
-        revisions_directory: revisions
-    
-      test:
-        base_directory: test
-        edits_file: edits.csv
-        revisions_directory: revisons
-    
-    output:
-      base_directory: /home/user/output_path
-      training:
-        arff_file: training.arff
-        index_file: training_index.yml
-      test:
-        arff_file: test.arff
-        index_file: test_index.yml
+```YAML
+corpora:
+  base_directory: /home/user/corpora
+
+  training:
+    base_directory: training
+    annotations_file: annotations.csv
+    edits_file: edits.csv
+    revisions_directory: revisions
+
+  test:
+    base_directory: test
+    edits_file: edits.csv
+    revisions_directory: revisons
+
+output:
+  base_directory: /home/user/output_path
+  training:
+    arff_file: training.arff
+    index_file: training_index.yml
+  test:
+    arff_file: test.arff
+    index_file: test_index.yml
+```
 
 Evaluation outputs are saved under the output base directory path.
 
 B) the features used by the feature calculator
 
-    features:
-      - anonymity
-      - biased frequency
-      - character sequence
-      - ...
+```YAML
+features:
+  - anonymity
+  - biased frequency
+  - character sequence
+  - ...
+```
 
 C) the classifier type and its options and the number of cross validation splits for the classifier evaluation
 
-    classifier:
-      type: Trees::RandomForest         # Weka classifier class
-      options: -I 10 -K 0.5             # same as for Weka, for further classifier options see Weka-dev documentation
-      cross-validation-fold: 5          # default is 10
-      training-data-options: balanced   # default is unbalanced
+```YAML
+classifier:
+  type: Trees::RandomForest         # Weka classifier class
+  options: -I 10 -K 0.5             # same as for Weka, for further classifier options see Weka-dev documentation
+  cross-validation-fold: 5          # default is 10
+  training-data-options: balanced   # default is unbalanced
+```
       
 `training-data-options` is used to resample the training dataset: 
 
@@ -102,7 +99,7 @@ C) the classifier type and its options and the number of cross validation splits
   
 Examples:
 
-```ruby
+```YAML
 # 200% SMOTE oversampling with 300% random undersampling
 training-data-options: oversampled -p 200 -u true 300 
 
@@ -272,10 +269,12 @@ The feature's name in the config.yml is the *downcased name with spaces or dashe
 
 E.g.: 
 
+```YAML
     features: 
       - my new 
       - my-new
-      
+```
+
 both search for a Feature class with the name `MyNew`.
 
 
