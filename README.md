@@ -10,13 +10,13 @@ The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library (v3
 
 * parsing Wikipedia history pages to get edits and revisions
 * creating training and test ARFF files from
-the [PAN 2010 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/) and
-the [PAN 2011 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-11/)
+the [WVC-PAN-10](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/) and
+the [WVC-PAN-11](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-11/)
 (See also http://pan.webis.de under category Wikipedia Vandalism Detection)
 
 * calculating vandalism features for a Wikipedia page (XML) from the history dump
-* creating and evaluate a classifier with the created training ARFF file
-* classifing new instances of Wikipedia pages as 'regular' or 'vandalism'
+* creating and evaluating a classifier with the created training ARFF file
+* classifing new instances of Wikipedia edits as 'regular' or 'vandalism'
 
 ## Installation
 
@@ -38,7 +38,7 @@ Or install it yourself as:
 
 ### Configuration
 
-To configure the system put a `config.yml` file in the `config/` or `lib/config/` directory.
+To configure the system put a `wikipedia-vandalism-detection.yml` file in the `config/` or `lib/config/` directory.
 
 You can configure:
 
