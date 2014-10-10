@@ -16,6 +16,7 @@ module Wikipedia
       TRAINING_DATA_BALANCED = 'balanced'
       TRAINING_DATA_UNBALANCED = 'unbalanced'
       TRAINING_DATA_OVERSAMPLED = 'oversampled'
+      CONFIG_FILE = 'wikipedia-vandalism-detection.yml'
 
       attr_reader :data,
                   :features,
@@ -275,7 +276,7 @@ module Wikipedia
       # Looks in two places for a custom config file:
       # in <app_root>/config/ and in <app_root>/lib/config
       def config_file
-        config_file_path = "config/config.yml"
+        config_file_path = "config/#{Configuration::CONFIG_FILE}"
         root_file = File.join(source, config_file_path)
         lib_file = File.join(source, "lib/#{config_file_path}")
         first_parent_file = find_first_parent_path_for(File.expand_path(File.dirname(__FILE__)), config_file_path)
@@ -284,7 +285,7 @@ module Wikipedia
       end
 
       def load_config_file(file)
-        if File.exists?(file) && file =~ /config\.yml/
+        if File.exists?(file) && file =~ /#{Configuration::CONFIG_FILE}/
           YAML.load_file(file)
         else
           warn %Q{
@@ -294,7 +295,7 @@ module Wikipedia
             #{source}/lib/config directory
             or any other parent path.
 
-            To customize the system, create a config.yml file.
+            To customize the system, create a '#{Configuration::CONFIG_FILE}' file.
 
           }
         end

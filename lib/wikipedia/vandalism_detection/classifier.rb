@@ -104,8 +104,8 @@ module Wikipedia
       def load_classifier(dataset)
         classifier_name = @config.classifier_type
 
-        raise ClassifierNotConfiguredError, "You have to define a classifier type in config.yml" unless classifier_name
-        raise FeaturesNotConfiguredError, "You have to configure features in config.yml" if @config.features.blank?
+        raise ClassifierNotConfiguredError, "You have to define a classifier type in wikipedia-vandalism-detection.yml" unless classifier_name
+        raise FeaturesNotConfiguredError, "You have to configure features in wikipedia-vandalism-detection.yml" if @config.features.blank?
 
         begin
           "Weka::Classifiers::#{classifier_name}::Base".constantize

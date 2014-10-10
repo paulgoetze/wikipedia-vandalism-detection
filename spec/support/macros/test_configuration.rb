@@ -20,8 +20,8 @@ module TestConfiguration
   end
 
   def test_configuration_content
-    puts File.join(SOURCE_DIR, 'config/config.yml')
-    YAML.load_file(File.join(source_dir, 'config/config.yml'))
+    puts File.join(SOURCE_DIR, 'config/wikipedia-vandalism-detection.yml')
+    YAML.load_file(File.join(source_dir, 'config/wikipedia-vandalism-detection.yml'))
   end
 
   def merged_configuration(override = test_configuration_content)

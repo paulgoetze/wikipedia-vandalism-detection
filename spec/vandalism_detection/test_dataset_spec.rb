@@ -167,7 +167,7 @@ describe Wikipedia::VandalismDetection::TestDataset do
       expect(Wikipedia::VandalismDetection::TestDataset).to respond_to :build!
     end
 
-    it "creates an .arff file in the directory defined in config.yml" do
+    it "creates an .arff file in the directory defined in wikipedia-vandalism-detection.yml" do
       expect(File.exist?(@arff_file)).to be false
       Wikipedia::VandalismDetection::TestDataset.build!
       expect(File.exist?(@arff_file)).to be true

@@ -214,7 +214,7 @@ module Wikipedia
         merged_dataset
       end
 
-      # Creates a Wikipedia::Edit out of an annotation's edit id using files form config.yml
+      # Creates a Wikipedia::Edit out of an annotation's edit id using files form wikipedia-vandalism-detection.yml
       def self.create_edit_from(edit_id)
         @file_index ||= load_corpus_file_index
         edit_data = find_edits_data_for(edit_id)

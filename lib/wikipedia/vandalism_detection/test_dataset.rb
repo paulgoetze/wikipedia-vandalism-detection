@@ -86,7 +86,7 @@ module Wikipedia
       end
 
       # Saves and returns the dataset as ARFF file.
-      # As test data the configured data corpus from /config/config.yml is used.
+      # As test data the configured data corpus from /config/wikipedia-vandalism-detection.yml is used.
       def self.build!
         @config = Wikipedia::VandalismDetection.configuration
 
@@ -291,7 +291,7 @@ module Wikipedia
         end
       end
 
-      # Creates a Wikipedia::Edit out of an edit's data from edit_file configured in config.yml
+      # Creates a Wikipedia::Edit out of an edit's data from edit_file configured in wikipedia-vandalism-detection.yml
       def self.create_edit_from(edit_data)
         @file_index ||= load_corpus_file_index
 

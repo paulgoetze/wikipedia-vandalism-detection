@@ -9,7 +9,7 @@ module Wikipedia
   module VandalismDetection
 
     # This class provides methods for calculating a feature set of an edit.
-    # The features that shall be used can be defined in the config/config.yml file
+    # The features that shall be used can be defined in the config/wikipedia-vandalism-detection.yml file
     # under the 'features:' root attribute like this:
     #
     # features:
@@ -65,7 +65,7 @@ module Wikipedia
         value
       end
 
-      # Returns the feature names as defined in conf/config.yml under 'features:'.
+      # Returns the feature names as defined in conf/wikipedia-vandalism-detection.yml under 'features:'.
       def used_features
         @features
       end

@@ -325,11 +325,11 @@ describe Wikipedia::VandalismDetection do
 
   describe "#configuration" do
 
-    it "can be overridden by a config.yml file" do
+    it "can be overridden by a wikipedia-vandalism-detection.yml file" do
       Wikipedia::VandalismDetection::DefaultConfiguration.any_instance.stub(source: source_dir)
 
       default_config = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS
-      custom_config = YAML.load_file(File.expand_path('../../resources/config/config.yml', __FILE__))
+      custom_config = YAML.load_file(File.expand_path('../../resources/config/wikipedia-vandalism-detection.yml', __FILE__))
 
       expect(Wikipedia::VandalismDetection.configuration.data).to eq default_config.deep_merge(custom_config)
     end
