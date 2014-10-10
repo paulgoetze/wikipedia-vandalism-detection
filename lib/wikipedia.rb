@@ -29,7 +29,7 @@ module Wikipedia
         times -= 1
         retry
       else
-        raise "#{times} times retrying request failed.\n#{e.message}"
+        warn "#{times} times retrying request failed.\n#{e.message}"
       end
     end
 
