@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "ruby-band", "~> 0.1"
   spec.add_runtime_dependency "nokogiri"
   spec.add_runtime_dependency "activesupport"
+  spec.add_runtime_dependency "hotwater"
 
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
