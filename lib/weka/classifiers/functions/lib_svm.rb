@@ -5,7 +5,6 @@ module Weka
   module Classifiers
     module Functions
       require 'java'
-      require 'java/libsvm.jar'
       require 'java/LibSVM.jar'
 
       include ClassBuilder
