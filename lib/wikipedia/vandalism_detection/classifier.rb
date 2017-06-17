@@ -1,4 +1,4 @@
-require 'ruby-band'
+require 'weka'
 require 'active_support/core_ext/string'
 require 'fileutils'
 
@@ -108,12 +108,12 @@ module Wikipedia
         raise FeaturesNotConfiguredError, "You have to configure features in wikipedia-vandalism-detection.yml" if @config.features.blank?
 
         begin
-          "Weka::Classifiers::#{classifier_name}::Base".constantize
+          "Weka::Classifiers::#{classifier_name}".constantize
         rescue
           raise ClassifierUnknownError, "The configured classifier type '#{classifier_name}' is unknown."
         end
 
-        classifier_class = "Weka::Classifiers::#{classifier_name}::Base".constantize
+        classifier_class = "Weka::Classifiers::#{classifier_name}".constantize
         options = @config.classifier_options
 
         puts "Loading classifier #{classifier_name} with options '#{options}'..."
@@ -132,18 +132,19 @@ module Wikipedia
         end
 
         if @config.use_occ?
-          dataset.rename_attribute_value(dataset.class_index, one_class_index, Instances::OUTLIER)
-        elsif @config.classifier_type.match('Functions::LibSVM')
-          dataset = remove_regular_instances(dataset)
+          dataset.rename_attribute_value(
+            dataset.class_index,
+            one_class_index,
+            Instances::OUTLIER
+          )
         end
 
         @dataset = dataset
 
         begin
-          classifier = classifier_class.new do
-            set_data dataset
-            set_class_index dataset.class_index
-            set_options options if options
+          classifier = classifier_class.build do
+            use_options options if options
+            train_with_instances dataset
           end
 
           classifier
@@ -164,20 +165,22 @@ module Wikipedia
       def remove_regular_instances(dataset)
         features = @config.features
 
-        vandalism_dataset = Core::Type::Instances::Base.new do
-          features.each { |name| numeric :"#{name.gsub(' ', '_')}" }
-          nominal :class, [Instances::VANDALISM]
+        vandalism_dataset = Weka::Core::Instances.new.with_attributes do
+          features.each { |name| numeric :"#{name.tr(' ', '_')}" }
+          nominal :class, values: [Instances::VANDALISM], class_attribute: true
         end
 
-        dataset.to_a2d.each_with_index do |attributes, index|
+        dataset.to_a.map(&:values).each_with_index do |attributes, index|
           class_value = Instances::CLASSES[dataset.instance(index).value(dataset.class_index).to_i]
-          vandalism_dataset.add_instance([*attributes, class_value]) if  class_value == Instances::VANDALISM
+
+          if class_value == Instances::VANDALISM
+            values = attributes[0..-2]
+            vandalism_dataset.add_instance([*values, class_value])
+          end
         end
 
         filter = Weka::Filters::Unsupervised::Attribute::Normalize.new
-        filter.data(vandalism_dataset)
-        vandalism_dataset = filter.use
-        vandalism_dataset.class_index = features.count
+        vandalism_dataset = filter.filter(vandalism_dataset)
 
         vandalism_dataset
       end

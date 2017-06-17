@@ -14,13 +14,13 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
   after do
     # remove training arff file
-    if File.exists?(@training_arff_file)
+    if File.exist?(@training_arff_file)
       File.delete(@training_arff_file)
       FileUtils.rm_r(File.dirname @training_arff_file)
     end
 
     # remove test arff file
-    if File.exists?(@test_arff_file)
+    if File.exist?(@test_arff_file)
       File.delete(@test_arff_file)
       FileUtils.rm_r(File.dirname @test_arff_file)
     end
@@ -32,7 +32,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     # remove output base directory
-    if Dir.exists?(@build_dir)
+    if Dir.exist?(@build_dir)
       FileUtils.rm_r(@build_dir)
     end
   end
@@ -293,16 +293,16 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "creates a classification file in the base output directory" do
-      expect(File.exists?(@test_classification_file)).to be false
+      expect(File.exist?(@test_classification_file)).to be false
       @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
-      expect(File.exists?(@test_classification_file)).to be true
+      expect(File.exist?(@test_classification_file)).to be true
     end
 
     it "creates a file with an appropriate header" do
       @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
       content = File.open(@test_classification_file, 'r')
 
-      features = Core::Parser.parse_ARFF(@test_arff_file).enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
+      features = Weka::Core::Instances.from_arff(@test_arff_file).enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
       proposed_header = ['OLDREVID', 'NEWREVID', 'C', 'CONF', *features]
       header = content.lines.first.split(' ')
 
@@ -313,7 +313,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
       @evaluator.create_testcorpus_classification_file!(@test_classification_file, @ground_truth)
       content = File.open(@test_classification_file, 'r')
 
-      samples_count = Core::Parser.parse_ARFF(@test_arff_file).n_rows
+      samples_count = Weka::Core::Instances.from_arff(@test_arff_file).size
 
       lines = content.lines.to_a
       lines.shift # remove header
@@ -390,9 +390,9 @@ describe Wikipedia::VandalismDetection::Evaluator do
     end
 
     it "runs the classification file creation" do
-      expect(File.exists?(@test_classification_file)).to be false
+      expect(File.exist?(@test_classification_file)).to be false
       @evaluator.evaluate_testcorpus_classification
-      expect(File.exists?(@test_classification_file)).to be true
+      expect(File.exist?(@test_classification_file)).to be true
     end
 
     it "overwrites the old classification file" do

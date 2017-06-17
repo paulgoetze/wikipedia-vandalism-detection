@@ -16,12 +16,14 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     use_configuration(@config)
 
     # add more test instances because instances number must higher than cross validation fold
-    instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+    instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a.map(&:values)
     dataset = Wikipedia::VandalismDetection::Instances.empty
 
     2.times do
       instances.each do |row|
-        dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[rand((0..1))]])
+        values = row[0..-2]
+        class_value = Wikipedia::VandalismDetection::Instances::CLASSES[rand((0..1))]
+        dataset.add_instance([*values, class_value])
       end
     end
 
@@ -33,12 +35,12 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     arff_file = @config.training_output_arff_file
     build_dir = @config.output_base_directory
 
-    if File.exists?(arff_file)
+    if File.exist?(arff_file)
       File.delete(arff_file)
       FileUtils.rm_r(File.dirname arff_file)
     end
 
-    if Dir.exists?(build_dir)
+    if Dir.exist?(build_dir)
       FileUtils.rm_r(build_dir)
     end
   end
@@ -47,7 +49,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
       features = [1.0, 2.0, 55.0]
-      confidence = classifier.classify features
+      confidence = classifier.classify(features)
       puts "vandalism confidence: #{confidence}}"
     }.not_to raise_error
   end
@@ -63,7 +65,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     expect {
       classifier = Wikipedia::VandalismDetection::Classifier.new
       features = [1.0, 2.0, 8.0]
-      confidence = classifier.classify features
+      confidence = classifier.classify(features)
       puts "regular confidence: #{confidence}}"
     }.not_to raise_error
   end

@@ -5,11 +5,11 @@ require 'timeout'
 module Wikipedia
 
   def self.api_base_uri
-    "http://en.wikipedia.org/w/api.php?format=xml&action=query&"
+    "https://en.wikipedia.org/w/api.php?format=xml&action=query&"
   end
 
   def self.wikitrust_base_uri
-    "http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=wikimarkup&"
+    "https://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=wikimarkup&"
   end
 
   def self.param_string(params)

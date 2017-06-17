@@ -4,7 +4,7 @@ require 'wikipedia/vandalism_detection/training_dataset'
 require 'wikipedia/vandalism_detection/test_dataset'
 require 'wikipedia/vandalism_detection/classifier'
 require 'wikipedia/vandalism_detection/instances'
-require 'ruby-band'
+require 'weka'
 require 'fileutils'
 require 'csv'
 
@@ -45,7 +45,7 @@ module Wikipedia
       #   evaluation = classifier.cross_validate
       #   evaluation = classifier.cross_validate(equally_distributed: true)
       #
-      def   cross_validate(options = {})
+      def cross_validate(options = {})
         equally_distributed = options[:equally_distributed]
 
         fold_defaults = Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['classifier']['cross-validation-fold']
@@ -81,11 +81,11 @@ module Wikipedia
         evaluations = cross_validate(options)
         threshold_curve = Weka::Classifiers::Evaluation::ThresholdCurve.new
 
-        evaluation_data = (evaluations.is_a? Array) ? evaluations[0] : evaluations
+        evaluation_data = evaluations.is_a?(Array) ? evaluations[0] : evaluations
 
         instances = threshold_curve.curve(evaluation_data.predictions, Instances::VANDALISM_CLASS_INDEX)
-        precision = instances.return_attr_data('Precision')
-        recall = instances.return_attr_data('Recall')
+        precision = instances.attribute_to_double_array(0).to_a
+        recall = instances.attribute_to_double_array(1).to_a
         area_under_prc = evaluation_data.area_under_prc(Instances::VANDALISM_CLASS_INDEX)
 
         { precision: precision, recall: recall, area_under_prc: area_under_prc }
@@ -313,7 +313,7 @@ module Wikipedia
         dataset = TestDataset.build!
 
         dir_name = File.dirname(file_path)
-        FileUtils.mkdir_p(dir_name) unless Dir.exists?(dir_name)
+        FileUtils.mkdir_p(dir_name) unless Dir.exist?(dir_name)
         file = File.open(file_path, 'w')
 
         feature_names = dataset.enumerate_attributes.to_a.map { |attr| attr.name.upcase }[0...-2]
@@ -321,31 +321,20 @@ module Wikipedia
 
         file.puts header
 
-        dataset.to_a2d.each do |instance|
+        dataset.to_a.map(&:values).each do |instance|
           features = instance[0...-3]
           old_revision_id = instance[-3].to_i
           new_revision_id = instance[-2].to_i
           ground_truth_class_name = Instances::CLASSES_SHORT[Instances::CLASSES.key(instance[-1])]
 
           classification = @classifier.classify(features, return_all_params: true)
-          class_value = Features::MISSING_VALUE
 
-          if @config.classifier_type.match(/Functions::LibSVM/) && @config.classifier_options.match(/-s 2/i)
-            # LibSVM with one class has only one class during training
-            # Vandalism will get class index 0 while classifying
-            # Regular will get missing (or Instances::NOT_KNOWN_INDEX in Wikipedia::VandalismDetection::Classifier)
-
-            if classification[:class_index] == 0
-              class_value = 1.0
-            elsif classification[:class_index] == Instances::NOT_KNOWN_INDEX
-              class_value = 0.0
-            end
+          if classification[:class_index] == Instances::VANDALISM_CLASS_INDEX
+            class_value = 1.0
+          elsif classification[:class_index] == Instances::REGULAR_CLASS_INDEX
+            class_value = 0.0
           else
-            if classification[:class_index] == Instances::VANDALISM_CLASS_INDEX
-              class_value = 1.0
-            elsif classification[:class_index] == Instances::REGULAR_CLASS_INDEX
-              class_value = 0.0
-            end
+            class_value = Features::MISSING_VALUE
           end
 
           confidence = classification[:confidence] || class_value
@@ -443,22 +432,19 @@ module Wikipedia
       # Weka Unsupervised Attribute Remove filter is used.
       def filter_single_attribute(dataset, attribute_index)
         filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+        filter.use_options("-V -R #{attribute_index + 1},#{dataset.class_index + 1}")
 
-        filter.set do
-          data dataset
-          filter_options "-V -R #{attribute_index + 1},#{dataset.class_index + 1}"
-        end
-
-        filtered  = filter.use
-        filtered.class_index = filtered.n_col - 1
+        filtered = filter.filter(dataset)
+        filtered.class_index = filtered.attributes_count - 1
         filtered
       end
 
-      # Returns an array of classification confidences of the test corpus' classification with the given classifier
+      # Returns an array of classification confidences of the test corpus'
+      # classification with the given classifier
       def classification_data(classifier, test_dataset)
         classification = {}
 
-        test_dataset.to_a2d.each do |instance|
+        test_dataset.to_a.map(&:values).each do |instance|
           features = instance[0...-3]
 
           old_revision_id = instance[-3].to_i
@@ -498,10 +484,10 @@ module Wikipedia
           confidence = line_parts[3].to_f
 
           classification[:"#{old_revision_id}-#{new_revision_id}"] = {
-              old_revision_id: old_revision_id,
-              new_revision_id: new_revision_id,
-              class: class_short,
-              confidence: confidence
+            old_revision_id: old_revision_id,
+            new_revision_id: new_revision_id,
+            class: class_short,
+            confidence: confidence
           }
         end
 
@@ -535,7 +521,7 @@ module Wikipedia
       # Cross validates classifier over full dataset with <fold>-fold cross validation
       def cross_validate_all_instances(fold)
         begin
-          @classifier_instance.cross_validate(fold)
+          @classifier_instance.cross_validate(folds: fold)
         rescue => e
           raise "Error while cross validation: #{e}"
         end
@@ -544,7 +530,7 @@ module Wikipedia
       # Cross validates classifier over equally distributed dataset with <fold>-fold cross validation
       def cross_validate_equally_distributed(fold)
         dirname = @config.output_base_directory
-        FileUtils.mkdir(dirname) unless Dir.exists?(dirname)
+        FileUtils.mkdir(dirname) unless Dir.exist?(dirname)
 
         file_name = 'cross_validation_eq_distr.txt'
         file_path = File.join(dirname, file_name)
@@ -567,9 +553,9 @@ module Wikipedia
           (1..times).each do |i|
             uniform_dataset = TrainingDataset.balanced_instances
 
-            print "\rcross validate dataset  (equally distributed) ... #{i}/#{times} | instances: #{uniform_dataset.n_rows}"
-            @classifier_instance.set_data(uniform_dataset)
-            evaluations << @classifier_instance.cross_validate(fold)
+            print "\rcross validate dataset  (equally distributed) ... #{i}/#{times} | instances: #{uniform_dataset.size}"
+            @classifier_instance.train_with_instances(uniform_dataset)
+            evaluations << @classifier_instance.cross_validate(folds: fold)
 
             print_evaluation_data(evaluations, result_file, i) if (i % (times / 10)) == 0
           end

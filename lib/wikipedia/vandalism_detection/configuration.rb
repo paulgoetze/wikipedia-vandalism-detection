@@ -285,7 +285,7 @@ module Wikipedia
       end
 
       def load_config_file(file)
-        if File.exists?(file) && file =~ /#{Configuration::CONFIG_FILE}/
+        if File.exist?(file) && file =~ /#{Configuration::CONFIG_FILE}/
           YAML.load_file(file)
         else
           warn %Q{
@@ -306,7 +306,7 @@ module Wikipedia
       def find_first_parent_path_for(start_path, file)
         file_path = File.join(start_path, file)
 
-        if File.exists?(file_path)
+        if File.exist?(file_path)
           file_path
         else
           if File.dirname(start_path) != start_path
