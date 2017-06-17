@@ -20,6 +20,9 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
+  spec.platform               = 'java'
+  spec.required_ruby_version  = '~> 2.0'
+
   spec.add_runtime_dependency 'weka', '~> 0.5'
   spec.add_runtime_dependency 'nokogiri', '~> 1.8'
   spec.add_runtime_dependency 'activesupport', '>= 4.0'
