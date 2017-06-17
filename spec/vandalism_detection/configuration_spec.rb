@@ -401,7 +401,6 @@ describe Wikipedia::VandalismDetection do
           "upper case ratio",
           "upper case words ratio",
           "upper to lower case ratio",
-          "user reputation",
           "vulgarism frequency",
           "vulgarism impact",
           "weekday",
