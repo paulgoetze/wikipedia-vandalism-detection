@@ -5,11 +5,7 @@ require 'timeout'
 module Wikipedia
 
   def self.api_base_uri
-    "http://en.wikipedia.org/w/api.php?format=xml&action=query&"
-  end
-
-  def self.wikitrust_base_uri
-    "http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=wikimarkup&"
+    "https://en.wikipedia.org/w/api.php?format=xml&action=query&"
   end
 
   def self.param_string(params)
@@ -42,10 +38,5 @@ module Wikipedia
     Nokogiri::XML(content)
   end
 
-  def wikitrust_request(params = {})
-    uri = URI::encode(wikitrust_base_uri + param_string(params))
-    request_with_retry(uri, 3)
-  end
-
-  module_function :api_request, :wikitrust_request
+  module_function :api_request
 end

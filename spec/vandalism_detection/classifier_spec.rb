@@ -13,26 +13,26 @@ describe Wikipedia::VandalismDetection::Classifier do
     arff_file = @config.training_output_arff_file
     build_dir = @config.output_base_directory
 
-    if File.exists?(arff_file)
+    if File.exist?(arff_file)
       File.delete(arff_file)
       FileUtils.rm_r(File.dirname arff_file)
     end
 
-    if Dir.exists?(build_dir)
+    if Dir.exist?(build_dir)
       FileUtils.rm_r(build_dir)
     end
   end
 
   it "loads the configured classifier while instanciating" do
     classifier_name =  @config.classifier_type
-    class_type = "Weka::Classifiers::#{classifier_name}::Base".constantize
+    class_type = "Weka::Classifiers::#{classifier_name}".constantize
 
     expect(@classifier.classifier_instance).to be_a class_type
   end
 
   it "loads the configured classifier with given dataset" do
     classifier_name =  @config.classifier_type
-    class_type = "Weka::Classifiers::#{classifier_name}::Base".constantize
+    class_type = "Weka::Classifiers::#{classifier_name}".constantize
     dataset = Wikipedia::VandalismDetection::Instances.empty_for_feature('anonymity')
     dataset.add_instance([1.0, Wikipedia::VandalismDetection::Instances::REGULAR])
 
@@ -77,7 +77,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     classifier = Wikipedia::VandalismDetection::Classifier.new
 
     # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
-    expect(classifier.dataset.n_rows).to eq 4
+    expect(classifier.dataset.size).to eq 4
   end
 
   it "load the classifier and learns it regarding the full configured (unbalanced) training set" do
@@ -102,7 +102,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 2 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-    expect(dataset.n_rows).to eq 6
+    expect(dataset.size).to eq 6
     expect(regular_count).to eq 4
     expect(vandalism_count).to eq 2
   end
@@ -129,7 +129,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 4 vandalism, 4 regular, due to SMOTE oversampling
-    expect(dataset.n_rows).to eq 8
+    expect(dataset.size).to eq 8
     expect(regular_count).to eq 4
     expect(vandalism_count).to eq 4
   end
@@ -155,7 +155,7 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     # 2 + 200 % = 6 vandalism, 4 regular, due to SMOTE oversampling without undersampling
-    expect(dataset.n_rows).to eq 10
+    expect(dataset.size).to eq 10
     expect(regular_count).to eq 4
     expect(vandalism_count).to eq 6
   end
@@ -256,7 +256,7 @@ describe Wikipedia::VandalismDetection::Classifier do
       use_configuration(config)
 
       # add more test instances because instances number must higher than cross validation fold
-      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a.map(&:values)
       dataset = Wikipedia::VandalismDetection::Instances.empty
 
       vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
@@ -264,7 +264,9 @@ describe Wikipedia::VandalismDetection::Classifier do
 
       [vandalism_index, regular_index].each do |index|
         instances.each do |row|
-          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[index]])
+          values = row[0..-2]
+          class_value = Wikipedia::VandalismDetection::Instances::CLASSES[index]
+          dataset.add_instance([*values, class_value])
         end
       end
 
@@ -281,7 +283,7 @@ describe Wikipedia::VandalismDetection::Classifier do
       use_configuration(config)
 
       # add more test instances because instances number must higher than cross validation fold
-      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a2d
+      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a.map(&:values)
       dataset = Wikipedia::VandalismDetection::Instances.empty
 
       vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
@@ -289,7 +291,9 @@ describe Wikipedia::VandalismDetection::Classifier do
 
       [vandalism_index, regular_index].each do |index|
         instances.each do |row|
-          dataset.add_instance([*row, Wikipedia::VandalismDetection::Instances::CLASSES[index]])
+          values = row[0..-2]
+          class_value = Wikipedia::VandalismDetection::Instances::CLASSES[index]
+          dataset.add_instance([*values, class_value])
         end
       end
 

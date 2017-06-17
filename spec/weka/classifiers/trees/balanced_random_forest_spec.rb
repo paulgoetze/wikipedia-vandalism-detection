@@ -19,12 +19,12 @@ describe Weka::Classifiers::Trees::BalancedRandomForest do
     arff_file = @config.training_output_arff_file
     build_dir = @config.output_base_directory
 
-    if File.exists?(arff_file)
+    if File.exist?(arff_file)
       File.delete(arff_file)
       FileUtils.rm_r(File.dirname arff_file)
     end
 
-    if Dir.exists?(build_dir)
+    if Dir.exist?(build_dir)
       FileUtils.rm_r(build_dir)
     end
   end

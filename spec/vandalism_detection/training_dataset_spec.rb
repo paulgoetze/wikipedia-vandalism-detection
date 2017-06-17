@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'fileutils'
-require 'ruby-band'
+require 'weka'
 
 describe Wikipedia::VandalismDetection::TrainingDataset do
 
@@ -16,18 +16,18 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
   end
 
   after do
-    if File.exists?(@arff_file)
+    if File.exist?(@arff_file)
       File.delete(@arff_file)
       FileUtils.rm_r(File.dirname @arff_file)
     end
 
-    File.delete(@index_file) if File.exists?(@index_file)
+    File.delete(@index_file) if File.exist?(@index_file)
 
     # remove feature arff files
     @config.features.each do |name|
       file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
 
-      if File.exists?(file)
+      if File.exist?(file)
         File.delete(file)
         FileUtils.rm_r(File.dirname file)
       end
@@ -86,12 +86,12 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       data = [10000, 123456, 234567]
       anonymity = Wikipedia::VandalismDetection::Instances.empty_for_test_feature('anonymity')
       6.times { anonymity.add_instance(data) }
-      anonymity.to_ARFF(anonymity_file)
+      anonymity.to_arff(anonymity_file)
 
       Wikipedia::VandalismDetection::TrainingDataset.build
 
       # anonymity should not be overwritten
-      expect(Core::Parser.parse_ARFF(anonymity_file).to_a2d.first).to eq data
+      expect(Weka::Core::Instances.from_arff(anonymity_file).first.values).to eq data
     end
 
     describe "internal algorithm" do
@@ -104,12 +104,14 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
         annotations_num = File.open(@annotations_file, 'r').lines.count - 1
         additional_header_lines = 5
 
-        expect(dataset.to_s.lines.count).to eq additional_header_lines + annotations_num + @features_num
+        total_lines = additional_header_lines + annotations_num + @features_num
+
+        expect(dataset.to_s.lines.count).to eq total_lines
       end
 
       it "builds the right number of data columns" do
         dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-        expect(dataset.n_col).to eq @config.features.count + 1
+        expect(dataset.attributes_count).to eq @config.features.count + 1
       end
     end
 
@@ -162,7 +164,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
     it "returns a dataset built from the configured corpus" do
       # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
-      expect(@dataset.n_rows).to eq 4
+      expect(@dataset.size).to eq 4
     end
 
     [:VANDALISM, :REGULAR].each do |class_const|
@@ -193,7 +195,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
 
       it "returns a dataset of size 8 built from the configured corpus" do
         # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-        expect(@dataset.n_rows).to eq 8
+        expect(@dataset.size).to eq 8
       end
 
       [:VANDALISM, :REGULAR].each do |class_const|
@@ -212,7 +214,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
         dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances(percentage: 200)
         puts dataset
 
-        expect(dataset.n_rows).to eq 8
+        expect(dataset.size).to eq 8
       end
     end
 
@@ -232,7 +234,7 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
       it "returns a dataset of size 12 built from the configured corpus" do
         # 2 + 300 % = 8 vandalism, 4 regular, see resources/corpora/training/annotations.csv
         puts @dataset
-        expect(@dataset.n_rows).to eq 12
+        expect(@dataset.size).to eq 12
       end
     end
   end
