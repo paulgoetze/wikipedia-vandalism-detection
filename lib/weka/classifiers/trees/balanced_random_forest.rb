@@ -7,7 +7,6 @@ module Weka
       require 'java/balancedRandomForest.jar'
       include ClassBuilder
 
-
       # balanced RandomForest classifier,
       # Modified from https://github.com/jdurbin/durbinlib/blob/master/src/durbin/weka/BalancedRandomForest.java
       # and https://github.com/jdurbin/durbinlib/blob/master/src/durbin/weka/BalancedRandomTree.java

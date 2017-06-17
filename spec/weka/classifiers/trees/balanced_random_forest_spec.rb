@@ -1,16 +1,16 @@
 require 'spec_helper'
 
 describe Weka::Classifiers::Trees::BalancedRandomForest do
-
-  it { should be_a Java::WekaClassifiersTrees::BalancedRandomForest }
+  it { is_expected.to be_a Java::WekaClassifiersTrees::BalancedRandomForest }
 
   before do
     @config = test_config
-    options = "-I 100"
+    classifier_type = 'Trees::BalancedRandomForest'
+    options = '-I 100'
 
-    @config.instance_variable_set :@classifier_type, 'Trees::BalancedRandomForest'
-    @config.instance_variable_set :@classifier_options, options
-    @config.instance_variable_set :@cross_validation_fold, 2
+    @config.instance_variable_set(:@classifier_type, classifier_type)
+    @config.instance_variable_set(:@classifier_options, options)
+    @config.instance_variable_set(:@cross_validation_fold, 2)
 
     use_configuration(@config)
   end
@@ -21,20 +21,17 @@ describe Weka::Classifiers::Trees::BalancedRandomForest do
 
     if File.exist?(arff_file)
       File.delete(arff_file)
-      FileUtils.rm_r(File.dirname arff_file)
+      directory = File.dirname(arff_file)
+      FileUtils.rm_r(directory)
     end
 
-    if Dir.exist?(build_dir)
-      FileUtils.rm_r(build_dir)
-    end
+    FileUtils.rm_r(build_dir) if Dir.exist?(build_dir)
   end
 
-  it "can be used to classify vandalism" do
-    expect {
-      classifier = Wikipedia::VandalismDetection::Classifier.new
-      features = [0.0, 25, 5]
-      confidence = classifier.classify features
-      puts "vandalism confidence: #{confidence}}"
-    }.not_to raise_error
+  it 'can be used to classify vandalism' do
+    classifier = Wikipedia::VandalismDetection::Classifier.new
+    features = [0.0, 25, 5]
+
+    expect { classifier.classify(features) }.not_to raise_error
   end
 end

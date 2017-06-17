@@ -1,4 +1,3 @@
-require 'active_support/core_ext/module'
 require 'weka'
 require 'weka/class_builder'
 
@@ -14,7 +13,7 @@ module Weka
 
       class OneClassClassifier
         def self.type
-          "Meta::OneClassClassifier"
+          'Meta::OneClassClassifier'
         end
       end
     end
