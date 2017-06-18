@@ -19,4 +19,7 @@ RSpec.configure do |config|
   config.include FileReading
   config.include TestConfiguration
   config.include FactoryGirl::Syntax::Methods
+
+  Features = Wikipedia::VandalismDetection::Features
+  Text = Wikipedia::VandalismDetection::Text
 end

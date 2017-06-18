@@ -4,10 +4,9 @@ require 'wikipedia/vandalism_detection/word_lists'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes the percentage by which the edit increases the number of all wordlists words in the text.
+      # This feature computes the percentage by which the edit increases the
+      # number of all wordlists words in the text.
       class AllWordlistsImpact < ImpactBase
-
         def calculate(edit)
           super
 

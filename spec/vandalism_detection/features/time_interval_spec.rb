@@ -1,50 +1,56 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::TimeInterval do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::TimeInterval.new
-  end
+  describe '#calculate' do
+    it 'returns time interval in days from the old to the new revision' do
+      old_timestamp = '2014-11-27T18:00:00Z'
+      new_timestamp = '2014-11-29T06:00:00Z'
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, timestamp: old_timestamp)
+      new_rev = build(:new_revision, timestamp: new_timestamp)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns time interval in days from old to new revision" do
-      old_revision_time = '2014-11-27T18:00:00Z'
-      new_revision_time = '2014-11-29T06:00:00Z'
-
-      old_revision = build(:old_revision, timestamp: old_revision_time)
-      new_revision = build(:new_revision, timestamp: new_revision_time)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 1.5
+      expect(subject.calculate(edit)).to eq 1.5
     end
 
-    it "requests the time from Wikipedia API if old revisions timestamp is not given" do
+    it 'requests the time from API if no old revisions timestamp is given' do
       # to get api call, see:
       # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=327585467
       # => 2009-11-24T01:57:35Z
-      new_revision_time = '2009-11-24T13:57:35Z'
+      new_timestamp = '2009-11-24T13:57:35Z'
 
-      old_revision = build(:old_revision, id: '327585467', timestamp: nil)
-      new_revision = build(:new_revision, id: '327607921', parent_id: '327585467', timestamp: new_revision_time)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, id: '327585467', timestamp: nil)
+      new_rev = build(
+        :new_revision,
+        id: '327607921',
+        parent_id: '327585467',
+        timestamp: new_timestamp
+      )
 
-      expect(@feature.calculate(edit)).to eq 0.5
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
+
+      expect(subject.calculate(edit)).to eq 0.5
     end
 
-    it "returns missing if old reivision is not available anymore" do
+    it 'returns missing if the old reivision is not available anymore' do
       # to get api call, see:
       # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=325218985
       # <rev revid="325218985"/>
-      new_revision_time = '2011-11-11T01:00:00Z'
+      new_timestamp = '2011-11-11T01:00:00Z'
 
-      old_revision = build(:old_revision, id: '325218985', timestamp: nil)
-      new_revision = build(:new_revision, id: '326980599', parent_id: '325218985', timestamp: new_revision_time)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, id: '325218985', timestamp: nil)
+      new_rev = build(
+        :new_revision,
+        id: '326980599',
+        parent_id: '325218985',
+        timestamp: new_timestamp
+      )
 
-      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
+
+      expect(subject.calculate(edit)).to eq Features::MISSING_VALUE
     end
   end
 end

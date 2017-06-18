@@ -1,36 +1,30 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::RemovedPronounFrequency do
+  it { is_expected.to be_a Features::FrequencyBase }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::RemovedPronounFrequency.new
-  end
+  describe '#calculate' do
+    it 'returns the number of removed pronouns over all removed words' do
+      # total 10 words, 6 pronouns
+      old_text = Text.new('Your old. I was you if You was We are ourselves us.')
+      new_text = Text.new('Your old.')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::FrequencyBase }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the number of removed pronouns relative to all removed words count" do
-      # total 12 words, 7 pronouns
-      old_text = Wikipedia::VandalismDetection::Text.new "Your old. I was you if You was Me and we are ourselves us."
-      new_text = Wikipedia::VandalismDetection::Text.new 'Your old.'
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 7.0 / 12.0
+      expect(subject.calculate(edit)).to eq 6.0 / 10.0
     end
 
-    it "returns 0.0 on emtpy removed clean text revisions" do
-      old_text = Wikipedia::VandalismDetection::Text.new "Your old. {{speedy deletion}}"
-      new_text = Wikipedia::VandalismDetection::Text.new 'Your old. My inserted.'
+    it 'returns 0.0 for an emtpy removed clean text in the new revision' do
+      old_text = Text.new('Your old. {{speedy deletion}}')
+      new_text = Text.new('Your old. My inserted.')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.0
+      expect(subject.calculate(edit)).to eq 0.0
     end
   end
 end

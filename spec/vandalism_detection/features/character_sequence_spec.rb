@@ -1,37 +1,31 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::CharacterSequence do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::CharacterSequence.new
-  end
+  describe '#calculate' do
+    it 'returns the number of the new revision’s longest character sequence' do
+      old_text = Text.new('a 666666')
+      new_text = Text.new("a 666666 4444ccc eefffff gggg g ''fffaffff''")
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base}
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
 
-  describe "#calculate" do
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-    it "returns the number of the new revision's longest sequence of the same character" do
-      old_text = Wikipedia::VandalismDetection::Text.new "a 666666"
-      new_text = Wikipedia::VandalismDetection::Text.new "a 666666 4444ccc eeeefffff gggg g \n===hhhh===\n''fffaffff''"
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 5
+      expect(subject.calculate(edit)).to eq 5
     end
 
-    it "returns 0 on non inserted text" do
-      old_text = Wikipedia::VandalismDetection::Text.new "a 666666 4444ccc eeeefffff gggg g"
-      new_text = Wikipedia::VandalismDetection::Text.new "a 666666 "
+    it 'returns 0 if no text was inserted' do
+      old_text = Text.new('a 666666 4444ccc eeeefffff gggg g')
+      new_text = Text.new('a 666666 ')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
 
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0
+      expect(subject.calculate(edit)).to eq 0
     end
   end
 end

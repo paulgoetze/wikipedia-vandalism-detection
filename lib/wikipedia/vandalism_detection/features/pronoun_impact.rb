@@ -4,10 +4,9 @@ require 'wikipedia/vandalism_detection/word_lists/pronouns'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes the percentage by which the edit increases the number of pronouns in the text.
+      # This feature computes the percentage by which the edit increases the
+      # number of pronouns in the text.
       class PronounImpact < ImpactBase
-
         def calculate(edit)
           super
           old_text = edit.old_revision.text.clean

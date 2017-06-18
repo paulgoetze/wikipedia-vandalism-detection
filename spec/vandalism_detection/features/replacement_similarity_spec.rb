@@ -1,44 +1,37 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::ReplacementSimilarity do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::ReplacementSimilarity.new
-  end
+  describe '#calculate' do
+    it 'returns the similarity of the deleted text to inserted in exchange' do
+      old_text = Text.new('this is Mr. Dixon')
+      new_text = Text.new('this is Mr. Dicksonx')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
 
-  describe "#calculate" do
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-    it "returns similarity of the deleted text to inserted in exchange" do
-      old_text = Wikipedia::VandalismDetection::Text.new "this is Mr. Dixon"
-      new_text = Wikipedia::VandalismDetection::Text.new "this is Mr. Dicksonx"
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 0.8133333333333332
+      expect(subject.calculate(edit)).to eq 0.8133333333333332
     end
 
-    it "returns 0 on empty old revisions text" do
-      old_revision = build(:old_revision, text: "")
-      new_revision = build(:new_revision, text: "{{speedy deletion}}")
+    it 'returns 0 if the old revision text is empty' do
+      old_rev = build(:old_revision, text: '')
+      new_rev = build(:new_revision, text: '{{speedy deletion}}')
 
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0
+      expect(subject.calculate(edit)).to eq 0
     end
 
+    it 'returns 0 if the new revision text is empty' do
+      old_rev = build(:old_revision, text: '{{speedy deletion}}')
+      new_rev = build(:new_revision, text: '')
 
-    it "returns 0 on empty new revisions text" do
-      old_revision = build(:old_revision, text: "{{speedy deletion}}")
-      new_revision = build(:new_revision, text: "")
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 0
+      expect(subject.calculate(edit)).to eq 0
     end
   end
 end

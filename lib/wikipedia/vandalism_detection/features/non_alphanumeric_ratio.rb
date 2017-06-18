@@ -3,10 +3,9 @@ require 'wikipedia/vandalism_detection/features/base'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes the non-alphanumeric to all letters ratio of the edit's new revision inserted text.
+      # This feature computes the non-alphanumeric to all letters ratio of the
+      # edit's new revision inserted text.
       class NonAlphanumericRatio < Base
-
         def calculate(edit)
           super
 

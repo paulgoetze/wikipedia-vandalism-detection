@@ -5,10 +5,8 @@ require 'wikipedia/vandalism_detection/text'
 module Wikipedia
   module VandalismDetection
     module Features
-
       # This feature computes the frequency of pronouns in the removed text.
       class RemovedPronounFrequency < FrequencyBase
-
         # Returns the percentage of pronoun words in the removed text.
         # Returns 0.0 if cleaned removed text is of zero length.
         def calculate(edit)

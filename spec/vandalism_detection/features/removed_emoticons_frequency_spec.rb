@@ -1,36 +1,30 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::RemovedEmoticonsFrequency do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::RemovedEmoticonsFrequency.new
-  end
-
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
-
-  describe "#calculate" do
-
-    it "returns the number of removed emoticon words relative to all removed words count" do
+  describe '#calculate' do
+    it 'returns the number of removed emoticon words over all removed words' do
       # inserted: total 6 words, 2 emoticons
-      old_text = Wikipedia::VandalismDetection::Text.new ":) old. It's :P man:Pio, this is X-D."
-      new_text = Wikipedia::VandalismDetection::Text.new ':) old.'
+      old_text = Text.new(':) old. It’s :P man:Pio, this is X-D.')
+      new_text = Text.new(':) old.')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 2.0 / 6.0
+      expect(subject.calculate(edit)).to eq 2.0 / 6.0
     end
 
-    it "returns 0.0 on emtpy removed text" do
-      old_text = Wikipedia::VandalismDetection::Text.new "Great old. {{speedy deletion}}"
-      new_text = Wikipedia::VandalismDetection::Text.new 'Great old. {{speedy deletion}} :)'
+    it 'returns 0.0 on emtpy removed text' do
+      old_text = Text.new('Great old. {{speedy deletion}}')
+      new_text = Text.new('Great old. {{speedy deletion}} :)')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.0
+      expect(subject.calculate(edit)).to eq 0.0
     end
   end
 end

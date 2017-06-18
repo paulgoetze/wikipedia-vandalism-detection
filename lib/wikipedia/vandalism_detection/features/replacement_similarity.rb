@@ -5,12 +5,10 @@ require 'hotwater'
 module Wikipedia
   module VandalismDetection
     module Features
-
       # This feature computes the similarity of deleted to inserted text.
       # As similarity measure the Jaro-Winkler distance is used.
       # See: http://courses.cs.washington.edu/courses/cse590q/04au/papers/Winkler99.pdf
       class ReplacementSimilarity < Base
-
         def calculate(edit)
           super
 
