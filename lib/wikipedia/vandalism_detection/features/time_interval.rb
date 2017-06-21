@@ -11,23 +11,26 @@ module Wikipedia
           super
 
           new_time = DateTime.parse(edit.new_revision.timestamp)
+          old_timestamp = timestamp_for(edit.old_revision)
 
-          if edit.old_revision.timestamp.blank?
-            xml = Wikipedia.api_request(
-              prop: 'revisions',
-              rvprop: 'timestamp',
-              revids: edit.old_revision.id
-            )
-
-            timestamp = xml.xpath('//rev/@timestamp').text
-            return Features::MISSING_VALUE if timestamp.blank?
-
-            old_time = DateTime.parse(timestamp)
-          else
-            old_time = DateTime.parse(edit.old_revision.timestamp)
-          end
+          return Features::MISSING_VALUE unless old_timestamp
+          old_time = DateTime.parse(old_timestamp)
 
           (new_time - old_time).to_f.abs
+        end
+
+        private
+
+        def timestamp_for(revision)
+          return revision.timestamp if revision.timestamp.present?
+
+          xml = Wikipedia.api_request(
+            prop: 'revisions',
+            rvprop: 'timestamp',
+            revids: revision.id
+          )
+
+          xml.xpath('//rev/@timestamp').text.presence
         end
       end
     end

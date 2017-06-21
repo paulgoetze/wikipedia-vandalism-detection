@@ -40,11 +40,14 @@ module Wikipedia
           distribution_a.each do |character, distribution|
             prob_a = distribution / sum_a
 
-            if distribution_b.key?(character)
-              prob_b = gamma * (distribution_b[character] / sum_b)
-            else
-              prob_b = epsilon
-            end
+            character_distribution = distribution_b[character]
+
+            prob_b =
+              if character_distribution
+                gamma * (character_distribution / sum_b)
+              else
+                epsilon
+              end
 
             divergence += (prob_a - prob_b) * Math.log(prob_a / prob_b)
           end

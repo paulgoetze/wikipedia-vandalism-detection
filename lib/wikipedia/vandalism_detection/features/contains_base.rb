@@ -8,7 +8,7 @@ module Wikipedia
         # It returns 0 if term is not included, else 1.
         def contains(comment, terms)
           terms = terms.is_a?(Array) ? terms.join('|') : terms
-          comment.match(/#{terms}/i) ? 1 : 0
+          comment =~ /#{terms}/i ? 1 : 0
         end
       end
     end

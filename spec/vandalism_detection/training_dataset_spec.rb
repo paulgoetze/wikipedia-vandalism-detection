@@ -1,9 +1,7 @@
 require 'spec_helper'
 require 'fileutils'
-require 'weka'
 
 describe Wikipedia::VandalismDetection::TrainingDataset do
-
   before do
     use_test_configuration
     @config = test_config
@@ -18,45 +16,46 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
   after do
     if File.exist?(@arff_file)
       File.delete(@arff_file)
-      FileUtils.rm_r(File.dirname @arff_file)
+      directory = File.dirname(@arff_file)
+      FileUtils.rm_r(directory)
     end
 
     File.delete(@index_file) if File.exist?(@index_file)
 
     # remove feature arff files
     @config.features.each do |name|
-      file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+      file = File.join(@arff_files_dir, "#{name.tr(' ', '_')}.arff")
 
-      if File.exist?(file)
-        File.delete(file)
-        FileUtils.rm_r(File.dirname file)
-      end
+      next unless File.exist?(file)
+
+      File.delete(file)
+      directory = File.dirname(file)
+      FileUtils.rm_r(directory)
     end
   end
 
-  describe "#build" do
-
-    it "returns a weka instances" do
-      dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-      expect(dataset.class).to be Java::WekaCore::Instances
+  describe '#build' do
+    it 'returns a weka instances' do
+      dataset = TrainingDataset.build
+      expect(dataset).to be_a Java::WekaCore::Instances
     end
 
-    describe "exceptions" do
-      it "raises an EditsFileNotConfiguredError if no edits file is configured" do
+    describe 'exceptions' do
+      it 'raises error unless edits file is configured' do
         config = test_config
         config.instance_variable_set(:@training_corpus_edits_file, nil)
         use_configuration(config)
 
-        expect { Wikipedia::VandalismDetection::TrainingDataset.build }.to raise_error \
+        expect { TrainingDataset.build }.to raise_error \
           Wikipedia::VandalismDetection::EditsFileNotConfiguredError
       end
 
-      it "raises an AnnotationsFileNotConfiguredError if no annotations file is configured" do
+      it 'raises error unless annotations file is configured' do
         config = test_config
         config.instance_variable_set(:@training_corpus_annotations_file, nil)
         use_configuration(config)
 
-        expect { Wikipedia::VandalismDetection::TrainingDataset.build }.to raise_error \
+        expect { TrainingDataset.build }.to raise_error \
           Wikipedia::VandalismDetection::AnnotationsFileNotConfiguredError
       end
     end
@@ -64,114 +63,115 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     Wikipedia::VandalismDetection::DefaultConfiguration::DEFAULTS['features'].each do |name|
       it "creates an arff file for the feature '#{name}'" do
         config = test_config
-        config.instance_variable_set :@features, [name]
+        config.instance_variable_set(:@features, [name])
         use_configuration(config)
 
-        file = File.join(@arff_files_dir, name.gsub(' ', '_') + '.arff')
+        file = File.join(@arff_files_dir, "#{name.tr(' ', '_')}.arff")
 
         expect(File.exist?(file)).to be false
-        Wikipedia::VandalismDetection::TrainingDataset.build
+        TrainingDataset.build
         expect(File.exist?(file)).to be true
       end
     end
 
-    it "creates only feature files that are not available yet" do
+    it 'creates only feature files that are not available yet' do
       config = test_config
-      config.instance_variable_set :@features, ['anonymity', 'comment length']
+      config.instance_variable_set(:@features, ['anonymity', 'comment length'])
       use_configuration(config)
 
       anonymity_file = File.join(config.output_base_directory, 'test', 'anonymity.arff')
 
-      # create file manually, so it is existent when building dataset
-      data = [10000, 123456, 234567]
-      anonymity = Wikipedia::VandalismDetection::Instances.empty_for_test_feature('anonymity')
+      # create file manually, so it is existent when building the dataset
+      data = [1, 2, 3]
+      anonymity = Instances.empty_for_test_feature('anonymity')
       6.times { anonymity.add_instance(data) }
       anonymity.to_arff(anonymity_file)
 
-      Wikipedia::VandalismDetection::TrainingDataset.build
+      TrainingDataset.build
 
       # anonymity should not be overwritten
-      expect(Weka::Core::Instances.from_arff(anonymity_file).first.values).to eq data
+      values = Weka::Core::Instances.from_arff(anonymity_file).first.values
+      expect(values).to eq data
     end
 
-    describe "internal algorithm" do
-      before do
-        @features_num = @config.features.count
-      end
+    describe 'internal algorithm' do
+      let(:features_count) { @config.features.count }
 
-      it "has builds the right number of data lines" do
-        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-        annotations_num = File.open(@annotations_file, 'r').lines.count - 1
+      it 'builds the right number of data lines' do
+        dataset = TrainingDataset.build
+        annotations_count = File.open(@annotations_file, 'r').lines.count - 1
         additional_header_lines = 5
 
-        total_lines = additional_header_lines + annotations_num + @features_num
+        total_lines = additional_header_lines + annotations_count + features_count
 
         expect(dataset.to_s.lines.count).to eq total_lines
       end
 
-      it "builds the right number of data columns" do
-        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
-        expect(dataset.attributes_count).to eq @config.features.count + 1
+      it 'builds the right number of data columns' do
+        dataset = TrainingDataset.build
+        expect(dataset.attributes_count).to eq features_count + 1
       end
     end
 
-    describe "replacing missing values" do
-
-      it "replaces missing values if configured" do
+    describe 'replacing missing values' do
+      it 'replaces missing values if configured' do
         config = test_config
-        config.instance_variable_set :@replace_missing_values, 'true'
+        config.instance_variable_set(:@replace_missing_values, 'true')
         use_configuration(config)
 
-        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
+        dataset = TrainingDataset.build
 
-        expect(dataset.to_s).to match /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
+        filter = /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
+        expect(dataset.to_s).to match filter
       end
 
-      it "does not replace missing values if not configured" do
+      it 'does not replace missing values if not configured' do
         config = test_config
-        config.instance_variable_set :@replace_missing_values, 'Nope'
+        config.instance_variable_set(:@replace_missing_values, 'Nope')
         use_configuration(config)
 
-        dataset = Wikipedia::VandalismDetection::TrainingDataset.build
+        dataset = TrainingDataset.build
 
-        expect(dataset.to_s).not_to match /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
+        filter = /weka\.filters\.unsupervised\.attribute\.ReplaceMissingValues/
+        expect(dataset.to_s).not_to match filter
       end
     end
   end
 
-  describe "#instances" do
-    it "is an alias method for #build" do
-      build = Wikipedia::VandalismDetection::TrainingDataset.build
-      instances = Wikipedia::VandalismDetection::TrainingDataset.instances
+  describe '#instances' do
+    it 'is an alias method for #build' do
+      build = TrainingDataset.method(:build)
+      instances = TrainingDataset.method(:instances)
 
-      expect(build.to_s).to eq instances.to_s
+      expect(build).to eq instances
     end
   end
 
-  describe "#balanced_instances" do
-
+  describe '#balanced_instances' do
     before do
       config = test_config
       config.instance_variable_set(:@training_data_options, 'balanced')
       use_configuration(config)
 
-      @dataset = Wikipedia::VandalismDetection::TrainingDataset.balanced_instances
+      @dataset = TrainingDataset.balanced_instances
     end
 
-    it "returns a weka dataset" do
-      expect(@dataset.class).to eq Java::WekaCore::Instances
+    it 'returns a weka dataset' do
+      expect(@dataset).to be_a Java::WekaCore::Instances
     end
 
-    it "returns a dataset built from the configured corpus" do
+    it 'returns a dataset of rigth size built from the configured corpus' do
       # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
       expect(@dataset.size).to eq 4
     end
 
-    [:VANDALISM, :REGULAR].each do |class_const|
-      it "has 2 '#{class_const.downcase}' samples in its instances" do
+    %i[VANDALISM REGULAR].each do |class_const|
+      it "has the right number of '#{class_const.downcase}' samples in its instances" do
         class_count = @dataset.enumerate_instances.reduce(0) do |count, instance|
-          label = Wikipedia::VandalismDetection::Instances::CLASSES[instance.class_value.to_i]
-          (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
+          label = Instances::CLASSES[instance.class_value.to_i]
+          value = Instances.const_get(class_const)
+
+          label == value ? count + 1 : count
         end
 
         expect(class_count).to eq 2
@@ -179,87 +179,87 @@ describe Wikipedia::VandalismDetection::TrainingDataset do
     end
   end
 
-  describe "#oversampled_instances" do
-    describe "with default options" do
+  describe '#oversampled_instances' do
+    describe 'with default options' do
       before do
         config = test_config
         config.instance_variable_set(:@training_data_options, 'oversampled')
         use_configuration(config)
 
-        @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances # default -P 100 -U true
+        # default -P 100 -U true
+        @dataset = TrainingDataset.oversampled_instances
       end
 
-      it "returns a weka dataset" do
-        expect(@dataset.class).to be Java::WekaCore::Instances
+      it 'returns a weka dataset' do
+        expect(@dataset).to be_a Java::WekaCore::Instances
       end
 
-      it "returns a dataset of size 8 built from the configured corpus" do
+      it 'returns a dataset of size 8 built from the configured corpus' do
         # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
         expect(@dataset.size).to eq 8
       end
 
-      [:VANDALISM, :REGULAR].each do |class_const|
-        it "has 4 '#{class_const.downcase}' samples in its instances" do
+      %i[VANDALISM REGULAR].each do |class_const|
+        it "has the right number of '#{class_const.downcase}' samples in its instances" do
           class_count = @dataset.enumerate_instances.reduce(0) do |count, instance|
-            label = Wikipedia::VandalismDetection::Instances::CLASSES[instance.class_value.to_i]
-            (label == Wikipedia::VandalismDetection::Instances::const_get(class_const)) ? (count + 1) : count
+            label = Instances::CLASSES[instance.class_value.to_i]
+            value = Instances.const_get(class_const)
+
+            label == value ? count + 1 : count
           end
 
           expect(class_count).to eq 4
         end
       end
 
-      it "returns a dataset of size 8 for 200% 'SMOTEING' built from the configured corpus" do
+      it 'returns the right-sized SMOTEd dataset from the configured corpus' do
         # 4 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-        dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances(percentage: 200)
-        puts dataset
-
+        dataset = TrainingDataset.oversampled_instances(percentage: 200)
         expect(dataset.size).to eq 8
       end
     end
 
-    describe "with custom options" do
+    describe 'with custom options' do
       before do
         config = test_config
-        config.instance_variable_set(:@training_data_options, 'oversampled -p 300 -u false')
+        options = 'oversampled -p 300 -u false'
+        config.instance_variable_set(:@training_data_options, options)
         use_configuration(config)
 
-        @dataset = Wikipedia::VandalismDetection::TrainingDataset.oversampled_instances
+        @dataset = TrainingDataset.oversampled_instances
       end
 
-      it "returns a weka dataset" do
-        expect(@dataset.class).to be Java::WekaCore::Instances
+      it 'returns a weka dataset' do
+        expect(@dataset).to be_a Java::WekaCore::Instances
       end
 
-      it "returns a dataset of size 12 built from the configured corpus" do
-        # 2 + 300 % = 8 vandalism, 4 regular, see resources/corpora/training/annotations.csv
-        puts @dataset
+      it 'returns the right dataset size built from the configured corpus' do
+        # 2 + 300 % = 8 vandalism, 4 regular,
+        # see resources/corpora/training/annotations.csv
         expect(@dataset.size).to eq 12
       end
     end
   end
 
-  describe "#create_corpus_index_file!" do
-
-    it "responds to #create_corpus_file_index!" do
-      expect(Wikipedia::VandalismDetection::TrainingDataset).to respond_to :create_corpus_file_index!
+  describe '#create_corpus_index_file!' do
+    it 'responds to #create_corpus_file_index!' do
+      expect(TrainingDataset).to respond_to :create_corpus_file_index!
     end
 
-    describe "exceptions" do
-
-      it "raises an RevisionsDirectoryNotConfiguredError if no revisions directory is configured" do
+    describe 'exceptions' do
+      it 'raises an error if no revisions directory is configured' do
         config = test_config
-        config.instance_variable_set :@training_corpus_revisions_directory, nil
+        config.instance_variable_set(:@training_corpus_revisions_directory, nil)
         use_configuration(config)
 
-        expect { Wikipedia::VandalismDetection::TrainingDataset.create_corpus_file_index! }.to raise_error \
+        expect { TrainingDataset.create_corpus_file_index! }.to raise_error \
           Wikipedia::VandalismDetection::RevisionsDirectoryNotConfiguredError
       end
     end
 
-    it "creates a corpus_index.yml file in the build directory" do
+    it 'creates a corpus_index.yml file in the build directory' do
       expect(File.exist?(@index_file)).to be false
-      Wikipedia::VandalismDetection::TrainingDataset.create_corpus_file_index!
+      TrainingDataset.create_corpus_file_index!
       expect(File.exist?(@index_file)).to be true
     end
   end

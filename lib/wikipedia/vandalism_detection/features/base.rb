@@ -35,13 +35,10 @@ module Wikipedia
         # @return Integer
         def count(terms, options = {})
           unless options[:in]
-            raise ArgumentError, 'The 2nd arg should be a Hash of form {in: text}'
+            raise ArgumentError, 'The options hash must include the in: key'
           end
 
-          terms_is_string = terms.is_a?(String)
-          terms_is_array = terms.is_a?(Array)
-
-          unless terms_is_array || terms_is_string
+          unless terms.is_a?(String) || terms.is_a?(Array)
             raise ArgumentError, 'The 1st arg should be an Array or String'
           end
 
@@ -52,7 +49,7 @@ module Wikipedia
             freq[word.to_sym] += 1
           end
 
-          if terms_is_string
+          if terms.is_a?(String)
             freq[terms.downcase.to_sym]
           else
             terms.reduce(0) { |result, term| result + freq[term] }

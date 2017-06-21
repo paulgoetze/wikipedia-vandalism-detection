@@ -11,31 +11,33 @@ require 'wikipedia/vandalism_detection/evaluator'
 module Wikipedia
   module VandalismDetection
     class Classifier
-
       attr_reader :evaluator, :dataset
 
       # Loads the classifier instance configured in the config file.
       def initialize(dataset = nil)
-        @config = Wikipedia::VandalismDetection.configuration
+        @config = Wikipedia::VandalismDetection.config
         @feature_calculator = FeatureCalculator.new
         @classifier = load_classifier(dataset)
         @evaluator = Evaluator.new(self)
       end
 
       # Returns the concrete classifier instance configured in the config file
-      # When you configured a Trees::RandomForest classifier you will get a Weka::Classifiers::Trees::RandomForest
-      # instance.
-      # This instance can be used for native function callings of the classifier class.
+      # When you configured a Trees::RandomForest classifier you will get a
+      # Weka::Classifiers::Trees::RandomForest instance.
+      # This instance can be used for native function callings of the classifier
+      # class.
       def classifier_instance
         @classifier
       end
 
-      # Classifies an edit or a set of features and returns the vandalism confidence by default
+      # Classifies an edit or a set of features and returns the vandalism
+      # confidence by default.
       # If option 'return_all_params: true' is set, it returns a Hash of form
       # { confidence => ..., class_index => ...}
       #
       # @example
-      #   # suppose you have a dataset with 2 feature or 'edit' as an instance of Wikipedia::VandalismDetection::Edit
+      #   # suppose you have a dataset with 2 feature or 'edit' as an instance
+      #   # of Wikipedia::VandalismDetection::Edit
       #   classifier = Wikipedia::VandalsimDetection::Classifier.new
       #   features = [0.45, 0.67]
       #
@@ -43,17 +45,20 @@ module Wikipedia
       #   confidence = classifier.classify(edit)
       def classify(edit_or_features, options = {})
         features = @config.features
-        param_is_features = edit_or_features.is_a?(Array) && (edit_or_features.size == features.count)
+        param_is_features = edit_or_features.is_a?(Array) && edit_or_features.size == features.count
         param_is_edit = edit_or_features.is_a? Edit
 
         unless param_is_edit || param_is_features
-          raise ArgumentError, "Input has to be an Edit or an Array of feature values."
+          message = 'Input has to be an Edit or an Array of feature values.'
+          raise ArgumentError, message
         end
 
         feature_values = param_is_edit ? @feature_calculator.calculate_features_for(edit_or_features) : edit_or_features
         return -1.0 if feature_values.empty?
 
-        feature_values = feature_values.map { |i| i == Features::MISSING_VALUE ? nil : i }
+        feature_values = feature_values.map do |i|
+          i == Features::MISSING_VALUE ? nil : i
+        end
 
         dataset = Instances.empty
         dataset.set_class_index(feature_values.count)
@@ -73,7 +78,7 @@ module Wikipedia
         end
 
 
-        confidence = (@classifier.distribution_for_instance(instance).to_a)[index]
+        confidence = @classifier.distribution_for_instance(instance).to_a[index]
 
         if options[:return_all_params]
           class_index = @classifier.classify_instance(instance)
@@ -104,29 +109,37 @@ module Wikipedia
       def load_classifier(dataset)
         classifier_name = @config.classifier_type
 
-        raise ClassifierNotConfiguredError, "You have to define a classifier type in wikipedia-vandalism-detection.yml" unless classifier_name
-        raise FeaturesNotConfiguredError, "You have to configure features in wikipedia-vandalism-detection.yml" if @config.features.blank?
+        unless classifier_name
+          message = 'Classifier type is not defined in wikipedia-vandalism-detection.yml'
+          raise ClassifierNotConfiguredError, message
+        end
+
+        if @config.features.blank?
+          message = 'No features configured in wikipedia-vandalism-detection.yml'
+          raise FeaturesNotConfiguredError, message
+        end
 
         begin
           "Weka::Classifiers::#{classifier_name}".constantize
         rescue
-          raise ClassifierUnknownError, "The configured classifier type '#{classifier_name}' is unknown."
+          message = "The configured classifier type '#{classifier_name}' is unknown."
+          raise ClassifierUnknownError, message
         end
 
         classifier_class = "Weka::Classifiers::#{classifier_name}".constantize
         options = @config.classifier_options
 
-        puts "Loading classifier #{classifier_name} with options '#{options}'..."
+        puts "Loading classifier #{classifier_name} with options '#{options}'…"
 
         if dataset.nil?
           if @config.balanced_training_data?
-            puts "using BALANCED training dataset"
+            puts 'using BALANCED training dataset'
             dataset = TrainingDataset.balanced_instances
           elsif @config.unbalanced_training_data?
-            puts "using FULL (unbalanced) training dataset"
+            puts 'using FULL (unbalanced) training dataset'
             dataset = TrainingDataset.instances
           elsif @config.oversampled_training_data?
-            puts "using OVERSAMPLED training dataset"
+            puts 'using OVERSAMPLED training dataset'
             dataset = TrainingDataset.oversampled_instances
           end
         end
@@ -148,8 +161,8 @@ module Wikipedia
           end
 
           classifier
-        rescue => e
-          raise "Error while loading classifier: #{e.class}: #{e.message}"
+        rescue => error
+          raise "Error while loading classifier: #{error}"
         end
       end
 

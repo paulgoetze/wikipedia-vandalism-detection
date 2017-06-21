@@ -1,12 +1,9 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Classifier do
-
   before do
     use_test_configuration
     @config = test_config
-
-    @classifier = Wikipedia::VandalismDetection::Classifier.new
   end
 
   after do
@@ -15,89 +12,88 @@ describe Wikipedia::VandalismDetection::Classifier do
 
     if File.exist?(arff_file)
       File.delete(arff_file)
-      FileUtils.rm_r(File.dirname arff_file)
+      directory = File.dirname(arff_file)
+      FileUtils.rm_r(directory)
     end
 
-    if Dir.exist?(build_dir)
-      FileUtils.rm_r(build_dir)
-    end
+    FileUtils.rm_r(build_dir) if Dir.exist?(build_dir)
   end
 
-  it "loads the configured classifier while instanciating" do
-    classifier_name =  @config.classifier_type
+  it 'loads the configured classifier while instanciating' do
+    classifier_name = @config.classifier_type
     class_type = "Weka::Classifiers::#{classifier_name}".constantize
 
-    expect(@classifier.classifier_instance).to be_a class_type
+    expect(subject.classifier_instance).to be_a class_type
   end
 
-  it "loads the configured classifier with given dataset" do
-    classifier_name =  @config.classifier_type
-    class_type = "Weka::Classifiers::#{classifier_name}".constantize
-    dataset = Wikipedia::VandalismDetection::Instances.empty_for_feature('anonymity')
-    dataset.add_instance([1.0, Wikipedia::VandalismDetection::Instances::REGULAR])
+  it 'loads the configured classifier with given dataset' do
+    classifier_name = @config.classifier_type
+    class_type      = "Weka::Classifiers::#{classifier_name}".constantize
+    dataset         = Instances.empty_for_feature('anonymity')
+    dataset.add_instance([1.0, Instances::REGULAR])
 
-    classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
+    classifier = Classifier.new(dataset)
 
     expect(classifier.classifier_instance).to be_a class_type
     expect(classifier.dataset).to be dataset
   end
 
-  it "raises an error if no classifier is configured" do
+  it 'raises an error if no classifier is configured' do
     config = test_config
-    config.instance_variable_set :@classifier_type, nil
+    config.instance_variable_set(:@classifier_type, nil)
     use_configuration(config)
 
-    expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
+    expect { Classifier.new }.to raise_error \
       Wikipedia::VandalismDetection::ClassifierNotConfiguredError
   end
 
-  it "raises an error if an unknown classifier is configured" do
+  it 'raises an error if an unknown classifier is configured' do
     config = test_config
-    config.instance_variable_set :@classifier_type, "Unknown Classifier"
+    config.instance_variable_set(:@classifier_type, 'Unknown Classifier')
     use_configuration(config)
 
-    expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
+    expect { Classifier.new }.to raise_error \
       Wikipedia::VandalismDetection::ClassifierUnknownError
   end
 
-  it "raises an error if no features are configured" do
+  it 'raises an error if no features are configured' do
     config = test_config
     config.instance_variable_set :@features, []
     use_configuration(config)
 
-    expect { Wikipedia::VandalismDetection::Classifier.new }.to raise_error \
+    expect { Classifier.new }.to raise_error \
       Wikipedia::VandalismDetection::FeaturesNotConfiguredError
   end
 
-  it "load the classifier and learns it regarding a balanced training set if set in config" do
+  it 'loads & trains the classifier with balanced dataset if configured' do
     config = test_config
     config.instance_variable_set(:@training_data_options, 'balanced')
     use_configuration(config)
 
-    classifier = Wikipedia::VandalismDetection::Classifier.new
+    classifier = Classifier.new
 
     # 2 vandalism, 2 regular, see resources/corpora/training/annotations.csv
     expect(classifier.dataset.size).to eq 4
   end
 
-  it "load the classifier and learns it regarding the full configured (unbalanced) training set" do
+  it 'loads & trains the classifier with unbalanced dataset if configured' do
     config = test_config
     config.instance_variable_set(:@training_data_options, 'unbalanced')
     use_configuration(config)
 
-    classifier = Wikipedia::VandalismDetection::Classifier.new
+    classifier = Classifier.new
     dataset = classifier.dataset
 
-    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
-    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+    vandalism_class_index = Instances::VANDALISM_CLASS_INDEX
+    regular_class_index   = Instances::REGULAR_CLASS_INDEX
 
-    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+    vandalism_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == vandalism_class_index
       count
     end
 
-    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == regular_class_index)
+    regular_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == regular_class_index
       count
     end
 
@@ -107,24 +103,24 @@ describe Wikipedia::VandalismDetection::Classifier do
     expect(vandalism_count).to eq 2
   end
 
-  it "loads the classifier and learns it regarding an oversampled training set if set in config" do
+  it 'loads & trains the classifier with oversampled dataset if configured' do
     config = test_config
     config.instance_variable_set(:@training_data_options, 'oversampled')
     use_configuration(config)
 
-    classifier = Wikipedia::VandalismDetection::Classifier.new
+    classifier = Classifier.new
     dataset = classifier.dataset
 
-    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
-    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+    vandalism_class_index = Instances::VANDALISM_CLASS_INDEX
+    regular_class_index   = Instances::REGULAR_CLASS_INDEX
 
-    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+    vandalism_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == vandalism_class_index
       count
     end
 
-    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == regular_class_index)
+    regular_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == regular_class_index
       count
     end
 
@@ -134,187 +130,197 @@ describe Wikipedia::VandalismDetection::Classifier do
     expect(vandalism_count).to eq 4
   end
 
-  it "loads the classifier and learns it regarding a customized oversampled training set if set in config" do
+  it 'loads & trains the classifier with customized oversampled dataset if configured' do
     config = test_config
-    config.instance_variable_set(:@training_data_options, 'oversampled -p 200 -u false')
+    options = 'oversampled -p 200 -u false'
+    config.instance_variable_set(:@training_data_options, options)
     use_configuration(config)
 
-    dataset = Wikipedia::VandalismDetection::Classifier.new.dataset
+    classifier = Classifier.new
+    dataset = classifier.dataset
 
-    vandalism_class_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
-    regular_class_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+    vandalism_class_index = Instances::VANDALISM_CLASS_INDEX
+    regular_class_index   = Instances::REGULAR_CLASS_INDEX
 
-    vandalism_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == vandalism_class_index)
+    vandalism_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == vandalism_class_index
       count
     end
 
-    regular_count = dataset.enumerate_instances.reduce(0) do |count, instance|
-      count += 1 if (instance.class_value.to_i == regular_class_index)
+    regular_count = dataset.instances.reduce(0) do |count, instance|
+      count += 1 if instance.class_value.to_i == regular_class_index
       count
     end
 
-    # 2 + 200 % = 6 vandalism, 4 regular, due to SMOTE oversampling without undersampling
+    # 2 + 200 % = 6 vandalism, 4 regular, due to SMOTE oversampling without
+    # undersampling
     expect(dataset.size).to eq 10
     expect(regular_count).to eq 4
     expect(vandalism_count).to eq 6
   end
 
-  describe "attribute readers" do
-
-    [:classifier_instance, :evaluator, :dataset].each do |name|
+  describe 'attribute readers' do
+    %i[classifier_instance evaluator dataset].each do |attribute|
       it "has a readable #{name} attribute" do
-        expect { @classifier.send(name) }.not_to raise_error
+        expect(subject).to respond_to attribute
       end
     end
 
-    it "returns an Evaluator instance from attribute #evaluator" do
-      expect(@classifier.evaluator).to be_a Wikipedia::VandalismDetection::Evaluator
+    it 'returns an Evaluator instance from attribute #evaluator' do
+      expect(subject.evaluator).to be_an Evaluator
     end
   end
 
-  describe "#classifiy" do
+  describe '#classify' do
+    let(:edit) { build(:edit) }
 
-    before do
-      @edit = build(:edit)
-      @features = Wikipedia::VandalismDetection::FeatureCalculator.new.calculate_features_for @edit
+    let(:features) do
+      calculator = Wikipedia::VandalismDetection::FeatureCalculator.new
+      calculator.calculate_features_for(edit)
     end
 
-    it "raises an error if the input param is no Wikipedia::Edit or feature Array" do
-      expect { @classifier.classify("data") }.to raise_error ArgumentError
+    it 'raises an error if the argument is no Edit or feature Array' do
+      expect { subject.classify('data') }.to raise_error ArgumentError
     end
 
-    it "takes a Wikipedia::Edit as input parameter" do
-      expect { @classifier.classify @edit }.not_to raise_error
+    it 'takes an Edit as argument' do
+      expect { subject.classify(edit) }.not_to raise_error ArgumentError
     end
 
-    it "takes a feature Array as input parameter" do
-      expect { @classifier.classify @features }.not_to raise_error
+    it 'takes a feature Array as argument' do
+      expect { subject.classify(features) }.not_to raise_error ArgumentError
     end
 
-    it "returns the same value for both edit and features as parameter" do
-      confidence_from_edit = @classifier.classify @edit
-      confidence_from_features = @classifier.classify @features
+    it 'returns the same value for both edit and features as argument' do
+      confidence_from_edit = subject.classify(edit)
+      confidence_from_features = subject.classify(features)
 
       expect(confidence_from_edit).to eq confidence_from_features
     end
 
-    it "returns a Numeric value which represents the confidence of vandalism class" do
-      confidence = @classifier.classify @features
+    it 'returns a Numeric value as the confidence of vandalism class' do
+      confidence = subject.classify(features)
       expect(confidence).to be_a Numeric
     end
 
-    it "returns an array that holds the confidence at first that is between 0.0 and 1.0" do
-      confidence = @classifier.classify @features
-      confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
-      expect(confidence_between_0_and_1).to be true
+    it 'returns a confidence between 0.0 and 1.0' do
+      confidence = subject.classify(features)
+      is_between_zero_and_one = confidence <= 1.0 && confidence >= 0.0
+      expect(is_between_zero_and_one).to be true
     end
 
-    it "returns -1.0 if features cannot be computed from the edit" do
+    it 'returns -1.0 if features cannot be computed from the edit' do
       Wikipedia::VandalismDetection::FeatureCalculator.any_instance.stub(calculate_features_for: [])
-      confidence = @classifier.classify @edit
+      confidence = subject.classify(edit)
 
-      expect(confidence).to eq -1.0
+      expect(confidence).to eq(-1.0)
     end
 
-    describe "with option ':return_all_params = true'" do
-
-      it "returns a hash" do
-        parameters = @classifier.classify @features, return_all_params: true
+    describe 'with option ":return_all_params = true"' do
+      it 'returns a hash' do
+        parameters = subject.classify(features, return_all_params: true)
         expect(parameters).to be_a Hash
       end
 
-      [:confidence, :class_index].each do |key|
+      %i[confidence class_index].each do |key|
         it "returns a hash with key :#{key}" do
-          parameters = @classifier.classify @features, return_all_params: true
-          expect(parameters.keys).to include key
+          results = subject.classify(features, return_all_params: true)
+          expect(results.keys).to include key
         end
       end
 
-      it "returns a class_index value of 0 or 1" do
-        class_index = @classifier.classify(@features, return_all_params: true)[:class_index]
+      it 'returns a class_index value of 0 or 1' do
+        results = subject.classify(features, return_all_params: true)
+        class_index = results[:class_index]
         is_one_or_zero = class_index == 0 || class_index == 1
+
         expect(is_one_or_zero).to be true
       end
 
-      it "returns an confidence value that is between 0.0 and 1.0" do
-        confidence = (@classifier.classify @features, return_all_params: true)[:confidence]
-        confidence_between_0_and_1 = (confidence <= 1.0) && (confidence >= 0.0)
-        expect(confidence_between_0_and_1).to be true
+      it 'returns an confidence value that is between 0.0 and 1.0' do
+        results = subject.classify(features, return_all_params: true)
+        confidence = results[:confidence]
+        between_zero_and_one = confidence <= 1.0 && confidence >= 0.0
+
+        expect(between_zero_and_one).to be true
       end
     end
 
-    it "raises an argument error if given features are an empty array" do
-      expect { @classifier.classify([]) }.to raise_error ArgumentError
+    it 'raises an argument error if given features are an empty array' do
+      expect { subject.classify([]) }.to raise_error ArgumentError
     end
 
-    it "does not raise an exception if classifier's classify method returns NaN (i.e. is not implemented)" do
+    it 'it handles NaN return values (i.e. is not implemented)' do
       config = test_config
       config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
-      config.instance_variable_set(:@classifier_options, "-tcl #{Wikipedia::VandalismDetection::Instances::VANDALISM}")
+      config.instance_variable_set(:@classifier_options, "-tcl #{Instances::VANDALISM}")
 
       use_configuration(config)
 
-      # add more test instances because instances number must higher than cross validation fold
-      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a.map(&:values)
-      dataset = Wikipedia::VandalismDetection::Instances.empty
+      # add more test instances because instances number must higher than cross
+      # validation fold
+      instances = TrainingDataset.instances.to_m.to_a
+      dataset = Instances.empty
 
-      vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
-      regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+      vandalism_index = Instances::VANDALISM_CLASS_INDEX
+      regular_index = Instances::REGULAR_CLASS_INDEX
 
       [vandalism_index, regular_index].each do |index|
         instances.each do |row|
           values = row[0..-2]
-          class_value = Wikipedia::VandalismDetection::Instances::CLASSES[index]
+          class_value = Instances::CLASSES[index]
           dataset.add_instance([*values, class_value])
         end
       end
 
-      classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
-
-      expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
+      classifier = Classifier.new(dataset)
+      results = classifier.classify(features, return_all_params: true)
+      expect(results).to be_a Hash
     end
 
-    it "does not raise an exception if classifier uses one class classification with 'regular' ast target class" do
+    it 'handles one class classification with "regular" as target class' do
       config = test_config
       config.instance_variable_set(:@classifier_type, 'Meta::OneClassClassifier')
-      config.instance_variable_set(:@classifier_options, "-tcl #{Wikipedia::VandalismDetection::Instances::REGULAR}")
+      config.instance_variable_set(:@classifier_options, "-tcl #{Instances::REGULAR}")
 
       use_configuration(config)
 
-      # add more test instances because instances number must higher than cross validation fold
-      instances = Wikipedia::VandalismDetection::TrainingDataset.instances.to_a.map(&:values)
-      dataset = Wikipedia::VandalismDetection::Instances.empty
+      # add more test instances because instances number must higher than cross
+      # validation fold
+      instances = TrainingDataset.instances.to_m.to_a
+      dataset = Instances.empty
 
-      vandalism_index = Wikipedia::VandalismDetection::Instances::VANDALISM_CLASS_INDEX
-      regular_index = Wikipedia::VandalismDetection::Instances::REGULAR_CLASS_INDEX
+      vandalism_index = Instances::VANDALISM_CLASS_INDEX
+      regular_index = Instances::REGULAR_CLASS_INDEX
 
       [vandalism_index, regular_index].each do |index|
         instances.each do |row|
           values = row[0..-2]
-          class_value = Wikipedia::VandalismDetection::Instances::CLASSES[index]
+          class_value = Instances::CLASSES[index]
           dataset.add_instance([*values, class_value])
         end
       end
 
-      classifier = Wikipedia::VandalismDetection::Classifier.new(dataset)
+      classifier = Classifier.new(dataset)
+      results = classifier.classify(features, return_all_params: true)
 
-      expect { classifier.classify(@features, return_all_params: true) }.not_to raise_exception
+      expect(results).to be_a Hash
     end
   end
 
-  describe "#cross_validate" do
-
-    it "returns a evaluation object" do
-      evaluation = @classifier.cross_validate
-      expect(evaluation.class).to be Java::WekaClassifiers::Evaluation
+  describe '#cross_validate' do
+    it 'returns an Evaluation object' do
+      evaluation = subject.cross_validate
+      expect(evaluation).to be_a Java::WekaClassifiers::Evaluation
     end
 
-    it "returns an Array of Evaluation objects (when equally distributed option used)" do
-      evaluations = @classifier.cross_validate(equally_distributed: true)
+    context 'with option "equally distributed"' do
+      it 'returns an array of Evaluation objects' do
+        evaluations = subject.cross_validate(equally_distributed: true)
 
-      evaluations.each do |evaluation|
-        expect(evaluation.class).to be Java::WekaClassifiers::Evaluation
+        evaluations.each do |evaluation|
+          expect(evaluation).to be_a Java::WekaClassifiers::Evaluation
+        end
       end
     end
   end

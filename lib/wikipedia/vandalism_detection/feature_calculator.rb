@@ -7,7 +7,6 @@ require 'wikipedia/vandalism_detection/edit'
 
 module Wikipedia
   module VandalismDetection
-
     # This class provides methods for calculating a feature set of an edit.
     # The features that shall be used can be defined in the config/wikipedia-vandalism-detection.yml file
     # under the 'features:' root attribute like this:
@@ -18,25 +17,24 @@ module Wikipedia
     #   - ...
     # etc.
     class FeatureCalculator
-
       def initialize
-        @features = Wikipedia::VandalismDetection.configuration.features
-        raise FeaturesNotConfiguredError if (@features.blank? || @features.empty?)
+        @features = Wikipedia::VandalismDetection.config.features
+        raise FeaturesNotConfiguredError if @features.blank? || @features.empty?
         @feature_classes = build_feature_classes @features
       end
 
-      # Calculates the configured festures for the given edit and
-      # returns an array of the computed values.
+      # Calculates the configured festures for the given edit and returns an
+      # array of the computed values.
       def calculate_features_for(edit)
-        raise ArgumentError, "Input has to be an Edit." unless edit.is_a? Edit
+        raise ArgumentError, 'Input has to be an Edit.' unless edit.is_a?(Edit)
 
         features = @feature_classes.map do |feature|
           begin
             feature.calculate(edit)
-          rescue WikitextExtractionError => e
-            $stderr.print %Q{
-              Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
-              by the WikitextExtractor and will be discarded.\n""}
+          rescue WikitextExtractionError
+            $stderr.print %{
+              Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not
+              be parsed by the WikitextExtractor and will be discarded.\n""}
 
             Features::MISSING_VALUE
           end
@@ -47,9 +45,15 @@ module Wikipedia
 
       # Returns the calculated Numeric feature value for given edit and feature with given name
       def calculate_feature_for(edit, feature_name)
-        raise ArgumentError, "First parameter has to be an Edit." unless edit.is_a? Edit
-        raise ArgumentError, "Second parameter has to be a feature name String (e.g. 'anonymity')." unless \
-          feature_name.is_a? String
+        unless edit.is_a?(Edit)
+          raise ArgumentError, 'First parameter has to be an Edit.'
+        end
+
+        unless feature_name.is_a?(String)
+          message = 'Second parameter has to be a feature name String ' \
+                    '(e.g. "anonymity").'
+          raise ArgumentError, message
+        end
 
         value = Features::MISSING_VALUE
 
@@ -57,15 +61,16 @@ module Wikipedia
           feature = feature_class_from_name(feature_name)
           value = feature.calculate(edit)
         rescue WikitextExtractionError
-          $stderr.print %Q{
-            Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not be parsed
-            by the WikitextExtractor and will be discarded.\n""}
+          $stderr.print %{
+            Edit (#{edit.old_revision.id}, #{edit.new_revision.id}) could not
+            be parsed by the WikitextExtractor and will be discarded.\n""}
         end
 
         value
       end
 
-      # Returns the feature names as defined in conf/wikipedia-vandalism-detection.yml under 'features:'.
+      # Returns the feature names as defined in
+      # conf/wikipedia-vandalism-detection.yml under 'features:'.
       def used_features
         @features
       end
@@ -81,7 +86,7 @@ module Wikipedia
 
       # Returns the Feature class of the given name
       def feature_class_from_name(name)
-        camelcased_name = name.split(/[\s-]/).map{ |s| s.capitalize! }.join('')
+        camelcased_name = name.split(/[\s-]/).map(&:capitalize!).join('')
         "Wikipedia::VandalismDetection::Features::#{camelcased_name}".constantize.new
       end
     end
