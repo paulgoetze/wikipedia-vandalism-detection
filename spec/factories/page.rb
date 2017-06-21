@@ -1,5 +1,4 @@
 FactoryGirl.define do
-
   factory :page, class: Wikipedia::VandalismDetection::Page do
     id nil
     title nil

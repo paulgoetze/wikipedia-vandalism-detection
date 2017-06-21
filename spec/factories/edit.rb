@@ -1,5 +1,4 @@
 FactoryGirl.define do
-
   factory :edit, class: Wikipedia::VandalismDetection::Edit do
     old_revision { FactoryGirl.build(:old_revision) }
     new_revision { FactoryGirl.build(:new_revision) }
