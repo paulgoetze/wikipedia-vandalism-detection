@@ -14,6 +14,9 @@ Style/Documentation:
 
 Metrics/LineLength:
   Max: 80
+  Exclude:
+    - '**/*_spec.rb'
+    - 'spec/factories/*.rb'
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
@@ -23,8 +26,10 @@ Style/FrozenStringLiteralComment:
 
 Metrics/ModuleLength:
   Exclude:
-    - "**/*_spec.rb"
+    - '**/*_spec.rb'
+    - 'spec/factories/*.rb'
 
 Metrics/BlockLength:
   Exclude:
-    - "**/*_spec.rb"
+    - '**/*_spec.rb'
+    - 'spec/factories/*.rb'
