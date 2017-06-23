@@ -16,3 +16,4 @@ spec/resources/build
 test/tmp
 test/version_tmp
 tmp
+/config/*.yml
