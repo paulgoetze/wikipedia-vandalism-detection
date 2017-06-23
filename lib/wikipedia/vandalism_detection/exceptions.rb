@@ -37,7 +37,7 @@ module Wikipedia
     # Exception is raises when there is no ground truth file available
     class GroundTruthFileNotFoundError < Error; end
 
-    # Exceptoion is raised when an already available featture should be added to
+    # Exception is raised when an already available feature should be added to
     # the arff file
     class FeatureAlreadyUsedError < Error; end
 

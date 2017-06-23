@@ -2,7 +2,8 @@
 
 Vandalism detection on the Wikipedia history with JRuby.  
 
-The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library (v3.7.10) via the ruby-band gem.
+The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library
+(v3.7.13) via the [weka](https://github.com/paulgoetze/weka-jruby) gem.
 
 [![Gem Version](https://badge.fury.io/rb/wikipedia-vandalism_detection.svg)](http://badge.fury.io/rb/wikipedia-vandalism_detection)
 [![Build Status](https://travis-ci.org/webis-de/wikipedia-vandalism-detection.png?branch=develop)](https://travis-ci.org/webis-de/wikipedia-vandalism-detection)
@@ -39,7 +40,8 @@ Or install it yourself as:
 
 ### Configuration
 
-To configure the system put a `wikipedia-vandalism-detection.yml` file in the `config/` or `lib/config/` directory.
+To configure the system put a `wikipedia-vandalism-detection.yml` file in the
+`config/` or `lib/config/` directory.
 
 You can configure:
 
@@ -82,7 +84,8 @@ features:
   - ...
 ```
 
-C) the classifier type and its options and the number of cross validation splits for the classifier evaluation
+C) the classifier type and its options and the number of cross validation splits
+for the classifier evaluation
 
 ```YAML
 classifier:
@@ -224,16 +227,16 @@ This returns a hash comprising all feature names as configured as keys and the t
 {
   feature_name_1:
     {
-      0.0 => {fp:... , fn:... , tp:... , tn:... },
-      ...,
-      1.0 => {fp:... , fn:... , tp:... , tn:... }
+      0.0 => {fp:… , fn:… , tp:… , tn:… },
+      …,
+      1.0 => {fp:… , fn:… , tp:… , tn:… }
     },
-  ...,
+  …,
   feature_name_n:
     {
-      0.0 => {fp:... , fn:... , tp:... , tn:... },
-      ...,
-      1.0 => {fp:... , fn:... , tp:... , tn:... }
+      0.0 => {fp:… , fn:… , tp:… , tn:… },
+      …,
+      1.0 => {fp:… , fn:… , tp:… , tn:… }
     },
 }
 ```
@@ -250,8 +253,7 @@ and to implement the `calculate` method
 module Wikipedia
   module VandalismDetection
     module Features
-
-      class MyNew < Base
+      class MyNewFeature < Base
         def calculate(edit)
           super # ensures raising an error if 'edit' is not an Edit.
 
@@ -270,11 +272,11 @@ E.g.:
 
 ```YAML
     features:
-      - my new
-      - my-new
+      - my new feature
+      - my-new-feature
 ```
 
-both search for a Feature class with the name `MyNew`.
+both search for a Feature class with the name `MyNewFeature`.
 
 
 ## Contributing
