@@ -12,9 +12,9 @@ The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library
 
 * parsing Wikipedia history pages to get edits and revisions
 * creating training and test ARFF files from
-the [WVC-PAN-10](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/) and
-the [WVC-PAN-11](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-11/)
-(See also http://pan.webis.de under category Wikipedia Vandalism Detection)
+the [WVC-PAN-10](https://www.uni-weimar.de/en/media/chairs/computer-science-and-media/webis/corpora/corpus-pan-wvc-10) and
+the [WVC-PAN-11](https://www.uni-weimar.de/en/media/chairs/computer-science-and-media/webis/corpora/corpus-pan-wvc-11)
+(See also http://pan.webis.de under category Wikipedia Vandalism Detection: [CLEF 2010](http://pan.webis.de/clef10/pan10-web/wikipedia-vandalism-detection) & [CLEF 2011](http://pan.webis.de/clef11/pan11-web/wikipedia-vandalism-detection))
 
 * calculating vandalism features for a Wikipedia page (XML) from the history dump
 * creating and evaluating a classifier with the created training ARFF file
