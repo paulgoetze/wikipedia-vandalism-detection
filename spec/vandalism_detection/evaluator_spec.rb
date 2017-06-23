@@ -49,7 +49,7 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
     it 'does not raise an error when a classifier is passed' do
       classifier = Classifier.new
-      expect { Evaluator.new(classifier) }.not_to raise_error
+      expect { Evaluator.new(classifier) }.not_to raise_error ArgumentError
     end
   end
 
@@ -468,17 +468,17 @@ describe Wikipedia::VandalismDetection::Evaluator do
 
   describe '#cross_validate' do
     it 'returns an evaluation object' do
-      evaluation = evaluator.cross_validate
-      expect(evaluation).to be_a Java::WekaClassifiers::Evaluation
-    end
-
-    it 'can cross validates the classifier' do
-      expect { evaluator.cross_validate }.not_to raise_error
+      result = evaluator.cross_validate
+      expect(result).to be_a Java::WekaClassifiers::Evaluation
     end
 
     it 'can cross validates the classifier with equally distributed samples' do
-      expect { evaluator.cross_validate(equally_distributed: true) }
-        .not_to raise_error
+      result = evaluator.cross_validate(equally_distributed: true)
+      expect(result).to be_an Array
+
+      result.each do |item|
+        expect(item).to be_a Java::WekaClassifiers::Evaluation
+      end
     end
   end
 

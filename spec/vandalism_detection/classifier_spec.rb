@@ -210,7 +210,10 @@ describe Wikipedia::VandalismDetection::Classifier do
     end
 
     it 'returns -1.0 if features cannot be computed from the edit' do
-      Wikipedia::VandalismDetection::FeatureCalculator.any_instance.stub(calculate_features_for: [])
+      allow_any_instance_of(Wikipedia::VandalismDetection::FeatureCalculator)
+        .to receive(:calculate_features_for)
+        .and_return([])
+
       confidence = subject.classify(edit)
 
       expect(confidence).to eq(-1.0)

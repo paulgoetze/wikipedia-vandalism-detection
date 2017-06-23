@@ -33,7 +33,9 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
       end
     end
 
-    Wikipedia::VandalismDetection::TrainingDataset.stub(instances: dataset)
+    allow(Wikipedia::VandalismDetection::TrainingDataset)
+      .to receive(:instances)
+      .and_return(dataset)
   end
 
   after do
@@ -53,7 +55,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     classifier = Wikipedia::VandalismDetection::Classifier.new
     features = [1.0, 2.0, 55.0]
 
-    expect { classifier.classify(features) }.not_to raise_error
+    expect(classifier.classify(features)).to be_between(0.0, 1.0)
   end
 
   it 'can be used to classify vandalism using regulars' do
@@ -68,7 +70,7 @@ describe Weka::Classifiers::Meta::OneClassClassifier do
     classifier = Wikipedia::VandalismDetection::Classifier.new
     features = [1.0, 2.0, 8.0]
 
-    expect { classifier.classify(features) }.not_to raise_error
+    expect(classifier.classify(features)).to be_between(0.0, 1.0)
   end
 
   describe '#type' do

@@ -9,7 +9,9 @@ module TestConfiguration
   end
 
   def use_configuration(override)
-    Wikipedia::VandalismDetection.stub(config: override)
+    allow(Wikipedia::VandalismDetection)
+      .to receive(:config)
+      .and_return(override)
   end
 
   def use_test_configuration
@@ -32,8 +34,9 @@ module TestConfiguration
   end
 
   def test_config
-    Wikipedia::VandalismDetection::DefaultConfiguration
-      .any_instance.stub(source: source_dir)
+    allow_any_instance_of(Wikipedia::VandalismDetection::DefaultConfiguration)
+      .to receive(:source)
+      .and_return(source_dir)
 
     Wikipedia::VandalismDetection::Configuration.send(:new)
   end

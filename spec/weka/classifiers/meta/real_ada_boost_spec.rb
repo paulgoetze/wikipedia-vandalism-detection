@@ -32,6 +32,6 @@ describe Weka::Classifiers::Meta::RealAdaBoost do
     classifier = Wikipedia::VandalismDetection::Classifier.new
     features = [0.0, 25, 5]
 
-    expect { classifier.classify(features) }.not_to raise_error
+    expect(classifier.classify(features)).to be_between(0.0, 1.0)
   end
 end

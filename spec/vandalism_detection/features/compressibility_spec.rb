@@ -16,8 +16,9 @@ describe Wikipedia::VandalismDetection::Features::Compressibility do
 
       bytesize = 10.0
 
-      Zlib::Deflate.stub(deflate: Text.new)
-      Text.any_instance.stub(bytesize: bytesize)
+      allow(Zlib::Deflate).to receive(:deflate).and_return(Text.new)
+      allow_any_instance_of(Text).to receive(:bytesize).and_return(bytesize)
+
       ratio = bytesize / (bytesize + bytesize)
 
       expect(subject.calculate(edit)).to eq ratio

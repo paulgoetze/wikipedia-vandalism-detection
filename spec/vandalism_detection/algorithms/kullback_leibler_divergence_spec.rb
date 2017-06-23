@@ -26,8 +26,9 @@ describe Wikipedia::VandalismDetection::Algorithms::KullbackLeiblerDivergence do
 
     it 'can handle invalid byte sequences' do
       invalid_byte_sequence = "text \255".force_encoding('UTF-8')
-      expect { subject.of(invalid_byte_sequence, invalid_byte_sequence) }
-        .not_to raise_error
+      result = subject.of(invalid_byte_sequence, invalid_byte_sequence)
+
+      expect(result).to eq 0.0
     end
   end
 end

@@ -6,7 +6,10 @@ describe Wikipedia::VandalismDetection do
 
   describe 'Configuration class' do
     before do
-      Wikipedia::VandalismDetection::DefaultConfiguration.any_instance.stub(source: source_dir)
+      allow_any_instance_of(Wikipedia::VandalismDetection::DefaultConfiguration)
+        .to receive(:source)
+        .and_return(source_dir)
+
       @config = Wikipedia::VandalismDetection::Configuration.instance
 
       use_test_configuration
@@ -404,7 +407,9 @@ describe Wikipedia::VandalismDetection do
 
   describe '#configuration' do
     it 'can be overridden by a wikipedia-vandalism-detection.yml file' do
-      Wikipedia::VandalismDetection::DefaultConfiguration.any_instance.stub(source: source_dir)
+      allow_any_instance_of(Wikipedia::VandalismDetection::DefaultConfiguration)
+        .to receive(:source)
+        .and_return(source_dir)
 
       default_config = DEFAULTS
       config_file = '../../resources/config/wikipedia-vandalism-detection.yml'

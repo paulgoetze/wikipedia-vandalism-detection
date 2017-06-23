@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
-  it { should be_a Features::Base }
+  it { is_expected.to be_a Features::Base }
 
   describe '#calculate' do
     context 'both contributors are given' do

@@ -4,7 +4,7 @@ describe Wikipedia::VandalismDetection::Features::Base do
   describe '#count' do
     let(:text) { 'I,  you: i will help You' }
 
-    it { should respond_to(:count).with(2).arguments }
+    it { is_expected.to respond_to(:count).with(2).arguments }
 
     it 'raises an error if option :in is not defined' do
       expect { subject.count(%i[i you], from: text) }
@@ -27,15 +27,15 @@ describe Wikipedia::VandalismDetection::Features::Base do
   end
 
   describe '#calculate' do
-    it { should respond_to :calculate }
+    it { is_expected.to respond_to :calculate }
 
     it 'takes an Wikipedia::Edit as argument' do
       edit = build(:edit)
-      expect { subject.calculate(edit) }.not_to raise_error
+      expect { subject.calculate(edit) }.not_to raise_error ArgumentError
     end
 
     it 'raises an ArgumentError if argument is no Wikipedia::Edit' do
-      expect { subject.calculate('string') }.to raise_error
+      expect { subject.calculate('string') }.to raise_error ArgumentError
     end
   end
 end

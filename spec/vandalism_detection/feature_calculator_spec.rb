@@ -22,7 +22,8 @@ describe Wikipedia::VandalismDetection::FeatureCalculator do
     it { is_expected.to respond_to :calculate_features_for }
 
     it 'takes an edit as parameter' do
-      expect { @calculator.calculate_features_for(edit) }.not_to raise_error
+      expect { @calculator.calculate_features_for(edit) }
+        .not_to raise_error ArgumentError
     end
 
     it 'raises an error if called with wrong parameter type' do
@@ -89,13 +90,17 @@ describe Wikipedia::VandalismDetection::FeatureCalculator do
     let(:random_number) { rand(1000) }
     let(:empty_revision) { build(:empty_revision) }
 
-    before { Features::Anonymity.any_instance.stub(calculate: random_number) }
+    before do
+      allow_any_instance_of(Features::Anonymity)
+        .to receive(:calculate)
+        .and_return(random_number)
+    end
 
     it { is_expected.to respond_to :calculate_feature_for }
 
     it 'takes an edit and feature name as parameter' do
       expect { @calculator.calculate_feature_for(edit, feature_name) }
-        .not_to raise_error
+        .not_to raise_error ArgumentError
     end
 
     it 'raises an error if called with wrong parameter type edit' do

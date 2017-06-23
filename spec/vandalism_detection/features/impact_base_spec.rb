@@ -7,7 +7,7 @@ describe Wikipedia::VandalismDetection::Features::ImpactBase do
   it { is_expected.to be_a Features::Base }
 
   describe '#impact' do
-    it { should respond_to :impact }
+    it { is_expected.to respond_to :impact }
 
     it 'returns the impact in % of given terms in old realitve to new text' do
       # 3 pronouns

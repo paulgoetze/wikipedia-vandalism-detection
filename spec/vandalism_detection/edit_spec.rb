@@ -28,7 +28,8 @@ describe Wikipedia::VandalismDetection::Edit do
 
   describe 'exception handling' do
     it 'raises no error if revisions are not sequent' do
-      expect { Edit.new(old_revision, new_revision) }.not_to raise_error
+      expect { Edit.new(old_revision, new_revision) }
+        .not_to raise_error ArgumentError
     end
 
     it 'raises an error if revisions are not sequent' do
