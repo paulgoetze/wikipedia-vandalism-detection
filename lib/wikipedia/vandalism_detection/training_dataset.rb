@@ -3,6 +3,7 @@ require 'yaml'
 require 'fileutils'
 require 'active_support/core_ext/string'
 require 'weka'
+require 'parallel'
 
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/text'
@@ -56,28 +57,17 @@ module Wikipedia
         feature_calculator = FeatureCalculator.new
 
         unless feature_files.empty?
-          processed_edits = 0
+          feature_files.each do |feature_name, file|
+            lines = Parallel.map(annotation_data, progress: feature_name) do |row|
+              edit_id   = row[:edit_id]
+              vandalism = row[:class]
+              edit      = create_edit_from(edit_id)
 
-          annotation_data.each do |row|
-            edit_id   = row[:edit_id]
-            vandalism = row[:class]
-            edit      = create_edit_from(edit_id)
-
-            feature_files.each do |feature_name, file|
               value = feature_calculator.calculate_feature_for(edit, feature_name)
-              file.puts [value, vandalism].join(',')
+              [value, vandalism].join(',')
             end
 
-            processed_edits += 1
-            print_progress(
-              processed_edits,
-              @edits_csv.count,
-              'computing training features'
-            )
-          end
-
-          # close all io objects
-          feature_files.each_value do |file|
+            lines.each { |line| file.puts line }
             file.close
             puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
           end
@@ -145,7 +135,8 @@ module Wikipedia
         dataset.apply_filter(filter)
       end
 
-      # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
+      # Saves and returns a file index hash of structure
+      # [file_name => full_path] for the given directory.
       def self.create_corpus_file_index!
         @config = Wikipedia::VandalismDetection.config
         revisions_directory = @config.training_corpus_revisions_directory
