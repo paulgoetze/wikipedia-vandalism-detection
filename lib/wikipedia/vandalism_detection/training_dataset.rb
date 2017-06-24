@@ -42,35 +42,28 @@ module Wikipedia
           FileUtils.mkdir_p(@config.output_base_directory)
         end
 
-        # create feature file hash with io objects
-        feature_files = @config.features.each_with_object({}) do |feature_name, hash|
-          file_name = "#{feature_name.tr(' ', '_').downcase}.arff"
+        feature_calculator = FeatureCalculator.new
+
+        @config.features.each do |feature|
+          file_name = "#{feature.tr(' ', '_').downcase}.arff"
           arff_file = File.join(output_directory, file_name)
 
           next if File.exist?(arff_file)
 
-          dataset = Instances.empty_for_feature(feature_name)
-          dataset.to_arff(arff_file)
-          hash[feature_name] = File.open(arff_file, 'a')
-        end
+          dataset = Instances.empty_for_feature(feature)
 
-        feature_calculator = FeatureCalculator.new
+          values = Parallel.map(annotation_data, progress: feature) do |row|
+            edit_id   = row[:edit_id]
+            vandalism = row[:class]
+            edit      = create_edit_from(edit_id)
 
-        unless feature_files.empty?
-          feature_files.each do |feature_name, file|
-            lines = Parallel.map(annotation_data, progress: feature_name) do |row|
-              edit_id   = row[:edit_id]
-              vandalism = row[:class]
-              edit      = create_edit_from(edit_id)
-
-              value = feature_calculator.calculate_feature_for(edit, feature_name)
-              [value, vandalism].join(',')
-            end
-
-            lines.each { |line| file.puts line }
-            file.close
-            puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
+            value = feature_calculator.calculate_feature_for(edit, feature)
+            [value, vandalism]
           end
+
+          dataset.add_instances(values)
+          dataset.to_arff(arff_file)
+          puts "'#{File.basename(arff_file)}' saved to #{File.dirname(arff_file)}"
         end
 
         dataset = merge_feature_arffs(@config.features, output_directory)
@@ -179,16 +172,17 @@ module Wikipedia
         filter.use_options('-R last')
         merged_dataset = nil
 
-        features.map do |feature_name|
-          file_name = "#{feature_name.tr(' ', '_').downcase}.arff"
+        features.each do |feature|
+          file_name = "#{feature.tr(' ', '_').downcase}.arff"
           arff_file = File.join(output_directory, file_name)
 
           feature_dataset = Weka::Core::Instances.from_arff(arff_file)
           puts "using #{File.basename(arff_file)}"
 
           if merged_dataset
-            merged_dataset = filter.filter(merged_dataset)
-            merged_dataset = merged_dataset.merge(feature_dataset)
+            merged_dataset = merged_dataset
+              .apply_filter(filter)
+              .merge(feature_dataset)
           else
             merged_dataset = feature_dataset
           end
