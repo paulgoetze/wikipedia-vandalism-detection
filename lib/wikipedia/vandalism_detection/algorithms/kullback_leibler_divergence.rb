@@ -8,7 +8,7 @@ module Wikipedia
 
         # Returns the Symmetric Kullback-Leibler divergence with simple back-off
         # of the given text's character distribution. For implementation details
-        # see: http://staff.science.uva.nl/~tsagias/?p=185.
+        # see: https://web.archive.org/web/20130508191111/http://staff.science.uva.nl/~tsagias/?p=185.
         def of(text_a, text_b)
           text_a = cleanup_text(text_a)
           text_b = cleanup_text(text_b)
