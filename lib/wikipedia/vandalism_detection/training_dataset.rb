@@ -272,16 +272,8 @@ module Wikipedia
         edit_data
       end
 
-      # Prints the progress to the $stdout
-      def self.print_progress(processed_count, total_count, message)
-        processed_absolute = "#{processed_count}/#{total_count}"
-        processed_percentage = format('%.2f%', ((processed_count * 100.00) / total_count).round(2))
-        print "\r#{message}… #{processed_absolute} | #{processed_percentage}"
-      end
-
       private_class_method :create_edit_from,
                            :merge_feature_arffs,
-                           :print_progress,
                            :find_edits_data_for,
                            :load_corpus_file_index,
                            :replace_missing_values
