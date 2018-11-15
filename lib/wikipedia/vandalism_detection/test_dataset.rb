@@ -365,8 +365,8 @@ module Wikipedia
         # Prints the progress to the $stdout
         def print_progress(processed_count, total_count, message)
           processed_absolute   = "#{processed_count}/#{total_count}"
-          processed_percentage = format('%0.2f%', ((processed_count * 100.00) / total_count).round(2))
-          print "\r#{message}… #{processed_absolute} | #{processed_percentage}"
+          processed_percentage = ((processed_count * 100.00) / total_count).round(2)
+          print "\r#{message}… #{processed_absolute} | #{'%.2f' % processed_percentage}%"
         end
       end
     end
