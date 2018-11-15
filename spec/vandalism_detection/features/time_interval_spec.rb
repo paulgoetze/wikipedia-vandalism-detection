@@ -17,15 +17,15 @@ describe Wikipedia::VandalismDetection::Features::TimeInterval do
 
     it 'requests the time from API if no old revisions timestamp is given' do
       # to get api call, see:
-      # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=327585467
-      # => 2009-11-24T01:57:35Z
-      new_timestamp = '2009-11-24T13:57:35Z'
+      # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=331655535
+      # => 2001-11-29T03:27:34Z
+      new_timestamp = '2001-11-06T13:16:13Z'
 
-      old_rev = build(:old_revision, id: '327585467', timestamp: nil)
+      old_rev = build(:old_revision, id: '331655534', timestamp: nil)
       new_rev = build(
         :new_revision,
-        id: '327607921',
-        parent_id: '327585467',
+        id: '331655535',
+        parent_id: '331655534',
         timestamp: new_timestamp
       )
 
