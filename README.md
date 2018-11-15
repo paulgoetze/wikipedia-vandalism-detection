@@ -1,9 +1,9 @@
 # Wikipedia Vandalism Detection
 
-Vandalism detection on the Wikipedia history with JRuby.  
+Vandalism detection on the Wikipedia history with JRuby.
 
 The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library
-(v3.7.13) via the [weka](https://github.com/paulgoetze/weka-jruby) gem.
+(v3.9.3) via the [weka](https://github.com/paulgoetze/weka-jruby) gem.
 
 [![Gem Version](https://badge.fury.io/rb/wikipedia-vandalism_detection.svg)](http://badge.fury.io/rb/wikipedia-vandalism_detection)
 [![Build Status](https://travis-ci.org/webis-de/wikipedia-vandalism-detection.png?branch=develop)](https://travis-ci.org/webis-de/wikipedia-vandalism-detection)
