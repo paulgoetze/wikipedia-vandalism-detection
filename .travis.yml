@@ -1,11 +1,7 @@
 language: ruby
+
 rvm:
   - jruby-9.0.1.0
   - jruby-9.1.0.0
   - jruby-9.2.0.0
   - jruby-head
-
-jdk:
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
