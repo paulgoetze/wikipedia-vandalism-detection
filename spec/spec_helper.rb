@@ -1,5 +1,5 @@
 require 'rspec'
-require 'factory_girl'
+require 'factory_bot'
 require 'fileutils'
 
 def require_files_from(paths = [])
@@ -20,7 +20,7 @@ RSpec.configure do |config|
 
   config.include FileReading
   config.include TestConfiguration
-  config.include FactoryGirl::Syntax::Methods
+  config.include FactoryBot::Syntax::Methods
 
   config.after(:suite) do
     test_build_dir = File.expand_path('../resources/build', __FILE__)
