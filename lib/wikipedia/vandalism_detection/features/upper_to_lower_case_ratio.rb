@@ -3,10 +3,9 @@ require 'wikipedia/vandalism_detection/features/base'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes the uppercase to all letters ratio of the edit's new revision inserted text.
-      class UpperToLowerCaseRatio< Base
-
+      # This feature computes the uppercase to all letters ratio of the edit's
+      # new revision inserted text.
+      class UpperToLowerCaseRatio < Base
         def calculate(edit)
           super
 

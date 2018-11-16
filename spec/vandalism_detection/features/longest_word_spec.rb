@@ -1,35 +1,29 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::LongestWord do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::LongestWord.new
-  end
+  describe '#calculate' do
+    it 'returns the length of the longest word in the new revision text' do
+      old_text = Text.new('1 7777777')
+      new_text = Text.new("1 7777777 22 a2c4e 333 55555\n======head======\nfff")
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the length of the edit's new revisions text's longest word" do
-      old_text = Wikipedia::VandalismDetection::Text.new "1 7777777"
-      new_text = Wikipedia::VandalismDetection::Text.new "1 7777777 22 a2c4e 4444 55555\n\n======head======\nfffff"
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 5
+      expect(subject.calculate(edit)).to eq 5
     end
 
-    it "returns 0 on non inserted clean text" do
-      old_text = Wikipedia::VandalismDetection::Text.new "1 22"
-      new_text = Wikipedia::VandalismDetection::Text.new "1 22 {{speedy deletion}}"
+    it 'returns 0 on non inserted clean text' do
+      old_text = Text.new('1 22')
+      new_text = Text.new('1 22 {{speedy deletion}}')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0
+      expect(subject.calculate(edit)).to eq 0
     end
   end
 end

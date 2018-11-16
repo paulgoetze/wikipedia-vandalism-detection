@@ -1,60 +1,66 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::AnonymityPrevious do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::AnonymityPrevious.new
-  end
+  describe '#calculate' do
+    context 'both contributors are given' do
+      it 'return 1.0 in case of an registered previous editor' do
+        old_rev = build(:old_revision, contributor: 'Peter')
+        new_rev = build(:new_revision)
+        edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
-
-  describe "#calculate" do
-
-    context "both contributors are given" do
-      it "return 1.0 in case of an registered previous editor" do
-        old_revision = build(:old_revision, contributor: 'Peter')
-        new_revision = build(:new_revision)
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-        expect(@feature.calculate(edit)).to eq 1
+        expect(subject.calculate(edit)).to eq 1
       end
 
-      it "returns 0.0 in case of an anonymous previous editor" do
-        old_revision = build(:old_revision, contributor: '137.163.16.199')
-        new_revision = build(:new_revision)
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      it 'returns 0.0 in case of an anonymous previous editor' do
+        old_rev = build(:old_revision, contributor: '137.163.16.199')
+        new_rev = build(:new_revision)
+        edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-        expect(@feature.calculate(edit)).to eq 0
+        expect(subject.calculate(edit)).to eq 0
       end
     end
 
-    context "previous contributor not given" do
-      it "requests the user from Wikipedia API and returns 1 in case of a registered previous editor" do
-        old_revision = build(:old_revision, id: '324557983', contributor: nil)
-        new_revision = build(:new_revision, id: '329962649', parent_id: '324557983', contributor: 'Tomaxer')
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+    context 'previous contributor not given' do
+      context 'for a registered previous editor' do
+        it 'requests the user from Wikipedia API and returns 1' do
+          old_rev = build(:old_revision, id: '324557983', contributor: nil)
+          new_rev = build(
+            :new_revision,
+            id: '329962649',
+            parent_id: '324557983',
+            contributor: 'Tomaxer'
+          )
 
-        expect(@feature.calculate(edit)).to eq 1
+          edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
+
+          expect(subject.calculate(edit)).to eq 1
+        end
       end
 
-      it "requests the user from Wikipedia API and returns 0 in case of an anonymous previous editor" do # also same editor!
-        old_revision = build(:old_revision, id: '328774110', contributor: nil)
-        new_revision = build(:new_revision, id: '328774035', parent_id: '328774110')
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      context 'for an anonymous previous editor' do # also same editor!
+        it 'requests the user from Wikipedia API and returns 0' do
+          old_rev = build(:old_revision, id: '328774110', contributor: nil)
+          new_rev = build(:new_revision, id: '328774035', parent_id: '328774110')
+          edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-        expect(@feature.calculate(edit)).to eq 0
+          expect(subject.calculate(edit)).to eq 0
+        end
       end
 
-      it "returns missing if old reivision is not available anymore" do
-        # to get api call, see:
-        # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=325218985
-        # <rev revid="325218985"/>
+      context 'if old reivision is not available anymore' do
+        it 'returns missing' do
+          # to get api call, see:
+          # https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=timestamp&revids=325218985
+          # <rev revid="325218985"/>
 
-        old_revision = build(:old_revision, id: '325218985', contributor: nil)
-        new_revision = build(:new_revision, id: '326980599', parent_id: '325218985')
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+          old_rev = build(:old_revision, id: '325218985', contributor: nil)
+          new_rev = build(:new_revision, id: '326980599', parent_id: '325218985')
+          edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-        expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
+          expect(subject.calculate(edit)).to eq Features::MISSING_VALUE
+        end
       end
     end
   end

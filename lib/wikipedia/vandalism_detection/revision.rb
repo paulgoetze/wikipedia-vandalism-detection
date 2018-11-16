@@ -12,11 +12,11 @@ module Wikipedia
       attr_accessor :id,
                     :parent_id,
                     :timestamp,
-                    :comment,
                     :contributor_username,
                     :sha1
 
-      attr_reader :contributor_id,
+      attr_reader :comment,
+                  :contributor_id,
                   :contributor_ip
 
       def initialize
@@ -46,6 +46,8 @@ module Wikipedia
 
       # Compresses text when set
       def text=(text)
+        text = '' unless text.is_a?(String)
+
         # remove invalid utf-8 byte sequences
         text.encode!('UTF-16', 'UTF-8', invalid: :replace, replace: '')
         text.encode!('UTF-8', 'UTF-16')
@@ -57,13 +59,17 @@ module Wikipedia
         Text.new(Zlib::Inflate.inflate(@text).force_encoding('utf-8'))
       end
 
+      def comment=(comment)
+        comment = '' unless comment.is_a?(String)
+        @comment = Text.new(comment)
+      end
+
       private
 
       # Returns whether the given value is an IPv4.
       def ip_v4?(value)
         !!value.to_s.match(/(\d+)\.(\d+)\.(\d+)\.(\d+)/)
       end
-
     end
   end
 end

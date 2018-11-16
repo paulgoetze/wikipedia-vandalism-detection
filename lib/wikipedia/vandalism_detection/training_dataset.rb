@@ -2,7 +2,8 @@ require 'find'
 require 'yaml'
 require 'fileutils'
 require 'active_support/core_ext/string'
-require 'ruby-band'
+require 'weka'
+require 'parallel'
 
 require 'wikipedia/vandalism_detection/configuration'
 require 'wikipedia/vandalism_detection/text'
@@ -15,90 +16,76 @@ require 'weka/filters/supervised/instance/smote'
 
 module Wikipedia
   module VandalismDetection
-
-    # This class provides methods for getting and creating a training ARFF file from a configured training corpus.
+    # This class provides methods for getting and creating a training ARFF file
+    # from a configured training corpus.
     class TrainingDataset
-
-      # Returns an instance dataset from the configured gold annotation file using the
-      # configured features from feature_calculator parameter.
+      # Returns an instance dataset from the configured gold annotation file
+      # using the configured features from feature_calculator parameter.
       def self.build
-        @config = Wikipedia::VandalismDetection.configuration
+        @config = Wikipedia::VandalismDetection.config
 
-        print "\ncreating training dataset..."
+        print "\ncreating training dataset…"
 
         annotations_file = @config.training_corpus_annotations_file
         raise AnnotationsFileNotConfiguredError unless annotations_file
 
         annotations = CSV.parse(File.read(annotations_file), headers: true)
-        annotation_data = annotations.map { |row| { edit_id: row['editid'], class: row['class'] } }
+
+        annotation_data = annotations.map do |row|
+          { edit_id: row['editid'], class: row['class'] }
+        end
 
         output_directory = File.join(@config.output_base_directory, 'training')
-        FileUtils.mkdir_p(output_directory) unless Dir.exists?(output_directory)
-        FileUtils.mkdir_p(@config.output_base_directory) unless Dir.exists?(@config.output_base_directory)
+        FileUtils.mkdir_p(output_directory) unless Dir.exist?(output_directory)
 
-        # create feature file hash with io objects
-        feature_files = @config.features.inject({}) do |hash, feature_name|
-          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
-          arff_file = File.join(output_directory, file_name)
-
-          unless File.exists?(arff_file)
-            dataset = Instances.empty_for_feature(feature_name)
-            dataset.to_ARFF(arff_file)
-            hash[feature_name] = File.open(arff_file, 'a')
-          end
-
-          hash
+        unless Dir.exist?(@config.output_base_directory)
+          FileUtils.mkdir_p(@config.output_base_directory)
         end
 
         feature_calculator = FeatureCalculator.new
 
-        unless feature_files.empty?
-          processed_edits = 0
+        @config.features.each do |feature|
+          file_name = "#{feature.tr(' ', '_').downcase}.arff"
+          arff_file = File.join(output_directory, file_name)
 
-          annotation_data.each do |row|
-            edit_id = row[:edit_id]
+          next if File.exist?(arff_file)
+
+          dataset = Instances.empty_for_feature(feature)
+
+          values = Parallel.map(annotation_data, progress: feature) do |row|
+            edit_id   = row[:edit_id]
             vandalism = row[:class]
-            edit = create_edit_from(edit_id)
+            edit      = create_edit_from(edit_id)
 
-            feature_files.each do |feature_name, file|
-              value = feature_calculator.calculate_feature_for(edit, feature_name)
-              file.puts [value, vandalism].join(',')
-            end
-
-            processed_edits += 1
-            print_progress(processed_edits, @edits_csv.count, "computing training features")
+            value = feature_calculator.calculate_feature_for(edit, feature)
+            [value, vandalism]
           end
 
-          # close all io objects
-          feature_files.each do |feature_name, file|
-            file.close
-            puts "'#{File.basename(file.path)}' saved to #{File.dirname(file.path)}"
-          end
+          dataset.add_instances(values)
+          dataset.to_arff(arff_file)
+          puts "'#{File.basename(arff_file)}' saved to #{File.dirname(arff_file)}"
         end
 
         dataset = merge_feature_arffs(@config.features, output_directory)
         dataset.class_index = @config.features.count
-        dataset = replace_missing_values(dataset) if @config.replace_training_data_missing_values?
+
+        if @config.replace_training_data_missing_values?
+          dataset = replace_missing_values(dataset)
+        end
 
         dataset
       end
 
       class << self
-        alias_method :instances, :build
+        alias instances build
       end
 
-      # Returns the balanced training dataset (same number of vandalism & regular instances)
+      # Returns the balanced training dataset (same number of vandalism &
+      # regular instances, Uniform distribution => removes majority instances)
       def self.balanced_instances
-        dataset = self.build
         filter = Weka::Filters::Supervised::Instance::SpreadSubsample.new
-
-        #uniform distribution (remove majority instances)
-        filter.set do
-          data dataset
-          filter_options '-M 1'
-        end
-
-        filter.use
+        filter.use_options('-M 1')
+        filter.filter(build)
       end
 
       # Returns an oversampled training dataset.
@@ -110,54 +97,46 @@ module Wikipedia
       # For SMOTE method see paper: http://arxiv.org/pdf/1106.1813.pdf
       # Doc: http://weka.sourceforge.net/doc.packages/SMOTE/weka/filters/supervised/instance/SMOTE.html
       def self.oversampled_instances(options = {})
-        config = Wikipedia::VandalismDetection.configuration
+        config          = Wikipedia::VandalismDetection.config
         default_options = config.oversampling_options
-        options[:percentage] = default_options[:percentage] unless options[:percentage]
-        options[:undersampling] = default_options[:undersampling] unless options[:undersampling]
 
-        smote = Weka::Filters::Supervised::Instance::SMOTE.new
-        dataset = self.build
-        percentage = options[:percentage]
+        options[:percentage]    ||= default_options[:percentage]
+        options[:undersampling] ||= default_options[:undersampling]
+
+        percentage    = options[:percentage]
         smote_options = "-P #{percentage.to_i}" if percentage
 
-        smote.set do
-          data dataset
-          filter_options smote_options if smote_options
-        end
+        smote = Weka::Filters::Supervised::Instance::SMOTE.new
+        smote.use_options(smote_options) if smote_options
+        smote_dataset = smote.filter(build)
 
         undersampling = options[:undersampling] / 100.0
-        smote_dataset = smote.use
 
         if undersampling > 0.0
-          subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
-
           # balance (remove majority instances)
-          subsample.set do
-            data smote_dataset
-            filter_options "-M #{undersampling}"
-          end
-
-          subsample.use
+          subsample = Weka::Filters::Supervised::Instance::SpreadSubsample.new
+          subsample.use_options("-M #{undersampling}")
+          smote_dataset.apply_filter(subsample)
         else
           smote_dataset
         end
       end
 
       def self.replace_missing_values(dataset)
-        puts "replacing missing values..."
+        puts 'replacing missing values…'
         filter = Weka::Filters::Unsupervised::Attribute::ReplaceMissingValues.new
-        filter.set { data dataset }
-        filter.use
+        dataset.apply_filter(filter)
       end
 
-      # Saves and returns a file index hash of structure [file_name => full_path] for the given directory.
+      # Saves and returns a file index hash of structure
+      # [file_name => full_path] for the given directory.
       def self.create_corpus_file_index!
-        @config = Wikipedia::VandalismDetection.configuration
+        @config = Wikipedia::VandalismDetection.config
         revisions_directory = @config.training_corpus_revisions_directory
 
         raise RevisionsDirectoryNotConfiguredError unless revisions_directory
 
-        print "\ncreating file index..."
+        print "\ncreating file index…"
         file_index = {}
 
         Dir.open revisions_directory do |part_directories|
@@ -168,7 +147,7 @@ module Wikipedia
 
                 if File.file?(path) && (file =~ /\d+.txt/)
                   file_index[file] = path
-                  print "\r processed #{file_index.count } files"
+                  print "\r processed #{file_index.count} files"
                 end
               end
             end
@@ -177,7 +156,8 @@ module Wikipedia
 
         file = @config.training_output_index_file
         dirname = File.dirname(file)
-        FileUtils.mkdir(dirname) unless Dir.exists?(dirname)
+
+        FileUtils.mkdir(dirname) unless Dir.exist?(dirname)
 
         written = File.open(file, 'w') { |f| f.write(file_index.to_yaml) }
         print "Index file saved to #{file}.\n" if written > 0
@@ -189,23 +169,20 @@ module Wikipedia
       # Returns the merged arff file.
       def self.merge_feature_arffs(features, output_directory)
         filter = Weka::Filters::Unsupervised::Attribute::Remove.new
+        filter.use_options('-R last')
         merged_dataset = nil
 
-        features.map do |feature_name|
-          file_name = "#{feature_name.gsub(' ', '_').downcase}.arff"
+        features.each do |feature|
+          file_name = "#{feature.tr(' ', '_').downcase}.arff"
           arff_file = File.join(output_directory, file_name)
 
-          feature_dataset = Core::Parser.parse_ARFF(arff_file)
+          feature_dataset = Weka::Core::Instances.from_arff(arff_file)
           puts "using #{File.basename(arff_file)}"
 
           if merged_dataset
-            filter.set do
-              data merged_dataset
-              filter_options '-R last'
-            end
-
-            merged_dataset = filter.use
-            merged_dataset = merged_dataset.merge_with(feature_dataset)
+            merged_dataset = merged_dataset
+              .apply_filter(filter)
+              .merge(feature_dataset)
           else
             merged_dataset = feature_dataset
           end
@@ -214,7 +191,8 @@ module Wikipedia
         merged_dataset
       end
 
-      # Creates a Wikipedia::Edit out of an annotation's edit id using files form config.yml
+      # Creates a Wikipedia::Edit out of an annotation's edit id using files
+      # form wikipedia-vandalism-detection.yml
       def self.create_edit_from(edit_id)
         @file_index ||= load_corpus_file_index
         edit_data = find_edits_data_for(edit_id)
@@ -231,10 +209,15 @@ module Wikipedia
         old_revision_file = @file_index["#{old_revision_id}.txt"]
         new_revision_file = @file_index["#{new_revision_id}.txt"]
 
-        raise(RevisionFileNotFound, "Old revision file #{old_revision_file} not found") unless \
-          File.exist?(old_revision_file)
-        raise(RevisionFileNotFound, "New revision file #{new_revision_file} not found") unless \
-          File.exist?(new_revision_file)
+        unless File.exist?(old_revision_file)
+          message = "Old revision file #{old_revision_file} not found"
+          raise RevisionFileNotFound, message
+        end
+
+        unless File.exist?(new_revision_file)
+          message = "New revision file #{new_revision_file} not found"
+          raise RevisionFileNotFound, message
+        end
 
         old_revision_text = File.read(old_revision_file)
         new_revision_text = File.read(new_revision_file)
@@ -258,12 +241,12 @@ module Wikipedia
         Edit.new(old_revision, new_revision, page: page)
       end
 
-      # Gets or creates the corpus index file, which holds a hash of revision files name and their path
-      # in the article revisions directory.
+      # Gets or creates the corpus index file, which holds a hash of revision
+      # files name and their path in the article revisions directory.
       def self.load_corpus_file_index
         index_file = @config.training_output_index_file
 
-        if File.exists? index_file
+        if File.exist? index_file
           puts "\n(Using #{index_file})\n"
           YAML.load_file index_file
         else
@@ -273,28 +256,24 @@ module Wikipedia
 
       # Returns the line array of the edits.csv file with given edit id.
       def self.find_edits_data_for(edit_id)
-        edits_file = Wikipedia::VandalismDetection.configuration.training_corpus_edits_file
+        edits_file = Wikipedia::VandalismDetection.config.training_corpus_edits_file
         raise EditsFileNotConfiguredError unless edits_file
 
         @edits_file_content ||= File.read(edits_file)
         @edits_csv ||= CSV.parse(@edits_file_content, headers: true)
 
         edit_data = @edits_csv.find { |row| row['editid'] == edit_id }
-        raise "Edit data for edit id #{edit_id} not found in #{ File.basename(edits_file) }." unless edit_data
+
+        unless edit_data
+          directory = File.basename(edits_file)
+          raise "Edit data for edit id #{edit_id} not found in #{directory}."
+        end
 
         edit_data
       end
 
-      # Prints the progress to the $stdout
-      def self.print_progress(processed_count, total_count, message)
-        processed_absolute = "#{processed_count}/#{total_count}"
-        processed_percentage = "%0.2f%" % ((processed_count * 100.00) / total_count).round(2)
-        print "\r#{message}... #{processed_absolute} | #{processed_percentage}"
-      end
-
       private_class_method :create_edit_from,
                            :merge_feature_arffs,
-                           :print_progress,
                            :find_edits_data_for,
                            :load_corpus_file_index,
                            :replace_missing_values

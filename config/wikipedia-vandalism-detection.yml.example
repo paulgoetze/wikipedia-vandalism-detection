@@ -1,0 +1,103 @@
+# Configuring the training and test corpora directories and essential input and output files.
+# As corpora the WVC-PAN-10 and WVC-PAN-11 can be used (see http://webis.de/ under Research -> Corpora).
+
+corpora:
+  base_directory: /home/user/corpora
+
+  training:
+    base_directory: training
+    annotations_file: annotations.csv
+    edits_file: edits.csv
+    revisions_directory: revisions
+
+  test:
+    base_directory: test
+    edits_file: edits.csv
+    revisions_directory: revisons
+
+output:
+  base_directory: /home/user/output_path
+  training:
+    arff_file: training.arff
+    index_file: training_index.yml
+  test:
+    arff_file: test.arff
+    index_file: test_index.yml
+
+
+# Configuring the used features.
+# See
+
+features:
+  - anonymity
+  - anonymity previous
+  - all wordlists frequency
+  - all wordlists impact
+  - article size
+  - bad frequency
+  - bad impact
+  - biased frequency
+  - biased impact
+  - blanking
+  - character sequence
+  - character diversity
+  - comment length
+  - comment biased frequency
+  - comment pronoun frequency
+  - comment vulgarism frequency
+  - compressibility
+  - copyedit
+  - digit ratio
+  - edits per user
+  - emoticons frequency
+  - emoticons impact
+  - inserted size
+  - inserted words
+  - inserted character distribution
+  - inserted external links
+  - inserted internal links
+  - longest word
+  - markup frequency
+  - markup impact
+  - non-alphanumeric ratio
+  - personal life
+  - pronoun frequency
+  - pronoun impact
+  - removed size
+  - removed words
+  - removed all wordlists frequency
+  - removed bad frequency
+  - removed biased frequency
+  - removed character distribution
+  - removed emoticons frequency
+  - removed markup frequency
+  - removed pronoun frequency
+  - removed sex frequency
+  - removed vulgarism frequency
+  - replacement similarity
+  - reverted
+  - revisions character distribution
+  - sex frequency
+  - sex impact
+  - same editor
+  - size increment
+  - size ratio
+  - term frequency
+  - time interval
+  - time of day
+  - upper case ratio
+  - upper case words ratio
+  - upper to lower case ratio
+  - vulgarism frequency
+  - vulgarism impact
+  - weekday
+  - words increment
+
+
+# Configuring the used classifier
+
+classifier:
+  type: Trees::RandomForest         # Weka classifier class
+  options: -I 10 -K 0.5             # same as for Weka, for further classifier options see the Weka-dev documentation
+  cross-validation-fold: 5          # default is 10
+  training-data-options: balanced   # default is unbalanced

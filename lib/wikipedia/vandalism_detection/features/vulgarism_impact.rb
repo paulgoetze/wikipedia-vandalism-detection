@@ -4,10 +4,9 @@ require 'wikipedia/vandalism_detection/word_lists/vulgarism'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes the percentage by which the edit increases the number of vulgarism words in the text.
+      # This feature computes the percentage by which the edit increases the
+      # number of vulgarism words in the text.
       class VulgarismImpact < ImpactBase
-
         def calculate(edit)
           super
 

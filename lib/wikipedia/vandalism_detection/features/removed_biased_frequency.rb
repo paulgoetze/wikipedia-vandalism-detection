@@ -5,10 +5,8 @@ require 'wikipedia/vandalism_detection/text'
 module Wikipedia
   module VandalismDetection
     module Features
-
       # This feature computes frequency of biased words in the removed text.
       class RemovedBiasedFrequency < FrequencyBase
-
         # Returns the percentage of biased words in the removed text.
         # Returns 0.0 if removed clean text is of zero length.
         def calculate(edit)

@@ -5,10 +5,9 @@ require 'wikipedia/vandalism_detection/text'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature computes frequency of all wordlists words in the removed text.
+      # This feature computes frequency of all wordlists words in the removed
+      # text.
       class RemovedAllWordlistsFrequency < FrequencyBase
-
         # Returns the percentage of wordlists words in the removed text.
         # Returns 0.0 if removed clean text is of zero length.
         def calculate(edit)

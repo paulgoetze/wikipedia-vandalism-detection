@@ -3,10 +3,8 @@ require 'wikipedia/vandalism_detection/features/base'
 module Wikipedia
   module VandalismDetection
     module Features
-
       # This feature computes the increment of the edit's revisions words.
       class WordsIncrement < Base
-
         #	computation: |inserted| - |removed|
         def calculate(edit)
           super

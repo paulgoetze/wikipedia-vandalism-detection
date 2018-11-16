@@ -5,10 +5,8 @@ require 'wikipedia/vandalism_detection/text'
 module Wikipedia
   module VandalismDetection
     module Features
-
       # This feature computes frequency of vulgarism words in the inserted text.
       class VulgarismFrequency < FrequencyBase
-
         # Returns the percentage of vulgarism words in the inserted text.
         # Returns 0.0 if inserted clean text is of zero length.
         def calculate(edit)

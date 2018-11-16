@@ -1,36 +1,34 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Algorithms::KullbackLeiblerDivergence do
+  it { is_expected.to respond_to :of }
 
-  it { should respond_to :of }
-
-  describe "#of" do
-    before do
-      @divergence = Wikipedia::VandalismDetection::Algorithms::KullbackLeiblerDivergence.new
+  describe '#of' do
+    it 'returns missing value if no character in either of the texts' do
+      expect(subject.of('&', '?')).to eq Features::MISSING_VALUE
     end
 
-    it "returns invalid value representation if no characters in given both texts" do
-      expect(@divergence.of("&", "?")).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
+    it 'returns zero for equal texts' do
+      text = 'Text sample'
+      expect(subject.of(text, text)).to eq 0.0
     end
 
-    it "returns a value of zero if texts are the same" do
-      expect(@divergence.of("Text sample", "Text sample")).to eq 0.0
+    it 'returns a value bigger than zero for different texts' do
+      expect(subject.of('Text 1', 'Text 2')).to be > 0.0
     end
 
-    it "returns a value bigger than zero for different texts" do
-      expect(@divergence.of("Text 1", "Text 2")).to be > 0.0
+    it 'returns a higher value for a more different text' do
+      lower_divergence = subject.of('text a', 'text b')
+      higher_divergence = subject.of('text a', 'bla bla bla')
+
+      expect(lower_divergence).to be < higher_divergence
     end
 
-    it "returns a higher value for a more different text" do
-      divergence_lower = @divergence.of("text a", "text b")
-      divergence_higher = @divergence.of("text a", "bla bla bla")
-
-      expect(divergence_lower).to be < divergence_higher
-    end
-
-    it "can handle invalid byte sequences" do
+    it 'can handle invalid byte sequences' do
       invalid_byte_sequence = "text \255".force_encoding('UTF-8')
-      expect { @divergence.of(invalid_byte_sequence, invalid_byte_sequence) }.not_to raise_error
+      result = subject.of(invalid_byte_sequence, invalid_byte_sequence)
+
+      expect(result).to eq 0.0
     end
   end
 end

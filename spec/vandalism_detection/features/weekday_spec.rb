@@ -1,22 +1,16 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::Weekday do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::Weekday.new
-  end
+  describe '#calculate' do
+    it 'returns the weekday as decimal value' do
+      old_rev = build(:old_revision)
+      new_rev = build(:new_revision, timestamp: '2012-12-11T05:30:36Z')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the weekday as decimal value" do
-      old_revision = build(:old_revision)
-      new_revision = build(:new_revision, timestamp: '2012-12-11T05:30:36Z' )
-
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 2 # Thuesday
+      expect(subject.calculate(edit)).to eq 2 # Thuesday
     end
   end
 end

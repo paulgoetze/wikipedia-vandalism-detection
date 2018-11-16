@@ -3,49 +3,56 @@ require 'wikipedia'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      MISSING_VALUE = '?'
+      MISSING_VALUE = '?'.freeze
 
       # This class should be the base class for all Wikipedia::Feature classes.
       class Base
-
         # Base method for feature calculation.
-        # This method should be overwritten in the concrete Wikipedia::Feature-classes.
+        # This method should be overwritten in the concrete
+        # Wikipedia::Feature-classes.
         #
-        # Example:
-        # def calculate(edit)
-        #   super # to handle ArgumentException
+        # @example
+        #   def calculate(edit)
+        #     super # to handle ArgumentException
         #
-        #   ... concrete calculation of feature out of edit...
-        # end
+        #     ... concrete calculation of feature out of edit...
+        #   end
         def calculate(edit)
-          raise ArgumentError.new "parameter should be an Edit" unless edit.kind_of? Edit
+          return if edit.is_a?(Edit)
+          raise ArgumentError, 'Passed argument has to be an Edit'
         end
 
-        # Count the apperance of a given single term or multiple terms in the given text
-        # @params terms String
-        # @params options Hash of form {in: String}
+        # Count the apperance of a given single term or multiple terms in the
+        #   given text
         #
-        # Example of usage:
+        # @param terms String
+        # @param options Hash of form { in: String }
         #
-        # feature.count "and", in: text
-        # feature.count ["and", "or"], in: text
+        # @example
+        #   feature.count "and", in: text
+        #   feature.count ["and", "or"], in: text
+        #
+        # @return Integer
         def count(terms, options = {})
-          terms_is_string = terms.is_a?(String)
-          terms_is_array = terms.is_a?(Array)
+          unless options[:in]
+            raise ArgumentError, 'The options hash must include the in: key'
+          end
 
-          raise ArgumentError, "The second parameter should be a Hash of form {in: text}" unless options[:in]
-          raise ArgumentError, "The first parameter should be an Array or String" unless
-              (terms_is_array || terms_is_string)
+          unless terms.is_a?(String) || terms.is_a?(Array)
+            raise ArgumentError, 'The 1st arg should be an Array or String'
+          end
 
           words = options[:in].downcase
           freq = Hash.new(0)
-          words.gsub(/[\.,'{2,}:\!\?\(\)]/, '').split.each{ |v| freq[v.to_sym] += 1 }
 
-          if terms_is_string
+          words.gsub(/[\.,'{2,}:\!\?\(\)]/, '').split.each do |word|
+            freq[word.to_sym] += 1
+          end
+
+          if terms.is_a?(String)
             freq[terms.downcase.to_sym]
           else
-            terms.reduce(0) {|r, term| r + freq[term] }
+            terms.reduce(0) { |result, term| result + freq[term] }
           end
         end
       end

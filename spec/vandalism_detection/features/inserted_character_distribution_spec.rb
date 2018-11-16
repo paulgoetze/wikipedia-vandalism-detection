@@ -1,46 +1,40 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::InsertedCharacterDistribution do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::InsertedCharacterDistribution.new
-  end
+  describe '#calculate' do
+    it 'returns the KL-Divergence of the inserted characters distribution' do
+      old_text = Text.new('old text')
+      new_text = Text.new('old text [[new inserted text]] given dero 9')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the Kullback-Leibler Divergence of the inserted text's character distribution" do
-      old_text = Wikipedia::VandalismDetection::Text.new('old text')
-      new_text = Wikipedia::VandalismDetection::Text.new 'old text [[new inserted text]] given dero 9'
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 1.6609633564650683
+      expect(subject.calculate(edit)).to eq 1.6609633564650683
     end
 
-    it "returns missing value if no alphanumeric characters are inserted" do
-      old_text = Wikipedia::VandalismDetection::Text.new("old text")
-      new_text = Wikipedia::VandalismDetection::Text.new("old text !* [[?]]")
+    it 'returns missing value if no alphanumeric characters were inserted' do
+      old_text = Text.new('old text')
+      new_text = Text.new('old text !* [[?]]')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, new_revision: new_rev, old_revision: old_rev)
 
-      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      expect(subject.calculate(edit)).to eq Features::MISSING_VALUE
     end
 
-    it "returns missing value if no text inserted" do
-      old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
-      new_text = Wikipedia::VandalismDetection::Text.new("text")
+    it 'returns missing value if no text was inserted' do
+      old_text = Text.new('deletion text')
+      new_text = Text.new('text')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, new_revision: new_rev, old_revision: old_rev)
 
-      expect(@feature.calculate(edit)).to eq Wikipedia::VandalismDetection::Features::MISSING_VALUE
+      expect(subject.calculate(edit)).to eq Features::MISSING_VALUE
     end
   end
 end

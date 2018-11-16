@@ -1,35 +1,29 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::InsertedWords do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::InsertedWords.new
-  end
+  describe '#calculate' do
+    it 'returns the number of the inserted words' do
+      old_text = Text.new('zero')
+      new_text = Text.new('zero one two three four five six')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the number of the inserted words" do
-      old_revision_text = Wikipedia::VandalismDetection::Text.new 'zero'
-      new_revision_text = Wikipedia::VandalismDetection::Text.new 'zero one two three four five six' # 6 inserted
-
-      old_revision = build(:old_revision, text: old_revision_text)
-      new_revision = build(:new_revision, text: new_revision_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 6
+      expect(subject.calculate(edit)).to eq 6
     end
 
-    it "returns 0 if no inserted text" do
-      old_revision_text = Wikipedia::VandalismDetection::Text.new 'zero one'
-      new_revision_text = Wikipedia::VandalismDetection::Text.new 'zero' # 0 inserted
+    it 'returns 0 if no inserted text' do
+      old_text = Text.new('zero one')
+      new_text = Text.new('zero')
 
-      old_revision = build(:old_revision, text: old_revision_text)
-      new_revision = build(:new_revision, text: new_revision_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0
+      expect(subject.calculate(edit)).to eq 0
     end
   end
 end

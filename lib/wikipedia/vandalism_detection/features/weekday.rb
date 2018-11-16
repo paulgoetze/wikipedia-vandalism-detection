@@ -4,11 +4,9 @@ require 'date'
 module Wikipedia
   module VandalismDetection
     module Features
-
-      # This feature calculates the weekday of new revision edit as numeric value.
-      # Monday => 1, Thuesday => 2, etc.
+      # This feature calculates the weekday of new revision edit as numeric
+      # value. Monday => 1, Thuesday => 2, etc.
       class Weekday < Base
-
         def calculate(edit)
           super
 

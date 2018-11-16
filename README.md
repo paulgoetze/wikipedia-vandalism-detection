@@ -1,22 +1,24 @@
 # Wikipedia Vandalism Detection
 
-Vandalism detection on the Wikipedia history with JRuby.  
+Vandalism detection on the Wikipedia history with JRuby v9.1.0.0+.
 
-The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library (v3.7.10) via the ruby-band gem.
+The Wikipedia Vandalism Detection Gem uses the Weka Machine-Learning Library
+via the [weka](https://github.com/paulgoetze/weka-jruby) gem.
 
 [![Gem Version](https://badge.fury.io/rb/wikipedia-vandalism_detection.svg)](http://badge.fury.io/rb/wikipedia-vandalism_detection)
+[![Build Status](https://travis-ci.org/paulgoetze/wikipedia-vandalism-detection.png?branch=develop)](https://travis-ci.org/paulgoetze/wikipedia-vandalism-detection)
 
 ## What You can do with it
 
 * parsing Wikipedia history pages to get edits and revisions
 * creating training and test ARFF files from
-the [PAN 2010 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-10/) and
-the [PAN 2011 WV Corpus](http://www.uni-weimar.de/en/media/chairs/webis/research/corpora/corpus-pan-wvc-11/)
-(See also http://pan.webis.de under category Wikipedia Vandalism Detection)
+the [WVC-PAN-10](https://www.uni-weimar.de/en/media/chairs/computer-science-and-media/webis/corpora/corpus-pan-wvc-10) and
+the [WVC-PAN-11](https://www.uni-weimar.de/en/media/chairs/computer-science-and-media/webis/corpora/corpus-pan-wvc-11)
+(See also http://pan.webis.de under category Wikipedia Vandalism Detection: [CLEF 2010](http://pan.webis.de/clef10/pan10-web/wikipedia-vandalism-detection) & [CLEF 2011](http://pan.webis.de/clef11/pan11-web/wikipedia-vandalism-detection))
 
 * calculating vandalism features for a Wikipedia page (XML) from the history dump
-* creating and evaluate a classifier with the created training ARFF file
-* classifing new instances of Wikipedia pages as 'regular' or 'vandalism'
+* creating and evaluating a classifier with the created training ARFF file
+* classifing new instances of Wikipedia edits as 'regular' or 'vandalism'
 
 ## Installation
 
@@ -38,7 +40,8 @@ Or install it yourself as:
 
 ### Configuration
 
-To configure the system put a `config.yml` file in the `config/` or `lib/config/` directory.
+To configure the system put a `wikipedia-vandalism-detection.yml` file in the
+`config/` or `lib/config/` directory.
 
 You can configure:
 
@@ -81,7 +84,8 @@ features:
   - ...
 ```
 
-C) the classifier type and its options and the number of cross validation splits for the classifier evaluation
+C) the classifier type and its options and the number of cross validation splits
+for the classifier evaluation
 
 ```YAML
 classifier:
@@ -90,30 +94,30 @@ classifier:
   cross-validation-fold: 5          # default is 10
   training-data-options: balanced   # default is unbalanced
 ```
-      
-`training-data-options` is used to resample the training dataset: 
 
-* `unbalanced` is the default value and uses the original dataset 
+`training-data-options` is used to resample the training dataset:
+
+* `unbalanced` is the default value and uses the original dataset
 * `balanced` uses random undersampling of the majority class
-* `oversampled` uses SMOTE oversampling (with percentage `-p`) and random undersampling (with minority/majority class balance `-u`) 
-  
+* `oversampled` uses SMOTE oversampling (with percentage `-p`) and random undersampling (with minority/majority class balance `-u`)
+
 Examples:
 
 ```YAML
 # 200% SMOTE oversampling with 300% random undersampling
-training-data-options: oversampled -p 200 -u true 300 
+training-data-options: oversampled -p 200 -u true 300
 
 # default 100% SMOTE oversampling with 300% random undersampling
-training-data-options: oversampled -u true 300 
+training-data-options: oversampled -u true 300
 
-# 200% SMOTE oversampling with default full (100% minority/majority class balance) 
+# 200% SMOTE oversampling with default full (100% minority/majority class balance)
 # random undersampling
-training-data-options: oversampled -p 200 
+training-data-options: oversampled -p 200
 
 # default 100% SMOTE oversampling without undersampling
 training-data-options: oversampled -u false
 ```
-    
+
 Instead of the `true` option you can also use `t`, `y` and `yes` as well as their upper case pendants.
 
 ### Examples
@@ -168,7 +172,7 @@ Evaluation of the classifier against the configured training corpus:
 
 ```ruby
 # classifier.classifier_instance returns the weka classifier instance
-evaluation = classifier.classifier_instance.cross_validate(10)
+evaluation = classifier.classifier_instance.cross_validate(folds: 10)
 puts evaluation.class_details
 ```
 
@@ -207,7 +211,7 @@ total_precision = performance_data[:total_precision]
 ```
 
 Get each features predictive value for analysis:
-    
+
 ```ruby
 evaluator = classifier.evaluator
 # or create a new evaluator
@@ -216,66 +220,63 @@ evaluator = Wikipedia::VandalismDetection::Evaluator.new(classifier)
 analysis_data = evaluator.feature_analysis #default sample_count = 100
 analysis_data = evaluator.feature_analysis(sample_count: 1000)
 ```
-    
+
 This returns a hash comprising all feature names as configured as keys and the threshold hashes as values.
 
 ```ruby
 {
   feature_name_1:
     {
-      0.0 => {fp:... , fn:... , tp:... , tn:... },
-      ...,
-      1.0 => {fp:... , fn:... , tp:... , tn:... }
+      0.0 => {fp:… , fn:… , tp:… , tn:… },
+      …,
+      1.0 => {fp:… , fn:… , tp:… , tn:… }
     },
-  ...,
+  …,
   feature_name_n:
     {
-      0.0 => {fp:... , fn:... , tp:... , tn:... },
-      ...,
-      1.0 => {fp:... , fn:... , tp:... , tn:... }
+      0.0 => {fp:… , fn:… , tp:… , tn:… },
+      …,
+      1.0 => {fp:… , fn:… , tp:… , tn:… }
     },
 }
 ```
 
 **Creating new Features:**
 
-You can define your own new Feature classes and use them by configuration in the config.yml. 
+You can define your own new Feature classes and use them by configuration in the config.yml.
 
-Make sure to define the Feature class inside of the `Wikipedia::VandalismDetection::Features` module 
-and to implement the `calculate` method 
+Make sure to define the Feature class inside of the `Wikipedia::VandalismDetection::Features` module
+and to implement the `calculate` method
 (also refer to the `Wikipedia::VandalismDetection::Features::Base` class definition).
 
 ```ruby
 module Wikipedia
   module VandalismDetection
     module Features
-    
-      class MyNew < Base
-      
+      class MyNewFeature < Base
         def calculate(edit)
           super # ensures raising an error if 'edit' is not an Edit.
-          
+
           # ...your implementation
         end
-        
       end
     end
   end
 end
 ```
 
-While creating new Feature classes you should be aware of the following naming convention: 
+While creating new Feature classes you should be aware of the following naming convention:
 The feature's name in the config.yml is the *downcased name with spaces or dashes* of the feature class name
 
-E.g.: 
+E.g.:
 
 ```YAML
-    features: 
-      - my new 
-      - my-new
+    features:
+      - my new feature
+      - my-new-feature
 ```
 
-both search for a Feature class with the name `MyNew`.
+both search for a Feature class with the name `MyNewFeature`.
 
 
 ## Contributing

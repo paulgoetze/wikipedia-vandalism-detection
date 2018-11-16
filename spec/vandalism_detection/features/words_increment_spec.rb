@@ -1,35 +1,29 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::WordsIncrement do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::WordsIncrement.new
-  end
+  describe '#calculate' do
+    it 'returns a negative increment for more removed texts' do
+      old_text = Text.new('one two three four five six seven eight') # length 8
+      new_text = Text.new('one two three') # length 3
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns a negative increment on more removed texts" do
-      old_revision_text = Wikipedia::VandalismDetection::Text.new 'one two three four five six seven eight nine' # length 9
-      new_revision_text = Wikipedia::VandalismDetection::Text.new 'one two three' # length 3
-
-      old_revision = build(:old_revision, text: old_revision_text)
-      new_revision = build(:new_revision, text: new_revision_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 3.0 - 9.0
+      expect(subject.calculate(edit)).to eq 3.0 - 8.0
     end
 
-    it "returns a positive increment on more removed texts" do
-      old_revision_text = Wikipedia::VandalismDetection::Text.new 'one two three' # length 3
-      new_revision_text = Wikipedia::VandalismDetection::Text.new 'one two three four five six seven eight nine' # length 9
+    it 'returns a positive increment on more removed texts' do
+      old_text = Text.new('one two three') # length 3
+      new_text = Text.new('one two three four five six seven eight') # length 8
 
-      old_revision = build(:old_revision, text: old_revision_text)
-      new_revision = build(:new_revision, text: new_revision_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 9.0 - 3.0
+      expect(subject.calculate(edit)).to eq 8.0 - 3.0
     end
   end
 end

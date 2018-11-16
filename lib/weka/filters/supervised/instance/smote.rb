@@ -1,21 +1,14 @@
-require 'ruby-band'
-require 'ruby-band/weka/filters/supervised/utils'
+require 'weka'
+require 'weka/class_builder'
 
 module Weka
   module Filters
     module Supervised
       module Instance
-
-        require 'java'
         require 'java/SMOTE.jar'
+        include ClassBuilder
 
-        java_import "weka.filters.supervised.instance.SMOTE"
-
-        class SMOTE
-          include Weka::Filters::Supervised::Utils
-        end
-
-        Weka::Filters::Supervised::Instance::SMOTE.__persistent__ = true
+        build_class :SMOTE
       end
     end
   end

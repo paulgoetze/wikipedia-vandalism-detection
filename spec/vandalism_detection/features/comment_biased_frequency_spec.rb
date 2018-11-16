@@ -1,34 +1,28 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::CommentBiasedFrequency do
+  it { is_expected.to be_a Features::FrequencyBase }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::CommentBiasedFrequency.new
-  end
-
-  it { should be_a Wikipedia::VandalismDetection::Features::FrequencyBase }
-
-  describe "#calculate" do
-
-    it "returns the number of biased words in comment relative to all words count" do
+  describe '#calculate' do
+    it 'returns the number of biased words in comment over all words' do
       # total 10 words, 3 biased
-      comment = Wikipedia::VandalismDetection::Text.new "It's Great man, this is amazing, really a classic."
+      comment = Text.new('It’s Great man, this is amazing, really a classic.')
 
-      old_revision = build(:old_revision)
-      new_revision = build(:new_revision, comment: comment)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision)
+      new_rev = build(:new_revision, comment: comment)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 4.0 / 9.0
+      expect(subject.calculate(edit)).to eq 4.0 / 9.0
     end
 
-    it "returns 0.0 on emtpy clean text comment" do
-      comment = Wikipedia::VandalismDetection::Text.new "{{speedy deletion}}"
+    it 'returns 0.0 for an emtpy clean text comment in the new revision' do
+      comment = Text.new('{{speedy deletion}}')
 
-      old_revision = build(:old_revision)
-      new_revision = build(:new_revision, comment: comment)
-      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+      old_rev = build(:old_revision)
+      new_rev = build(:new_revision, comment: comment)
+      edit = build(:edit, new_revision: new_rev, old_revision: old_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.0
+      expect(subject.calculate(edit)).to eq 0.0
     end
   end
 end

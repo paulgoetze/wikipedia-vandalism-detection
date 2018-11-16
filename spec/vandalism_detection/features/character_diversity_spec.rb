@@ -1,35 +1,30 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::CharacterDiversity do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::CharacterDiversity.new
-  end
+  describe '#calculate' do
+    it 'returns the character diversity of the new inserted text' do
+      old_text = Text.new('text')
+      # 9 unique characters of total 14
+      new_text = Text.new('text [[aa ab cdeefg]]')
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    it "returns the character diversity of the edit's new revision inserted text" do
-      old_text = Wikipedia::VandalismDetection::Text.new('text')
-      new_text = Wikipedia::VandalismDetection::Text.new 'text [[aa ab cdeefg]]' # 9 unique characters of total 14
-
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-      expect(@feature.calculate(edit)).to eq 14 ** (1.0 / 9)
+      expect(subject.calculate(edit)).to eq 14**(1.0 / 9)
     end
 
-    it "returns 0.0 if no text inserted" do
-      old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
-      new_text = Wikipedia::VandalismDetection::Text.new("text")
+    it 'returns 0.0 if no text inserted' do
+      old_text = Text.new('deletion text')
+      new_text = Text.new('text')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, new_revision: new_rev, old_revision: old_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.0
+      expect(subject.calculate(edit)).to eq 0.0
     end
   end
 end

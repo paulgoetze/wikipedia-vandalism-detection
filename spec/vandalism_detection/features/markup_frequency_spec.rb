@@ -1,36 +1,31 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::MarkupFrequency do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::MarkupFrequency.new
-  end
-
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
-
-  describe "#calculate" do
-
-    it "returns the number of markup related words relative to all inserted words count" do
+  describe '#calculate' do
+    it 'returns the number of markup related words over all inserted words' do
       # total 4 words, 3 markup
-      old_text = Wikipedia::VandalismDetection::Text.new 'Old whatever.'
-      new_text = Wikipedia::VandalismDetection::Text.new "Old whatever. {{template}} <ref>list</ref> [[heading]] boy."
+      old_text = Text.new('Old whatever.')
+      new_text = Text.new('Old whatever. {{template}} <ref>list</ref> [[heading]] boy.')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 3.0 / 4.0
+      expect(subject.calculate(edit)).to eq 3.0 / 4.0
     end
 
-    it "returns 0.0 on no inserted text" do
-      old_text = Wikipedia::VandalismDetection::Text.new 'Old guy.'
-      new_text = Wikipedia::VandalismDetection::Text.new "Old guy."
+    it 'returns 0.0 on no inserted text' do
+      text = 'Old guy.'
+      old_text = Text.new(text)
+      new_text = Text.new(text)
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.0
+      expect(subject.calculate(edit)).to eq 0.0
     end
   end
 end

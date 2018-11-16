@@ -1,48 +1,50 @@
 require 'spec_helper'
 
 describe Wikipedia::VandalismDetection::Features::EditsPerUser do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::EditsPerUser.new
-  end
+  describe '#calculate' do
+    describe 'online' do
+      it 'returns the number of previous edits from same IP or ID' do
+        # https://en.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&ucuser=<name or ip>&ucprop=ids
+        old_rev = build(:old_revision, id: '527136737')
+        new_rev = build(
+          :new_revision,
+          id: '527137015',
+          parent_id: '527136737',
+          contributor: '142.11.81.219',
+          timestamp: '2012-12-09T05:30:07Z'
+        )
 
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
+        edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
-  describe "#calculate" do
-
-    describe "online" do
-      it "returns the number of previously submitted edit from the same IP or ID" do
-        #http://en.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&ucuser=<name or ip>&ucprop=ids
-        old_revision = build(:old_revision, id: '527136737')
-        new_revision = build(:new_revision, id: '527137015', parent_id: '527136737',
-                             contributor: '142.11.81.219', timestamp: '2012-12-09T05:30:07Z' )
-
-        edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
-
-        expect(@feature.calculate(edit)).to eq 1
+        expect(subject.calculate(edit)).to eq 1
       end
     end
 
-    describe "offline" do
+    describe 'offline' do
       before do
-        page = build(:page)
-        page.id = '1234'
-        page.title = 'Page Title'
+        page = build(:page, id: '1234', title: 'Page Title')
 
         # contributor: see factories/page.rb !
-        old_revision = build(:new_revision, contributor: 'User')
-        new_revision = build(:even_newer_revision, contributor: 'User')
+        old_rev = build(:new_revision, contributor: 'User')
+        new_rev = build(:even_newer_revision, contributor: 'User')
 
-        @edit = build(:edit, old_revision: old_revision, new_revision: new_revision, page: page)
+        @edit = build(
+          :edit,
+          old_revision: old_rev,
+          new_revision: new_rev,
+          page: page
+        )
       end
 
-      it "does not use an API call if the edit has a page reference" do
+      it 'does not use an API call if the edit has a page reference' do
         expect(Wikipedia).to_not receive :api_request
-        @feature.calculate(@edit)
+        subject.calculate(@edit)
       end
 
-      it "returns the number of previously submitted edit from the same IP or ID" do
-        expect(@feature.calculate(@edit)).to eq 1
+      it 'returns the number of previous edits from the same IP or ID' do
+        expect(subject.calculate(@edit)).to eq 1
       end
     end
   end

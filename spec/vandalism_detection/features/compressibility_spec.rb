@@ -2,41 +2,37 @@ require 'spec_helper'
 require 'zlib'
 
 describe Wikipedia::VandalismDetection::Features::Compressibility do
+  it { is_expected.to be_a Features::Base }
 
-  before do
-    @feature = Wikipedia::VandalismDetection::Features::Compressibility.new
-  end
-
-  it { should be_a Wikipedia::VandalismDetection::Features::Base }
-
-  describe "#calculate" do
-
-    it "returns the ratio of compressed text size to uncompressed text size" do
+  describe '#calculate' do
+    it 'returns the ratio of compressed text size to uncompressed text size' do
       old_text = 'text'
-      new_text = 'text [[If this is a quite long textpart]] of normal words then it might be less possible to be a vandalism.'
+      new_text = 'text [[If this is a quite long textpart]] of normal words ' \
+                 'then it might be less possible to be a vandalism.'
 
-      old_revision = build(:old_revision, text: Wikipedia::VandalismDetection::Text.new(old_text))
-      new_revision = build(:new_revision, text: Wikipedia::VandalismDetection::Text.new(new_text))
-      edit = build(:edit, old_revision: old_revision, new_revision: new_revision)
+      old_rev = build(:old_revision, text: Text.new(old_text))
+      new_rev = build(:new_revision, text: Text.new(new_text))
+      edit = build(:edit, old_revision: old_rev, new_revision: new_rev)
 
       bytesize = 10.0
 
-      Zlib::Deflate.stub(deflate: Wikipedia::VandalismDetection::Text.new)
-      Wikipedia::VandalismDetection::Text.any_instance.stub(bytesize: bytesize)
+      allow(Zlib::Deflate).to receive(:deflate).and_return(Text.new)
+      allow_any_instance_of(Text).to receive(:bytesize).and_return(bytesize)
+
       ratio = bytesize / (bytesize + bytesize)
 
-      expect(@feature.calculate(edit)).to eq ratio
+      expect(subject.calculate(edit)).to eq ratio
     end
 
-    it "returns 0.5 on emtpy inserted text" do
-      old_text = Wikipedia::VandalismDetection::Text.new("deletion text")
-      new_text = Wikipedia::VandalismDetection::Text.new(" text")
+    it 'returns 0.5 on emtpy inserted text' do
+      old_text = Text.new('deletion text')
+      new_text = Text.new(' text')
 
-      old_revision = build(:old_revision, text: old_text)
-      new_revision = build(:new_revision, text: new_text)
-      edit = build(:edit, new_revision: new_revision, old_revision: old_revision)
+      old_rev = build(:old_revision, text: old_text)
+      new_rev = build(:new_revision, text: new_text)
+      edit = build(:edit, new_revision: new_rev, old_revision: old_rev)
 
-      expect(@feature.calculate(edit)).to eq 0.5
+      expect(subject.calculate(edit)).to eq 0.5
     end
   end
 end
