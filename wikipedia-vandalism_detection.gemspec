@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['paul.christoph.goetze@gmail.com']
   spec.summary       = %q{Wikipedia vandalism detection with JRuby.}
   spec.description   = %q{Wikipedia vandalism detection with JRuby.}
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/paulgoetze/wikipedia-vandalism-detection'
   spec.license       = 'GPL v3'
 
   spec.files         = `git ls-files -z`.split("\x0")
