@@ -36,7 +36,7 @@ module Wikipedia
             same_user = page_revision.contributor == edit_revision.contributor
             diff = time_diff(page_revision.timestamp, edit_revision.timestamp)
 
-            count += 1 if same_user && diff.negative?
+            count += 1 if same_user && diff < 0
             count
           end
         end
@@ -58,7 +58,7 @@ module Wikipedia
           # count only edits before current
           xml.xpath("//item[@pageid='#{page_id}']").reduce(0) do |count, item|
             time = item.attr('timestamp')
-            count += 1 if time_diff(time, revision.timestamp).negative?
+            count += 1 if time_diff(time, revision.timestamp) < 0
             count
           end
         end

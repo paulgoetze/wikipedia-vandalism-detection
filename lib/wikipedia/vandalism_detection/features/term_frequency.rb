@@ -19,7 +19,7 @@ module Wikipedia
             count + frequency(new_text.clean, term)
           end
 
-          if inserted_terms.count.positive?
+          if inserted_terms.count > 0
             summed_frequencies / inserted_terms.count
           else
             0.0

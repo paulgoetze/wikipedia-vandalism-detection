@@ -219,7 +219,7 @@ module Wikipedia
 
           written = File.open(file, 'w') { |f| f.write(file_index.to_yaml) }
 
-          if written.positive?
+          if written > 0
             print "\nSaved test corpus index file to #{file}.\n"
           end
 

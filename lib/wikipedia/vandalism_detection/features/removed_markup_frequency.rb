@@ -18,7 +18,7 @@ module Wikipedia
           all_words_count = edit.removed_words.count
           markup_words_count = text.scan(MARKUP_REGEX).count
 
-          if all_words_count.positive?
+          if all_words_count > 0
             markup_words_count.to_f / all_words_count.to_f
           else
             0.0

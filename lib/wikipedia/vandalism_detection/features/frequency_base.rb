@@ -10,7 +10,7 @@ module Wikipedia
           total_count = text.split.count
           term_count = count terms, in: text
 
-          total_count.positive? ? term_count.to_f / total_count.to_f : 0.0
+          total_count > 0 ? term_count.to_f / total_count.to_f : 0.0
         end
       end
     end

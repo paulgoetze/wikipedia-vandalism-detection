@@ -11,7 +11,7 @@ module Wikipedia
           super
 
           size = edit.inserted_text.size
-          size.negative? ? 0 : size
+          size < 0 ? 0 : size
         end
       end
     end

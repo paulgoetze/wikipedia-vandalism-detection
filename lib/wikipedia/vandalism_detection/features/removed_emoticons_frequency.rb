@@ -20,7 +20,7 @@ module Wikipedia
             .reject { |c| c.size < 2 }.count
           total_count = removed_text.split.count
 
-          total_count.positive? ? emoticons_count.to_f / total_count.to_f : 0.0
+          total_count > 0 ? emoticons_count.to_f / total_count.to_f : 0.0
         end
       end
     end

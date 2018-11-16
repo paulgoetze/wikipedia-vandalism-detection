@@ -20,7 +20,7 @@ module Wikipedia
         content = URI.parse(uri).read
       end
     rescue => error
-      if times.positive?
+      if times > 0
         times -= 1
         retry
       else

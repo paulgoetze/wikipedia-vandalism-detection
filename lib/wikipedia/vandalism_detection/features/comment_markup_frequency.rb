@@ -18,7 +18,7 @@ module Wikipedia
           all_words_count = comment.split.count
           markup_words_count = comment.scan(MARKUP_REGEX).count
 
-          if all_words_count.positive?
+          if all_words_count > 0
             markup_words_count.to_f / all_words_count.to_f
           else
             0.0

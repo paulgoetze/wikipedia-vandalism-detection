@@ -160,7 +160,7 @@ module Wikipedia
         FileUtils.mkdir(dirname) unless Dir.exist?(dirname)
 
         written = File.open(file, 'w') { |f| f.write(file_index.to_yaml) }
-        print "Index file saved to #{file}.\n" if written.positive?
+        print "Index file saved to #{file}.\n" if written > 0
 
         file_index
       end

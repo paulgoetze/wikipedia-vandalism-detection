@@ -11,7 +11,7 @@ module Wikipedia
           super
 
           size = edit.removed_text.size
-          size.positive? ? size : 0
+          size > 0 ? size : 0
         end
       end
     end
